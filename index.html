@@ -157,7 +157,9 @@ body.light .particles span{
   font-size:21px;font-weight:700;letter-spacing:-0.5px;
   background:linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1.25;
 }
+body[data-mode="login"] .header h1{font-size:19px;}
 .header .sub{
   font-size:13.5px;color:var(--hint);margin-top:4px;font-weight:500;
   letter-spacing:-0.1px;
@@ -1014,7 +1016,15 @@ code{
   });
   if (mode === 'login') tabbar.style.display = 'none';
 
-  document.getElementById('title').textContent = (mode === 'login') ? 'Sign in' : 'CPM2 Control';
+  document.getElementById('title').textContent =
+    (mode === 'login') ? 'Sign in to your Car Parking 2 account' : 'CPM2 Control';
+  document.body.setAttribute('data-mode', mode);
+  // In login mode the title already names the action — hide the subtitle
+  // so we don't render "Sign in" twice on top of each other.
+  if (mode === 'login') {
+    var sub = document.getElementById('subtitle');
+    if (sub) sub.style.display = 'none';
+  }
 
   // STATE
   var state = {
