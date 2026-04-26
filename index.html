@@ -840,7 +840,7 @@ code{
           <div class="toggle"></div>
         </div>
         <div class="row" data-b="garage">
-          <div class="text"><div class="title">Garage slots</div><div class="desc" id="garage-desc">+50 slots · ~5,000 coins from balance</div></div>
+          <div class="text"><div class="title">Garage slots</div><div class="desc" id="garage-desc">100 coins per slot · buys until server caps</div></div>
           <div class="toggle"></div>
         </div>
       </div>
@@ -1523,20 +1523,24 @@ code{
   function personalizeBoost(){
     if (!accountState) return;
     var s = accountState;
-    // Garage slot row — render dynamic remaining count + price.
-    // owned/max come from the bot's snapshot (slots_owned tracked locally
-    // since GetPlayerRecords' garage field isn't reverse-engineered yet).
-    var slotsMax   = (s.slots_max   != null) ? s.slots_max   : 50;
+    // Garage slot row — game-side cap is server-private, so we don't show
+    // "of X". Just the per-slot price (100 coins) plus optional session
+    // history: how many the bot already bought, or a maxed marker if the
+    // server has started rejecting purchases.
+    var slotPrice  = (s.slot_price != null) ? s.slot_price : 100;
     var slotsOwn   = (s.slots_owned != null) ? s.slots_owned : 0;
-    var slotsLeft  = Math.max(0, slotsMax - slotsOwn);
+    var slotsMaxed = !!s.slots_maxed;
     var garageDesc = document.getElementById('garage-desc');
     if (garageDesc) {
-      if (slotsLeft <= 0) {
-        garageDesc.textContent = 'All ' + slotsMax + ' slots already bought';
+      if (slotsMaxed) {
+        garageDesc.textContent =
+          'Garage already full · server rejected last attempt';
+      } else if (slotsOwn > 0) {
+        garageDesc.textContent =
+          '+' + slotsOwn + ' bought already · ' + slotPrice + ' coins per slot';
       } else {
-        var price = slotsLeft * 100;
-        garageDesc.textContent = '+' + slotsLeft + ' slots · ' +
-          fmtN(price) + ' coins from balance';
+        garageDesc.textContent =
+          slotPrice + ' coins per slot · buys until server caps';
       }
     }
     var checks = {
@@ -1546,7 +1550,7 @@ code{
       flags:     s.flags     != null && s.flags     >= (s.flags_max     || 250),
       equipment: s.equipment != null && s.equipment >= (s.equipment_max || 12),
       cosmetics: s.paint     != null && s.paint     >= (s.paint_max     || 7),
-      garage:    slotsLeft <= 0,
+      garage:    slotsMaxed,
     };
     var rows = document.querySelectorAll('#boost-list .row');
     var maxedAll = true;
