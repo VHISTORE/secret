@@ -7,6 +7,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
+  /* dark-default values; light theme overrides via body.light */
   --bg: var(--tg-theme-bg-color, #0f1620);
   --bg-2: var(--tg-theme-secondary-bg-color, #1a2532);
   --surface: rgba(255,255,255,0.04);
@@ -23,9 +24,23 @@
   --divider: rgba(255,255,255,0.06);
   --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.18);
   --shadow-glow: 0 6px 20px rgba(94,155,240,.35);
+  --shimmer: rgba(255,255,255,0.32);
   --radius-card: 14px;
   --radius-row: 10px;
   --radius-pill: 999px;
+}
+body.light{
+  --bg: var(--tg-theme-bg-color, #f4f6f9);
+  --bg-2: var(--tg-theme-secondary-bg-color, #ffffff);
+  --surface: rgba(0,0,0,0.035);
+  --surface-2: rgba(0,0,0,0.06);
+  --surface-hi: rgba(0,0,0,0.10);
+  --text: var(--tg-theme-text-color, #0f1620);
+  --hint: var(--tg-theme-hint-color, #6b7785);
+  --divider: rgba(0,0,0,0.08);
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 16px rgba(0,0,0,.06);
+  --shadow-glow: 0 4px 16px rgba(94,155,240,.25);
+  --shimmer: rgba(255,255,255,0.6);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
@@ -326,8 +341,26 @@ code{
 }
 .progress-fill::after{
   content:'';position:absolute;top:0;left:0;right:0;bottom:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.32) 50%,transparent);
+  background:linear-gradient(90deg,transparent,var(--shimmer) 50%,transparent);
   animation:shimmer 1.6s linear infinite;
+}
+
+/* SVG icons used in tab bar — inherit `currentColor` so theme switches work. */
+.tab svg{
+  display:block;margin:0 auto 3px;
+  width:22px;height:22px;
+  stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .2s cubic-bezier(.2,.6,.2,1);
+}
+.tab.active svg{transform:scale(1.08);}
+
+/* Adapt to wider screens — tablets / desktop Telegram. */
+@media (min-width: 600px){
+  .content{padding:22px 26px 32px;max-width:540px;margin:0 auto;width:100%;}
+  .actionbar{padding:14px 26px 18px;}
+  .actionbar > *{max-width:540px;margin-left:auto;margin-right:auto;}
+  .tabbar{max-width:540px;margin:0 auto;}
 }
 @keyframes shimmer{
   0%{transform:translateX(-100%);}
@@ -457,7 +490,7 @@ code{
           <div class="toggle"></div>
         </div>
         <div class="row" data-b="garage">
-          <div class="text"><div class="title">Garage slots</div><div class="desc">Maximum garage capacity</div></div>
+          <div class="text"><div class="title">Garage slots</div><div class="desc">+50 slots · costs ~5,000 coins from balance</div></div>
           <div class="toggle"></div>
         </div>
       </div>
@@ -525,29 +558,46 @@ code{
   tg.expand();
   if (tg.MainButton) tg.MainButton.hide();
 
-  // light theme tweak (Telegram desktop default)
-  if (tg.colorScheme === 'light') {
-    document.body.style.setProperty('--surface', '#f1f3f6');
-    document.body.style.setProperty('--surface-hi', 'rgba(0,0,0,0.04)');
-    document.body.style.setProperty('--divider', 'rgba(0,0,0,0.07)');
+  // Live theme sync — Telegram lets the user toggle between system / dark /
+  // light. We hook themeChanged so the mini-app re-skins immediately.
+  function applyTheme(){
+    document.body.classList.toggle('light', tg.colorScheme === 'light');
+    if (tg.setHeaderColor)     try{ tg.setHeaderColor('secondary_bg_color'); }catch(e){}
+    if (tg.setBackgroundColor) try{ tg.setBackgroundColor('bg_color'); }catch(e){}
   }
+  applyTheme();
+  try{ tg.onEvent('themeChanged', applyTheme); }catch(e){}
 
   function haptic(kind){ try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred(kind || 'light'); }catch(e){} }
   function selHaptic(){  try{ tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); }catch(e){} }
   function notif(kind){  try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(kind); }catch(e){} }
 
+  // Inline Lucide-style SVGs — crisp at any DPI, follow theme color.
+  var ICONS = {
+    login:
+      '<svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>',
+    farm:
+      '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    boost:
+      '<svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+    add:
+      '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    af:
+      '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+  };
+
   // Tabs depending on mode
   var tabs = (mode === 'login')
-    ? [['login','🔐','Sign In']]
-    : [['farm','🚀','Farm'], ['boost','🎁','Boost'], ['add','👥','Accounts']]
-        .concat(admin ? [['af','🤖','AutoFarm']] : []);
+    ? [['login','Sign In']]
+    : [['farm','Farm'], ['boost','Boost'], ['add','Accounts']]
+        .concat(admin ? [['af','AutoFarm']] : []);
 
   var tabbar = document.getElementById('tabbar');
   tabs.forEach(function(t){
     var div = document.createElement('div');
     div.className = 'tab';
     div.dataset.tab = t[0];
-    div.innerHTML = '<span class="ico">' + t[1] + '</span>' + t[2];
+    div.innerHTML = ICONS[t[0]] + t[1];
     div.addEventListener('click', function(){ selHaptic(); activate(t[0]); });
     tabbar.appendChild(div);
   });
@@ -571,7 +621,7 @@ code{
     for (var j=0;j<allPanels.length;j++) allPanels[j].classList.toggle('active', allPanels[j].id === 'p-' + id);
     var found = null;
     for (var k=0;k<tabs.length;k++) if (tabs[k][0] === id) found = tabs[k];
-    document.getElementById('subtitle').textContent = found ? found[2] : '';
+    document.getElementById('subtitle').textContent = found ? found[1] : '';
     refreshCTA();
   }
 
