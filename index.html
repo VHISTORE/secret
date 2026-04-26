@@ -118,8 +118,18 @@ button:not(:disabled):active{opacity:.8;}
     btn.disabled = true;
     btn.textContent = '⏳';
 
-    tg.sendData(JSON.stringify({mode: mode, email: email, password: pw}));
-    tg.close();
+    try {
+      tg.sendData(JSON.stringify({mode: mode, email: email, password: pw}));
+    } catch(e){
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+      errEl.textContent = '❌ ' + (e.message || 'Send failed');
+      return;
+    }
+    // Some clients don't auto-close after sendData. Small delay ensures the
+    // bridge finishes the send before we forcibly close, otherwise the next
+    // open of the WebApp shows empty initData ("Access Denied").
+    setTimeout(function(){ try { tg.close(); } catch(e){} }, 200);
   }
 }());
 </script>
