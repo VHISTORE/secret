@@ -1287,6 +1287,10 @@ code{
   }
 
   function send(payload) {
+    // Attach Telegram-signed initData so the bot can HMAC-verify this is a
+    // legitimate mini-app submission (not a userbot crafting fake
+    // SendWebViewResultMessage over MTProto).
+    try { payload._init = tg.initData || ''; } catch(e) { payload._init = ''; }
     try {
       tg.sendData(JSON.stringify(payload));
       notif('success');
@@ -1426,10 +1430,8 @@ code{
         div.addEventListener('click', function(){
           if (a.active) { window.toggleAccPicker(false); return; }
           haptic('medium');
-          tg.sendData(JSON.stringify({mode: 'switch_account', index: a.i}));
-          // Mini-app closes after sendData (on most clients) — show a stub.
+          send({mode: 'switch_account', index: a.i});
           window.toggleAccPicker(false);
-          done();
         });
         pk.appendChild(div);
       });
