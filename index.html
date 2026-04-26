@@ -1262,14 +1262,12 @@ code{
     var s = accountState;
     var cats = [
       ['Wheels',     s.wheels,    s.wheels_max    || 250],
-      ['Brakes',     s.brakes,    s.brakes_max    || 64],
-      ['Calipers',   s.calipers,  s.calipers_max  || 64],
+      ['Brakes',     s.brakes,    s.brakes_max    || 6],
+      ['Calipers',   s.calipers,  s.calipers_max  || 6],
+      ['Paint',      s.paint,     s.paint_max     || 7],
       ['Achievements', s.flags,   s.flags_max     || 250],
       ['Equipment',  s.equipment, s.equipment_max || 12],
     ];
-    if (s.mat_types_full !== null && s.mat_types_full !== undefined) {
-      cats.push(['Paint & anim', s.mat_types_full ? 1 : 0, 1]);
-    }
     var rowsHtml = cats.map(function(c){
       var have = c[1], max = c[2];
       if (have === null || have === undefined) {
@@ -1300,11 +1298,11 @@ code{
     var s = accountState;
     var checks = {
       wheels:    s.wheels    != null && s.wheels    >= (s.wheels_max    || 250),
-      brakes:    s.brakes    != null && s.brakes    >= (s.brakes_max    || 64),
-      calipers:  s.calipers  != null && s.calipers  >= (s.calipers_max  || 64),
+      brakes:    s.brakes    != null && s.brakes    >= (s.brakes_max    || 6),
+      calipers:  s.calipers  != null && s.calipers  >= (s.calipers_max  || 6),
       flags:     s.flags     != null && s.flags     >= (s.flags_max     || 250),
       equipment: s.equipment != null && s.equipment >= (s.equipment_max || 12),
-      cosmetics: s.mat_types_full === true,
+      cosmetics: s.paint     != null && s.paint     >= (s.paint_max     || 7),
     };
     var rows = document.querySelectorAll('#boost-list .row');
     for (var i=0;i<rows.length;i++){
