@@ -211,6 +211,57 @@ code{
 #gate .ico,#done .ico{font-size:54px;margin-bottom:12px;}
 #gate h2,#done h2{font-size:19px;font-weight:600;margin-bottom:8px;}
 #gate p,#done p{color:var(--hint);font-size:14px;line-height:1.5;}
+
+/* PROGRESS SCREEN (post-Apply) */
+.progress-screen{
+  text-align:center;padding:54px 28px 0;
+  animation:fadeIn .25s ease both;
+}
+.progress-screen .ico{
+  font-size:42px;margin-bottom:16px;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:0.6;transform:scale(0.96);}
+}
+.progress-screen .ttl{
+  font-size:20px;font-weight:600;margin-bottom:6px;
+}
+.progress-screen .subttl{
+  font-size:13px;color:var(--hint);margin-bottom:28px;
+}
+.progress-track{
+  height:8px;background:var(--surface);border-radius:4px;
+  overflow:hidden;margin-bottom:12px;
+  position:relative;
+}
+.progress-fill{
+  height:100%;background:var(--primary);
+  border-radius:4px;width:0%;
+  transition:width 0.3s linear;
+  position:relative;
+}
+.progress-fill::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+  animation:shimmer 1.4s linear infinite;
+}
+@keyframes shimmer{
+  0%{transform:translateX(-100%);}
+  100%{transform:translateX(100%);}
+}
+.progress-meta{
+  display:flex;justify-content:space-between;
+  font-size:13.5px;color:var(--text);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:24px;font-weight:600;
+}
+.progress-meta .lbl{color:var(--hint);font-weight:500;}
+.progress-hint{
+  font-size:12.5px;color:var(--hint);
+  line-height:1.5;padding:0 12px;
+}
 </style>
 </head>
 <body>
@@ -732,11 +783,121 @@ code{
     send(payload);
   });
 
+  // ── Estimated duration for in-app progress bar ──────────────────────────
+  // Mirrors the bot's EST_* constants. Mini-app cannot poll the backend so
+  // this is a synced animation, not a real progress feed — but timings are
+  // close enough that the bar finishes around when the bot does.
+  function estimateSeconds(payload) {
+    var t = 0;
+    var newAcc = (payload.accounts || []).length;
+    var newAf  = (payload.af_accounts || []).length;
+    // Login phase is sequential: ~2.5 s per account, ~1.5 s per AF verify.
+    t += newAcc * 2.5;
+    t += newAf  * 1.5;
+    // Per-session farm/boost (parallel, semaphore=8).
+    var perSession = 0;
+    if (payload.coins === 'max')      perSession += 6 + 6 + 14*60;   // daily + drag + circuit
+    else if (payload.coins) {
+      var n = parseInt(payload.coins, 10) || 0;
+      var races = Math.min(36, Math.ceil(n / 1000));
+      perSession += 6 + races * 0.5;
+    }
+    if (payload.cash) perSession += 2;
+    if (payload.boost && payload.boost.length) {
+      var ext = payload.boost.filter(function(x){
+        return ['wheels','brakes','calipers','flags','equipment','cosmetics'].indexOf(x) >= 0;
+      });
+      if (ext.length) perSession += 3;
+      if (payload.boost.indexOf('garage') >= 0) perSession += 12;
+    }
+    var sessions = Math.max(1, newAcc);
+    var batches  = Math.ceil(sessions / 8);
+    t += batches * perSession;
+    return Math.max(2, Math.ceil(t));
+  }
+
+  function fmtSec(s) {
+    s = Math.max(0, Math.round(s));
+    if (s < 60) return s + 's';
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    if (m < 60) return m + 'm' + (sec ? ' ' + sec + 's' : '');
+    var h = Math.floor(m / 60);
+    m = m % 60;
+    return h + 'h' + (m ? ' ' + m + 'm' : '');
+  }
+
+  // Replaces content with a live progress screen that ticks down the
+  // estimated duration. When countdown ends, swaps to a Done screen and
+  // fires success haptics. User can close mini-app any time.
+  function showProgress(durationSec) {
+    var content = document.getElementById('content');
+    content.innerHTML = '';
+    var pane = document.createElement('div');
+    pane.className = 'progress-screen';
+    pane.innerHTML =
+      '<div class="ico">⏱</div>' +
+      '<div class="ttl">Working</div>' +
+      '<div class="subttl">Running on the active session(s)</div>' +
+      '<div class="progress-track"><div class="progress-fill" id="pf"></div></div>' +
+      '<div class="progress-meta"><span class="lbl" id="pp">0%</span><span id="pe">~' + fmtSec(durationSec) + ' left</span></div>' +
+      '<div class="progress-hint">You can close this — the bot keeps working in chat.</div>';
+    content.appendChild(pane);
+    document.getElementById('actionbar').style.display = 'none';
+    tabbar.style.display = 'none';
+
+    var t0 = Date.now();
+    var iv = setInterval(function(){
+      var elapsed = (Date.now() - t0) / 1000;
+      var pct = Math.min(0.99, elapsed / durationSec);
+      var fill = document.getElementById('pf');
+      var pp   = document.getElementById('pp');
+      var pe   = document.getElementById('pe');
+      if (!fill) { clearInterval(iv); return; }
+      fill.style.width = (pct * 100).toFixed(1) + '%';
+      pp.textContent   = Math.round(pct * 100) + '%';
+      var rem = Math.max(0, durationSec - elapsed);
+      pe.textContent   = rem > 1 ? '~' + fmtSec(rem) + ' left' : 'finishing…';
+      if (elapsed >= durationSec) {
+        clearInterval(iv);
+        finishProgress();
+      }
+    }, 250);
+  }
+
+  function finishProgress() {
+    var fill = document.getElementById('pf');
+    if (fill) fill.style.width = '100%';
+    notif('success');
+    setTimeout(function(){
+      var content = document.getElementById('content');
+      content.innerHTML = '';
+      content.appendChild(document.getElementById('done'));
+      document.getElementById('done').style.display = 'block';
+      // Update the Done copy so it matches expectations
+      var p = document.getElementById('done').querySelector('p');
+      if (p) p.textContent = 'Bot finished. See chat for details.';
+      var h2 = document.getElementById('done').querySelector('h2');
+      if (h2) h2.textContent = 'Done';
+    }, 450);
+  }
+
   function send(payload) {
     try {
       tg.sendData(JSON.stringify(payload));
       notif('success');
-      done();
+      // Quick actions (login, balance) get a simple Sent screen.
+      // Aggregate apply with farm/boost gets the simulated progress bar.
+      var hasFarmWork = payload.mode === 'apply' &&
+                        (payload.coins || payload.cash ||
+                         (payload.boost && payload.boost.length));
+      var hasLoginWork = (payload.accounts && payload.accounts.length) ||
+                        (payload.af_accounts && payload.af_accounts.length);
+      if (payload.mode === 'apply' && (hasFarmWork || hasLoginWork)) {
+        showProgress(estimateSeconds(payload));
+      } else {
+        done();
+      }
     } catch(e) {
       var err = document.getElementById('li-err');
       if (err) err.textContent = '❌ ' + (e.message || 'Send failed');
