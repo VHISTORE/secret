@@ -1443,8 +1443,23 @@ code{
   function send(payload) {
     // Attach Telegram-signed initData so the bot can HMAC-verify this is a
     // legitimate mini-app submission (not a userbot crafting fake
-    // SendWebViewResultMessage over MTProto).
+    // SendWebViewResultMessage over MTProto). Some Telegram clients (older
+    // Desktop, certain Web builds) deliver an empty initData — bot has a
+    // hybrid-fallback path that uses Telegram-delivered chat_id when an
+    // active session already exists. _meta lets the bot log which clients
+    // hit the fallback so we can target a real fix later.
     try { payload._init = tg.initData || ''; } catch(e) { payload._init = ''; }
+    try {
+      var initLen = (tg.initData || '').length;
+      var unsafeUid = 0;
+      try { unsafeUid = (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 0; } catch(_) {}
+      payload._meta = {
+        p: tg.platform || '',
+        v: tg.version || '',
+        l: initLen,
+        u: unsafeUid
+      };
+    } catch(e) { payload._meta = {}; }
     var sentOk = false;
     try {
       tg.sendData(JSON.stringify(payload));
