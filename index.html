@@ -81,7 +81,9 @@ button:not(:disabled):active{opacity:.8;}
   var tg   = window.Telegram && window.Telegram.WebApp;
   var mode = new URLSearchParams(window.location.search).get('mode') || 'login';
 
-  if(!tg || !tg.initData || tg.initData.length === 0){
+  // initData can be empty on Telegram Desktop / some clients even for valid opens;
+  // platform === 'unknown' reliably identifies direct browser access.
+  if(!tg || tg.platform === 'unknown'){
     document.getElementById('block').style.display = 'block';
     return;
   }
