@@ -502,10 +502,33 @@ code{
     cta.disabled = !enabled;
   }
 
-  // Live refresh on inputs
-  ['li-email','li-pw','ad-email','ad-pw','bulk','afbulk'].forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('input', refreshCTA);
+  // Live refresh on inputs. iOS Telegram WebView is flaky with the bare
+  // `input` event (autofill paths sometimes skip it), so we attach multiple
+  // handlers and a small post-paste delay.
+  var liveInputs = document.querySelectorAll('input, textarea');
+  for (var li=0; li<liveInputs.length; li++) {
+    (function(el){
+      ['input','keyup','change'].forEach(function(ev){ el.addEventListener(ev, refreshCTA); });
+      el.addEventListener('paste', function(){ setTimeout(refreshCTA, 50); });
+      el.addEventListener('blur',  refreshCTA);
+    })(liveInputs[li]);
+  }
+
+  // Tap outside any input/textarea → blur active field so the on-screen
+  // keyboard collapses. Without this, a focused field stays focused
+  // forever and the keyboard covers half of the mini-app.
+  function isTextField(el) {
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  }
+  document.addEventListener('touchend', function(e){
+    if (isTextField(e.target)) return;
+    var ae = document.activeElement;
+    if (isTextField(ae)) ae.blur();
+  }, {passive: true});
+  document.addEventListener('click', function(e){
+    if (isTextField(e.target)) return;
+    var ae = document.activeElement;
+    if (isTextField(ae)) ae.blur();
   });
 
   cta.addEventListener('click', function(){
