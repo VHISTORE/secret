@@ -93,16 +93,18 @@ body.light::before{
   50%{transform:translate(2%,-2%) scale(1.04);}
 }
 
-/* HEADER — gradient title with subtle neon underline */
+/* HEADER — gradient title with subtle neon underline + active-account chip */
 .header{
-  flex-shrink:0;padding:20px 22px 16px;
+  flex-shrink:0;padding:18px 22px 14px;
   position:relative;
-  background:linear-gradient(180deg, rgba(76, 201, 240, 0.04) 0%, transparent 100%);
 }
 .header::after{
   content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
   background:linear-gradient(90deg, transparent, var(--neon) 50%, transparent);
   opacity:0.45;
+}
+.header-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
 }
 .header h1{
   font-size:21px;font-weight:700;letter-spacing:-0.5px;
@@ -112,6 +114,56 @@ body.light::before{
 .header .sub{
   font-size:13.5px;color:var(--hint);margin-top:4px;font-weight:500;
   letter-spacing:-0.1px;
+}
+/* Active-account chip in the header — tap opens the account picker. */
+.acc-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 11px;border-radius:var(--radius-pill);
+  background:var(--surface);
+  border:1px solid var(--divider);
+  font-size:12.5px;font-weight:600;color:var(--text);
+  cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s, box-shadow .2s, border-color .2s;
+  flex-shrink:0;
+}
+.acc-chip:active{transform:scale(.95);}
+.acc-chip.has-multi{border-color:var(--neon);box-shadow:0 0 0 3px var(--neon-soft);}
+.acc-chip .caret{font-size:10px;opacity:.7;}
+
+/* Account picker overlay */
+.acc-picker-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:50;display:none;
+  animation:fadeIn .2s ease;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.acc-picker-bg.on{display:block;}
+.acc-picker{
+  position:fixed;left:14px;right:14px;
+  top:62px;
+  background:var(--bg-2);
+  border:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  padding:6px;z-index:51;
+  box-shadow:var(--shadow);
+  animation:slideDown .25s cubic-bezier(.2,.6,.2,1);
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.acc-picker .item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 13px;border-radius:10px;
+  font-size:14px;font-weight:600;color:var(--text);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:background .15s;
+  font-family:ui-monospace,Menlo,monospace;
+}
+.acc-picker .item:active{background:var(--surface-hi);}
+.acc-picker .item.active{
+  background:var(--surface-2);color:var(--primary);
+}
+.acc-picker .item.active::before{
+  content:'●';color:var(--primary);font-size:10px;
 }
 
 /* CONTENT */
@@ -559,9 +611,19 @@ code{
 <body>
 
 <div class="header">
-  <h1 id="title">CPM2</h1>
-  <div class="sub" id="subtitle">Loading…</div>
+  <div class="header-row">
+    <div>
+      <h1 id="title">CPM2</h1>
+      <div class="sub" id="subtitle">Loading…</div>
+    </div>
+    <div class="acc-chip" id="acc-chip" style="display:none" onclick="window.toggleAccPicker(true)">
+      <span id="acc-chip-mask">—</span>
+      <span class="caret" id="acc-chip-caret">▾</span>
+    </div>
+  </div>
 </div>
+<div class="acc-picker-bg" id="acc-picker-bg" onclick="window.toggleAccPicker(false)"></div>
+<div class="acc-picker" id="acc-picker" style="display:none"></div>
 
 <div class="content" id="content">
 
@@ -1305,24 +1367,79 @@ code{
       cosmetics: s.paint     != null && s.paint     >= (s.paint_max     || 7),
     };
     var rows = document.querySelectorAll('#boost-list .row');
+    var maxedAll = true;
+    var anyKnown = false;
     for (var i=0;i<rows.length;i++){
       var key = rows[i].dataset.b;
+      if (key === 'garage') continue;  // garage isn't tracked in state — always available
+      if (checks[key] !== undefined) {
+        anyKnown = true;
+        if (!checks[key]) maxedAll = false;
+      }
       if (checks[key]){
         rows[i].classList.add('maxed');
         rows[i].classList.remove('on');
         delete state.boost[key];
-        // replace toggle with "Done" badge
         if (!rows[i].querySelector('.badge-done')){
           var b = document.createElement('div');
           b.className = 'badge-done';
           b.textContent = 'DONE';
           rows[i].appendChild(b);
         }
-        // disable click-to-toggle
         rows[i].style.pointerEvents = 'none';
       }
     }
+    if (anyKnown && maxedAll) {
+      var hint = document.getElementById('boost-detail');
+      if (hint) hint.innerHTML = '✅ <b>All categories already maxed</b><br><span style="font-size:12px;opacity:0.7">Garage slots can still be bought below</span>';
+    }
   }
+
+  // ── Active-account chip + picker ──────────────────────────────────────
+  function renderAccChip(){
+    if (!accountState || !accountState.active_email_mask) return;
+    var chip = document.getElementById('acc-chip');
+    var maskEl = document.getElementById('acc-chip-mask');
+    var caret  = document.getElementById('acc-chip-caret');
+    if (!chip || !maskEl) return;
+    chip.style.display = 'inline-flex';
+    maskEl.textContent = accountState.active_email_mask;
+    var multi = (accountState.accounts || []).length > 1;
+    chip.classList.toggle('has-multi', multi);
+    if (caret) caret.style.display = multi ? 'inline' : 'none';
+    if (!multi) chip.style.cursor = 'default';
+  }
+
+  window.toggleAccPicker = function(open){
+    var bg = document.getElementById('acc-picker-bg');
+    var pk = document.getElementById('acc-picker');
+    if (!bg || !pk) return;
+    var multi = (accountState && accountState.accounts && accountState.accounts.length > 1);
+    if (open && !multi) return;
+    if (open){
+      // build list
+      pk.innerHTML = '';
+      (accountState.accounts || []).forEach(function(a){
+        var div = document.createElement('div');
+        div.className = 'item' + (a.active ? ' active' : '');
+        div.textContent = a.mask;
+        div.addEventListener('click', function(){
+          if (a.active) { window.toggleAccPicker(false); return; }
+          haptic('medium');
+          tg.sendData(JSON.stringify({mode: 'switch_account', index: a.i}));
+          // Mini-app closes after sendData (on most clients) — show a stub.
+          window.toggleAccPicker(false);
+          done();
+        });
+        pk.appendChild(div);
+      });
+      bg.classList.add('on');
+      pk.style.display = 'block';
+    } else {
+      bg.classList.remove('on');
+      pk.style.display = 'none';
+    }
+  };
 
   // ── Fetch ceremony — brief animated reveal of the account snapshot ────
   function showFetch(){
@@ -1342,6 +1459,7 @@ code{
       if (mode !== 'login') document.getElementById('tabbar').style.display = 'flex';
       renderStats();
       personalizeBoost();
+      renderAccChip();
       activate(tabs[0][0]);
     }, 1450);
   }
@@ -1351,6 +1469,7 @@ code{
     showFetch();
   } else {
     activate(tabs[0][0]);
+    if (mode === 'hub') renderAccChip();
   }
 }());
 </script>
