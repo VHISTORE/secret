@@ -378,6 +378,111 @@ code{
 #gate h2,#done h2{font-size:20px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px;}
 #gate p,#done p{color:var(--hint);font-size:14px;line-height:1.5;}
 
+/* FETCH SCREEN — shown briefly when the hub opens to render account state. */
+.fetch-screen{
+  padding:50px 28px 0;text-align:center;
+  animation:fadeIn .25s cubic-bezier(.2,.6,.2,1) both;
+}
+.spinner{
+  width:48px;height:48px;border-radius:50%;
+  border:3px solid var(--surface-2);
+  border-top-color:var(--primary);
+  margin:0 auto 22px;
+  animation:spin .9s linear infinite;
+  box-shadow:0 0 24px var(--neon-soft);
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.fetch-title{font-size:18px;font-weight:600;letter-spacing:-0.2px;margin-bottom:6px;}
+.fetch-sub{font-size:13.5px;color:var(--hint);margin-bottom:24px;font-weight:500;}
+.fetch-steps{
+  display:flex;flex-direction:column;gap:9px;align-items:center;
+  font-size:13px;color:var(--hint);
+}
+.fetch-step{
+  display:flex;align-items:center;gap:10px;
+  opacity:0.4;transition:opacity .3s, color .3s;
+}
+.fetch-step.on{opacity:1;color:var(--text-2);}
+.fetch-step .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--surface-hi);
+  transition:background .3s, box-shadow .3s;
+}
+.fetch-step.on .dot{
+  background:var(--primary);
+  box-shadow:0 0 8px var(--neon);
+}
+
+/* STATS — top of Farm tab when account state is loaded. */
+.stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-bottom:18px;
+}
+.stat{
+  background:var(--surface);
+  border:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  padding:13px 15px;
+  display:flex;flex-direction:column;gap:2px;
+  position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;right:0;width:60%;height:60%;
+  background:radial-gradient(circle at top right, var(--neon-soft), transparent 70%);
+  pointer-events:none;
+}
+.stat .lbl{
+  font-size:11.5px;color:var(--hint);text-transform:uppercase;
+  letter-spacing:0.6px;font-weight:600;
+}
+.stat .num{
+  font-size:18px;font-weight:700;letter-spacing:-0.4px;
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg, var(--text) 0%, var(--primary) 130%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.progress-list{
+  background:var(--surface);
+  border:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  padding:14px 16px;margin-bottom:18px;
+}
+.prog-row{
+  display:grid;grid-template-columns:90px 1fr auto;gap:11px;
+  align-items:center;padding:7px 0;
+}
+.prog-row .lbl{font-size:13px;color:var(--text-2);font-weight:500;}
+.prog-row .num{
+  font-size:12.5px;color:var(--hint);font-variant-numeric:tabular-nums;
+  font-weight:600;letter-spacing:-0.05px;
+}
+.prog-row .bar{
+  height:5px;background:var(--surface-2);border-radius:3px;overflow:hidden;
+}
+.prog-row .bar > div{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg, var(--primary-2) 0%, var(--primary) 100%);
+  box-shadow:0 0 6px var(--neon-soft);
+  transition:width .8s cubic-bezier(.2,.6,.2,1);
+}
+.prog-row.maxed .bar > div{
+  background:linear-gradient(90deg, var(--success) 0%, #6fdf85 100%);
+  box-shadow:0 0 6px rgba(74, 222, 128, 0.4);
+}
+.prog-row.maxed .num{color:var(--success);}
+
+/* Disabled boost row (already maxed). */
+.row.maxed{opacity:0.55;}
+.row.maxed .toggle{display:none;}
+.row.maxed .badge-done{
+  font-size:11px;font-weight:700;letter-spacing:0.4px;
+  background:rgba(74, 222, 128, 0.15);
+  color:var(--success);
+  border:1px solid rgba(74, 222, 128, 0.3);
+  padding:4px 9px;border-radius:var(--radius-pill);
+  flex-shrink:0;
+}
+
 /* PROGRESS SCREEN (post-Apply) */
 .progress-screen{
   text-align:center;padding:60px 32px 0;
@@ -472,6 +577,20 @@ code{
     <p>Check the chat for results.</p>
   </div>
 
+  <div id="fetch" style="display:none">
+    <div class="fetch-screen">
+      <div class="spinner"></div>
+      <div class="fetch-title">Reading account…</div>
+      <div class="fetch-sub">Pulling balance and unlocks</div>
+      <div class="fetch-steps" id="fetch-steps">
+        <div class="fetch-step" data-step="0"><span class="dot"></span>Authenticating session</div>
+        <div class="fetch-step" data-step="1"><span class="dot"></span>Reading wallet</div>
+        <div class="fetch-step" data-step="2"><span class="dot"></span>Scanning unlocks</div>
+        <div class="fetch-step" data-step="3"><span class="dot"></span>Personalizing options</div>
+      </div>
+    </div>
+  </div>
+
   <!-- LOGIN -->
   <div class="panel" id="p-login">
     <div class="section">
@@ -490,6 +609,7 @@ code{
 
   <!-- FARM -->
   <div class="panel" id="p-farm">
+    <div id="stats-host"></div>
     <div class="section">
       <div class="section-title">Coins</div>
       <div class="pills" id="coins-pills">
@@ -619,6 +739,24 @@ code{
   var params = new URLSearchParams(window.location.search);
   var mode  = params.get('mode')  || 'login';
   var admin = params.get('admin') === '1';
+
+  // Account state passed from the bot via base64-url JSON (`s` query param).
+  // Drives stats rendering on the Farm tab and disables already-completed
+  // boost categories on the Boost tab.
+  function decodeState(){
+    var raw = params.get('s');
+    if (!raw) return null;
+    try{
+      var pad = '='.repeat((4 - (raw.length % 4)) % 4);
+      var b64 = raw.replace(/-/g, '+').replace(/_/g, '/') + pad;
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    }catch(e){ try{ return JSON.parse(atob(raw)); }catch(_){ return null; } }
+  }
+  var accountState = decodeState();
+  function fmtN(n){
+    if (n === null || n === undefined) return '—';
+    return Number(n).toLocaleString('en-US').replace(/,/g,' ');
+  }
 
   if (!tg || tg.platform === 'unknown') {
     document.getElementById('gate').style.display = 'block';
@@ -1116,8 +1254,99 @@ code{
     tabbar.style.display = 'none';
   }
 
-  // Initial activation
-  activate(tabs[0][0]);
+  // ── Stats card on Farm tab ────────────────────────────────────────────
+  function renderStats(){
+    var host = document.getElementById('stats-host');
+    if (!host) return;
+    if (!accountState) { host.innerHTML = ''; return; }
+    var s = accountState;
+    var cats = [
+      ['Wheels',     s.wheels,   s.wheels_max  || 250],
+      ['Brakes',     s.brakes,   s.brakes_max  || 64],
+      ['Calipers',   s.calipers, s.calipers_max|| 64],
+      ['Achievements', s.flags,  s.flags_max   || 250],
+    ];
+    var rowsHtml = cats.map(function(c){
+      var have = c[1], max = c[2];
+      if (have === null || have === undefined) {
+        return '<div class="prog-row"><div class="lbl">' + c[0] + '</div>'
+          + '<div class="bar"><div style="width:0%"></div></div>'
+          + '<div class="num">—</div></div>';
+      }
+      var pct = Math.min(100, Math.round(have * 100 / max));
+      var maxedClass = (have >= max) ? ' maxed' : '';
+      return '<div class="prog-row' + maxedClass + '"><div class="lbl">' + c[0] + '</div>'
+        + '<div class="bar"><div style="width:' + pct + '%"></div></div>'
+        + '<div class="num">' + have + '/' + max + '</div></div>';
+    }).join('');
+    host.innerHTML =
+      '<div class="section">' +
+        '<div class="section-title">Account</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat"><div class="lbl">Coins</div><div class="num">' + fmtN(s.coins) + '</div></div>' +
+          '<div class="stat"><div class="lbl">Cash</div><div class="num">' + fmtN(s.money) + '</div></div>' +
+        '</div>' +
+        '<div class="progress-list">' + rowsHtml + '</div>' +
+      '</div>';
+  }
+
+  // ── Boost personalization — disable already-completed categories ──────
+  function personalizeBoost(){
+    if (!accountState) return;
+    var checks = {
+      wheels:   accountState.wheels   !== null && accountState.wheels   >= (accountState.wheels_max   || 250),
+      brakes:   accountState.brakes   !== null && accountState.brakes   >= (accountState.brakes_max   || 64),
+      calipers: accountState.calipers !== null && accountState.calipers >= (accountState.calipers_max || 64),
+      flags:    accountState.flags    !== null && accountState.flags    >= (accountState.flags_max    || 250),
+    };
+    var rows = document.querySelectorAll('#boost-list .row');
+    for (var i=0;i<rows.length;i++){
+      var key = rows[i].dataset.b;
+      if (checks[key]){
+        rows[i].classList.add('maxed');
+        rows[i].classList.remove('on');
+        delete state.boost[key];
+        // replace toggle with "Done" badge
+        if (!rows[i].querySelector('.badge-done')){
+          var b = document.createElement('div');
+          b.className = 'badge-done';
+          b.textContent = 'DONE';
+          rows[i].appendChild(b);
+        }
+        // disable click-to-toggle
+        rows[i].style.pointerEvents = 'none';
+      }
+    }
+  }
+
+  // ── Fetch ceremony — brief animated reveal of the account snapshot ────
+  function showFetch(){
+    document.getElementById('content').style.display = 'block';
+    var f = document.getElementById('fetch');
+    f.style.display = 'block';
+    document.getElementById('actionbar').style.display = 'none';
+    document.getElementById('tabbar').style.display = 'none';
+    var steps = document.querySelectorAll('#fetch-steps .fetch-step');
+    var delays = [180, 420, 760, 1100];
+    delays.forEach(function(d, i){
+      setTimeout(function(){ if (steps[i]) steps[i].classList.add('on'); }, d);
+    });
+    setTimeout(function(){
+      f.style.display = 'none';
+      document.getElementById('actionbar').style.display = 'block';
+      if (mode !== 'login') document.getElementById('tabbar').style.display = 'flex';
+      renderStats();
+      personalizeBoost();
+      activate(tabs[0][0]);
+    }, 1450);
+  }
+
+  // Initial activation — for hub mode with state, ceremony first; otherwise direct.
+  if (mode === 'hub' && accountState){
+    showFetch();
+  } else {
+    activate(tabs[0][0]);
+  }
 }());
 </script>
 </body>
