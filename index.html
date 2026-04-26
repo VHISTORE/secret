@@ -92,6 +92,53 @@ body.light::before{
   0%,100%{transform:translate(0,0) scale(1);}
   50%{transform:translate(2%,-2%) scale(1.04);}
 }
+/* Second drifting glow layer — opposite direction, longer cycle. Adds
+   parallax-like life without distracting from the foreground. */
+body::after{
+  content:'';
+  position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(40% 32% at 25% 20%, rgba(125, 90, 255, 0.16), transparent 65%),
+    radial-gradient(36% 30% at 78% 78%, rgba(76, 201, 240, 0.13), transparent 60%);
+  animation: bgDrift 32s ease-in-out infinite, bgPulse 7s ease-in-out infinite;
+  filter: blur(6px);
+  mix-blend-mode: screen;
+}
+body.light::after{
+  background:
+    radial-gradient(40% 32% at 25% 20%, rgba(124, 58, 237, 0.10), transparent 65%),
+    radial-gradient(36% 30% at 78% 78%, rgba(37, 99, 235, 0.08), transparent 60%);
+  mix-blend-mode: multiply;
+}
+@keyframes bgDrift{
+  0%,100%{transform:translate(0,0) scale(1.05) rotate(0deg);}
+  50%{transform:translate(-3%, 3%) scale(1.10) rotate(2deg);}
+}
+@keyframes bgPulse{
+  0%,100%{opacity:0.85;}
+  50%{opacity:1.0;}
+}
+/* Floating particles — small soft dots that drift up across the screen.
+   Pure decoration, pointer-events:none, low motion to avoid distraction. */
+.particles{
+  position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden;
+}
+.particles span{
+  position:absolute;display:block;
+  width:6px;height:6px;border-radius:50%;
+  background:radial-gradient(circle, rgba(76, 201, 240, 0.55) 0%, rgba(76, 201, 240, 0) 70%);
+  bottom:-10px;
+  animation: particleRise linear infinite;
+}
+body.light .particles span{
+  background:radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(37, 99, 235, 0) 70%);
+}
+@keyframes particleRise{
+  0%{transform:translateY(0) translateX(0);opacity:0;}
+  10%{opacity:1;}
+  90%{opacity:1;}
+  100%{transform:translateY(-110vh) translateX(var(--drift, 20px));opacity:0;}
+}
 
 /* HEADER — gradient title with subtle neon underline + active-account chip */
 .header{
@@ -309,6 +356,34 @@ body.light input,body.light textarea{
   border:1px solid rgba(37, 99, 235, 0.28);
   background:rgba(255, 255, 255, 0.85);
 }
+.input-wrap{position:relative;}
+.input-wrap input{padding-right:48px;}
+/* Render the email value as bullets while still keeping the underlying
+   string intact for the form submit. Toggling .revealed flips it back to
+   real text. Works on iOS/Android/macOS WebKit and Chromium-Edge. */
+.input-wrap input.masked:not(.revealed){
+  -webkit-text-security:disc;
+  text-security:disc;
+  letter-spacing:2px;
+}
+.eye{
+  position:absolute;right:8px;top:50%;
+  transform:translateY(-50%);
+  width:36px;height:36px;border-radius:10px;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--hint);padding:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s, color .2s, transform .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.eye:hover{background:var(--surface-2);color:var(--primary);}
+.eye:active{transform:translateY(-50%) scale(0.92);}
+.eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;}
+.eye .ico-eye-off{display:none;}
+.eye.on .ico-eye{display:none;}
+.eye.on .ico-eye-off{display:block;}
+.eye.on{color:var(--primary);}
 input:focus,textarea:focus{
   border-color:var(--primary);
   background:var(--surface-2);
@@ -615,6 +690,8 @@ code{
 </head>
 <body>
 
+<div class="particles" id="particles" aria-hidden="true"></div>
+
 <div class="header">
   <div class="header-row">
     <div>
@@ -663,15 +740,27 @@ code{
     <div class="section">
       <div class="field">
         <label>Email</label>
-        <input type="email" id="li-email" autocomplete="email" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
+        <div class="input-wrap">
+          <input type="email" id="li-email" class="masked" autocomplete="email" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
+          <button class="eye" id="li-email-eye" type="button" aria-label="Toggle email visibility">
+            <svg viewBox="0 0 24 24" class="ico-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" class="ico-eye-off"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.5 19.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
       </div>
       <div class="field">
         <label>Password</label>
-        <input type="password" id="li-pw" autocomplete="current-password" placeholder="••••••">
+        <div class="input-wrap">
+          <input type="password" id="li-pw" autocomplete="current-password" placeholder="••••••">
+          <button class="eye" id="li-pw-eye" type="button" aria-label="Toggle password visibility">
+            <svg viewBox="0 0 24 24" class="ico-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" class="ico-eye-off"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.5 19.5 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
       </div>
       <div class="err" id="li-err"></div>
     </div>
-    <div class="hint center">Credentials never appear in chat.</div>
+    <div class="hint center">Credentials never appear in chat. Tap 👁 to reveal.</div>
   </div>
 
   <!-- FARM -->
@@ -749,7 +838,7 @@ code{
           <div class="toggle"></div>
         </div>
         <div class="row" data-b="garage">
-          <div class="text"><div class="title">Garage slots</div><div class="desc">+50 slots · costs ~5,000 coins from balance</div></div>
+          <div class="text"><div class="title">Garage slots</div><div class="desc" id="garage-desc">+50 slots · ~5,000 coins from balance</div></div>
           <div class="toggle"></div>
         </div>
       </div>
@@ -848,6 +937,51 @@ code{
   function haptic(kind){ try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred(kind || 'light'); }catch(e){} }
   function selHaptic(){  try{ tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); }catch(e){} }
   function notif(kind){  try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(kind); }catch(e){} }
+
+  // Spawn floating particles for ambient liveliness. Pure decoration —
+  // 14 of them, each with random horizontal start, drift, duration, delay.
+  (function spawnParticles(){
+    var host = document.getElementById('particles');
+    if (!host) return;
+    var n = 14;
+    for (var i = 0; i < n; i++) {
+      var el = document.createElement('span');
+      var size = 4 + Math.random() * 8;
+      el.style.left   = Math.random() * 100 + '%';
+      el.style.width  = size.toFixed(1) + 'px';
+      el.style.height = size.toFixed(1) + 'px';
+      el.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
+      el.style.setProperty('--drift', (Math.random() * 80 - 40).toFixed(0) + 'px');
+      el.style.animationDuration = (14 + Math.random() * 16).toFixed(1) + 's';
+      el.style.animationDelay    = (-Math.random() * 22).toFixed(1) + 's';
+      host.appendChild(el);
+    }
+  })();
+
+  // Eye-toggle for email + password fields. Tap toggles between masked
+  // (bullets via -webkit-text-security) and revealed (real text). Email
+  // also flips its CSS .masked off when revealed so bullets disappear.
+  function bindEyeToggle(inputId, btnId){
+    var inp = document.getElementById(inputId);
+    var btn = document.getElementById(btnId);
+    if (!inp || !btn) return;
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      selHaptic();
+      var show = !btn.classList.contains('on');
+      btn.classList.toggle('on', show);
+      if (inp.type === 'password' || inp.type === 'text') {
+        inp.type = show ? 'text' : 'password';
+      } else {
+        // email field uses .masked CSS instead of type=password so the
+        // browser keeps email autofill / inputmode behavior.
+        inp.classList.toggle('revealed', show);
+      }
+    });
+  }
+  bindEyeToggle('li-email', 'li-email-eye');
+  bindEyeToggle('li-pw',    'li-pw-eye');
 
   // Inline Lucide-style SVGs — crisp at any DPI, follow theme color.
   var ICONS = {
@@ -1379,6 +1513,22 @@ code{
   function personalizeBoost(){
     if (!accountState) return;
     var s = accountState;
+    // Garage slot row — render dynamic remaining count + price.
+    // owned/max come from the bot's snapshot (slots_owned tracked locally
+    // since GetPlayerRecords' garage field isn't reverse-engineered yet).
+    var slotsMax   = (s.slots_max   != null) ? s.slots_max   : 50;
+    var slotsOwn   = (s.slots_owned != null) ? s.slots_owned : 0;
+    var slotsLeft  = Math.max(0, slotsMax - slotsOwn);
+    var garageDesc = document.getElementById('garage-desc');
+    if (garageDesc) {
+      if (slotsLeft <= 0) {
+        garageDesc.textContent = 'All ' + slotsMax + ' slots already bought';
+      } else {
+        var price = slotsLeft * 100;
+        garageDesc.textContent = '+' + slotsLeft + ' slots · ' +
+          fmtN(price) + ' coins from balance';
+      }
+    }
     var checks = {
       wheels:    s.wheels    != null && s.wheels    >= (s.wheels_max    || 250),
       brakes:    s.brakes    != null && s.brakes    >= (s.brakes_max    || 6),
@@ -1386,13 +1536,13 @@ code{
       flags:     s.flags     != null && s.flags     >= (s.flags_max     || 250),
       equipment: s.equipment != null && s.equipment >= (s.equipment_max || 12),
       cosmetics: s.paint     != null && s.paint     >= (s.paint_max     || 7),
+      garage:    slotsLeft <= 0,
     };
     var rows = document.querySelectorAll('#boost-list .row');
     var maxedAll = true;
     var anyKnown = false;
     for (var i=0;i<rows.length;i++){
       var key = rows[i].dataset.b;
-      if (key === 'garage') continue;  // garage isn't tracked in state — always available
       if (checks[key] !== undefined) {
         anyKnown = true;
         if (!checks[key]) maxedAll = false;
@@ -1412,7 +1562,7 @@ code{
     }
     if (anyKnown && maxedAll) {
       var hint = document.getElementById('boost-detail');
-      if (hint) hint.innerHTML = '✅ <b>All categories already maxed</b><br><span style="font-size:12px;opacity:0.7">Garage slots can still be bought below</span>';
+      if (hint) hint.innerHTML = '✅ <b>All categories already maxed</b>';
     }
   }
 
