@@ -122,14 +122,18 @@ button:not(:disabled):active{opacity:.8;}
       tg.sendData(JSON.stringify({mode: mode, email: email, password: pw}));
     } catch(e){
       btn.disabled = false;
-      btn.textContent = 'Sign In';
+      btn.textContent = mode === 'af' ? 'Add' : 'Sign In';
       errEl.textContent = '❌ ' + (e.message || 'Send failed');
       return;
     }
-    // Some clients don't auto-close after sendData. Small delay ensures the
-    // bridge finishes the send before we forcibly close, otherwise the next
-    // open of the WebApp shows empty initData ("Access Denied").
-    setTimeout(function(){ try { tg.close(); } catch(e){} }, 200);
+    // Do NOT call tg.close() — calling it after sendData() corrupts the WebApp
+    // session and causes empty initData ("Access Denied") on next open.
+    // Telegram auto-closes on iOS; Android users see the success screen.
+    document.getElementById('form').innerHTML =
+      '<div style="text-align:center;padding:60px 0">' +
+      '<div style="font-size:52px;margin-bottom:16px">✅</div>' +
+      '<p style="font-size:15px;color:var(--tg-theme-hint-color,#8899a6)">Sent! You can close this window.</p>' +
+      '</div>';
   }
 }());
 </script>
