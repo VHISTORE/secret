@@ -2,197 +2,341 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>CPM2</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+:root{
+  --bg: var(--tg-theme-bg-color, #17212b);
+  --surface: var(--tg-theme-secondary-bg-color, #232e3c);
+  --surface-hi: rgba(255,255,255,0.04);
+  --text: var(--tg-theme-text-color, #ffffff);
+  --hint: var(--tg-theme-hint-color, #708499);
+  --primary: var(--tg-theme-button-color, #5288c1);
+  --on-primary: var(--tg-theme-button-text-color, #ffffff);
+  --danger: #e74c3c;
+  --success: #34c759;
+  --divider: rgba(255,255,255,0.06);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
 html,body{height:100%;}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:var(--tg-theme-bg-color,#1c2733);
-  color:var(--tg-theme-text-color,#f1f1f1);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);
   display:flex;flex-direction:column;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  font-size:15px;line-height:1.4;
 }
-.header{padding:14px 18px 11px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
-.header h1{font-size:17px;font-weight:700;}
-.header .sub{font-size:12px;color:var(--tg-theme-hint-color,#8899a6);margin-top:3px;}
-.content{flex:1;overflow-y:auto;padding:16px 18px 22px;-webkit-overflow-scrolling:touch;}
-.tabbar{display:flex;border-top:1px solid rgba(255,255,255,0.08);
-  background:var(--tg-theme-secondary-bg-color,#232f3e);flex-shrink:0;}
-.tab{flex:1;padding:9px 4px;text-align:center;font-size:10px;
-  color:var(--tg-theme-hint-color,#8899a6);cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.tab.active{color:var(--tg-theme-button-color,#2481cc);}
-.tab .ico{font-size:19px;display:block;margin-bottom:2px;}
+
+/* HEADER */
+.header{
+  flex-shrink:0;padding:14px 18px 12px;
+  border-bottom:0.5px solid var(--divider);
+}
+.header h1{font-size:17px;font-weight:600;letter-spacing:-0.2px;}
+.header .sub{font-size:13px;color:var(--hint);margin-top:2px;}
+
+/* CONTENT */
+.content{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 16px 24px;
+}
 .panel{display:none;}
-.panel.active{display:block;}
-.preset{
-  background:var(--tg-theme-secondary-bg-color,#232f3e);
-  border-radius:13px;padding:13px 15px;margin-bottom:8px;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-  border:1.5px solid transparent;transition:border-color .12s,transform .08s;
+.panel.active{display:block;animation:fadeIn .22s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.section{margin-bottom:22px;}
+.section-title{
+  font-size:12px;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.6px;color:var(--hint);
+  margin-bottom:9px;padding-left:4px;
 }
-.preset:active{transform:scale(.98);border-color:var(--tg-theme-button-color,#2481cc);}
-.preset .name{font-weight:700;font-size:15px;margin-bottom:3px;}
-.preset .desc{font-size:12px;color:var(--tg-theme-hint-color,#8899a6);}
-.check{
-  display:flex;align-items:center;gap:12px;
-  background:var(--tg-theme-secondary-bg-color,#232f3e);
-  border-radius:11px;padding:12px 14px;margin-bottom:7px;cursor:pointer;
+
+/* PILLS */
+.pills{
+  display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;
+  padding:2px 16px 4px;margin:0 -16px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.pills::-webkit-scrollbar{display:none;}
+.pill{
+  flex-shrink:0;padding:10px 16px;border-radius:22px;
+  background:var(--surface);font-size:14px;font-weight:600;
+  cursor:pointer;color:var(--text);
+  transition:transform .12s,background .15s,color .15s;
+}
+.pill:active{transform:scale(0.94);}
+.pill.active{background:var(--primary);color:var(--on-primary);}
+.pill-detail{
+  margin-top:8px;padding:0 4px;font-size:13px;
+  color:var(--hint);min-height:18px;
+}
+
+/* CARD + ROWS */
+.card{
+  background:var(--surface);border-radius:12px;
+  margin-bottom:8px;overflow:hidden;
+}
+.row{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 16px;cursor:pointer;
+  transition:background .15s;
+}
+.row+.row{border-top:0.5px solid var(--divider);}
+.row:active{background:var(--surface-hi);}
+.row .text{flex:1;min-width:0;}
+.row .title{font-size:15px;font-weight:500;line-height:1.3;}
+.row .desc{font-size:12.5px;color:var(--hint);margin-top:2px;line-height:1.3;}
+.row .chev{font-size:18px;color:var(--hint);font-weight:300;}
+
+/* TOGGLE */
+.toggle{
+  position:relative;width:48px;height:28px;
+  background:rgba(120,120,128,0.32);border-radius:14px;
+  transition:background .2s;flex-shrink:0;
+}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:24px;height:24px;background:#fff;border-radius:50%;
+  transition:left .22s cubic-bezier(0.32,0.72,0.4,1);
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.row.on .toggle{background:var(--success);}
+.row.on .toggle::after{left:22px;}
+#p-boost .row.on .toggle{background:var(--primary);}
+
+/* INPUT */
+.field{margin-bottom:10px;}
+.field label{
+  display:block;font-size:12px;font-weight:600;
+  color:var(--hint);margin-bottom:6px;padding-left:4px;
+}
+input,textarea{
+  width:100%;padding:13px 14px;border-radius:11px;
+  border:none;background:var(--surface);color:var(--text);
+  font-size:16px;font-family:inherit;outline:none;
+  -webkit-appearance:none;
+  -webkit-user-select:text;user-select:text;
+  transition:box-shadow .15s;
+}
+input:focus,textarea:focus{box-shadow:0 0 0 2px var(--primary);}
+textarea{
+  resize:none;min-height:140px;line-height:1.5;
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:14px;
+}
+
+/* ACTION BAR */
+.actionbar{
+  flex-shrink:0;padding:10px 16px 12px;
+  background:var(--bg);border-top:0.5px solid var(--divider);
+}
+.cta{
+  width:100%;padding:14px;border-radius:12px;border:none;
+  background:var(--primary);color:var(--on-primary);
+  font-size:15px;font-weight:600;cursor:pointer;
+  font-family:inherit;
+  transition:opacity .15s,transform .12s;
   -webkit-tap-highlight-color:transparent;
 }
-.check .tx{flex:1;}
-.check .nm{font-size:14px;font-weight:600;}
-.check .ds{font-size:11px;color:var(--tg-theme-hint-color,#8899a6);margin-top:2px;}
-.check .box{
-  width:22px;height:22px;border:2px solid var(--tg-theme-hint-color,#8899a6);
-  border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+.cta:disabled{opacity:0.4;cursor:not-allowed;}
+.cta:not(:disabled):active{transform:scale(0.985);}
+
+/* TABS */
+.tabbar{
+  flex-shrink:0;display:flex;
+  background:var(--surface);
+  border-top:0.5px solid var(--divider);
+  padding-bottom:env(safe-area-inset-bottom);
 }
-.check.on .box{background:var(--tg-theme-button-color,#2481cc);border-color:var(--tg-theme-button-color,#2481cc);}
-.check.on .box::after{content:'✓';color:#fff;font-weight:700;font-size:13px;}
-.field{margin-bottom:12px;}
-label{display:block;font-size:11px;font-weight:700;letter-spacing:.7px;
-  text-transform:uppercase;color:var(--tg-theme-hint-color,#8899a6);margin-bottom:6px;}
-input,textarea{
-  width:100%;padding:12px 14px;border-radius:10px;
-  border:1.5px solid rgba(255,255,255,.07);
-  background:var(--tg-theme-secondary-bg-color,#232f3e);
-  color:var(--tg-theme-text-color,#fff);
-  font-size:15px;outline:none;-webkit-appearance:none;
-  -webkit-user-select:text;user-select:text;font-family:inherit;
+.tab{
+  flex:1;padding:8px 4px 6px;text-align:center;
+  color:var(--hint);cursor:pointer;
+  font-size:10px;font-weight:500;
+  transition:color .15s;
 }
-textarea{resize:none;min-height:108px;}
-input:focus,textarea:focus{border-color:var(--tg-theme-button-color,#2481cc);}
-button.go{
-  width:100%;padding:13px;border-radius:11px;border:none;
-  background:var(--tg-theme-button-color,#2481cc);
-  color:var(--tg-theme-button-text-color,#fff);
-  font-size:15px;font-weight:700;-webkit-tap-highlight-color:transparent;margin-top:5px;
+.tab.active{color:var(--primary);}
+.tab .ico{display:block;font-size:22px;line-height:1;margin-bottom:3px;}
+
+/* MISC */
+.hint{
+  font-size:12.5px;color:var(--hint);
+  line-height:1.5;padding:0 4px;
 }
-button.go:disabled{opacity:.5;}
-.err{min-height:18px;color:#ff6b6b;font-size:13px;margin:4px 0;}
-.hint{font-size:12px;color:var(--tg-theme-hint-color,#8899a6);
-  margin:0 0 12px;line-height:1.5;}
-.section{font-size:11px;font-weight:700;letter-spacing:.7px;
-  text-transform:uppercase;color:var(--tg-theme-hint-color,#8899a6);
-  margin:18px 0 8px;}
-code{font-family:ui-monospace,Menlo,monospace;font-size:11px;
-  background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;}
-#block{text-align:center;padding:60px 20px;}
-#block .ico{font-size:54px;margin-bottom:12px;}
-#block h2{font-size:19px;margin-bottom:8px;}
-#block p{color:var(--tg-theme-hint-color,#8899a6);line-height:1.5;font-size:14px;}
+.hint.center{text-align:center;}
+.err{
+  min-height:18px;font-size:13px;color:var(--danger);
+  padding:6px 4px 0;
+}
+code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:12px;background:rgba(255,255,255,0.07);
+  padding:1px 5px;border-radius:4px;
+}
+#gate,#done{text-align:center;padding:80px 24px 0;}
+#gate .ico,#done .ico{font-size:54px;margin-bottom:12px;}
+#gate h2,#done h2{font-size:19px;font-weight:600;margin-bottom:8px;}
+#gate p,#done p{color:var(--hint);font-size:14px;line-height:1.5;}
 </style>
 </head>
 <body>
+
 <div class="header">
   <h1 id="title">CPM2</h1>
   <div class="sub" id="subtitle">Loading…</div>
 </div>
+
 <div class="content" id="content">
-  <div id="block" style="display:none">
+
+  <div id="gate" style="display:none">
     <div class="ico">⛔</div>
     <h2>Access Denied</h2>
-    <p>This app only works inside Telegram via the bot button.</p>
+    <p>Open this app via the bot button in Telegram.</p>
   </div>
 
+  <div id="done" style="display:none">
+    <div class="ico">✅</div>
+    <h2>Sent</h2>
+    <p>Check the chat for results.</p>
+  </div>
+
+  <!-- LOGIN -->
   <div class="panel" id="p-login">
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="li-email" autocomplete="email" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
+    <div class="section">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="li-email" autocomplete="email" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="li-pw" autocomplete="current-password" placeholder="••••••">
+      </div>
+      <div class="err" id="li-err"></div>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="li-pw" autocomplete="current-password" placeholder="••••••">
-    </div>
-    <div class="err" id="li-err"></div>
-    <button class="go" id="b-login">Sign In</button>
-    <div class="hint">Credentials never appear in chat. They are sent securely to the bot only.</div>
+    <div class="hint center">Credentials never appear in chat.</div>
   </div>
 
+  <!-- FARM -->
   <div class="panel" id="p-farm">
-    <div class="hint">Pick a preset. Drag-racing combos are claimed top-reward first; daily quest is bundled.</div>
-    <div class="preset" data-act="coins" data-target="1000">
-      <div class="name">🪙 +1,000 coins</div>
-      <div class="desc">~1 race · &lt;5 sec</div>
+    <div class="section">
+      <div class="section-title">Coins</div>
+      <div class="pills" id="coins-pills">
+        <div class="pill" data-coins="1000">+1,000</div>
+        <div class="pill" data-coins="2500">+2,500</div>
+        <div class="pill" data-coins="5000">+5,000</div>
+        <div class="pill" data-coins="10000">+10,000</div>
+        <div class="pill" data-coins="max">Max</div>
+      </div>
+      <div class="pill-detail" id="coins-detail">Tap an amount</div>
     </div>
-    <div class="preset" data-act="coins" data-target="2500">
-      <div class="name">🪙 +2,500 coins</div>
-      <div class="desc">~3 races · ~10 sec</div>
+
+    <div class="section">
+      <div class="section-title">Cash</div>
+      <div class="card">
+        <div class="row" id="cash-row">
+          <div class="text">
+            <div class="title">+50,000,000</div>
+            <div class="desc">~2 seconds</div>
+          </div>
+          <div class="toggle"></div>
+        </div>
+      </div>
     </div>
-    <div class="preset" data-act="coins" data-target="5000">
-      <div class="name">🪙 +5,000 coins</div>
-      <div class="desc">~7 races · ~15 sec</div>
-    </div>
-    <div class="preset" data-act="coins" data-target="10000">
-      <div class="name">🪙 +10,000 coins</div>
-      <div class="desc">~16 races · ~25 sec</div>
-    </div>
-    <div class="preset" data-act="coins" data-target="max">
-      <div class="name">🚀 Max coins</div>
-      <div class="desc">drag (~12k) + circuit (~14k) + daily · ~14 min</div>
-    </div>
-    <div class="section">Cash</div>
-    <div class="preset" data-act="cash">
-      <div class="name">💰 +50,000,000 cash</div>
-      <div class="desc">server cap, instant · ~2 sec</div>
-    </div>
-    <div class="section">Misc</div>
-    <div class="preset" data-act="balance">
-      <div class="name">🔄 Refresh balance</div>
-      <div class="desc">show coins / money in chat</div>
+
+    <div class="section">
+      <div class="section-title">Account</div>
+      <div class="card">
+        <div class="row" id="balance-row">
+          <div class="text">
+            <div class="title">Refresh balance</div>
+            <div class="desc">Show current totals in chat</div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- BOOST -->
   <div class="panel" id="p-boost">
-    <div class="hint">Toggle items, then Apply. Active account only.</div>
-    <div class="check" data-b="wheels"><div class="tx"><div class="nm">All Wheels</div><div class="ds">all 250 disks</div></div><div class="box"></div></div>
-    <div class="check" data-b="brakes"><div class="tx"><div class="nm">All Brakes</div><div class="ds">all 64 brake slots</div></div><div class="box"></div></div>
-    <div class="check" data-b="calipers"><div class="tx"><div class="nm">All Calipers</div><div class="ds">all 64 caliper slots</div></div><div class="box"></div></div>
-    <div class="check" data-b="flags"><div class="tx"><div class="nm">Achievement Flags</div><div class="ds">flags 0..250</div></div><div class="box"></div></div>
-    <div class="check" data-b="equipment"><div class="tx"><div class="nm">Equipment</div><div class="ds">male equipment idx 19-29, female top idx 41</div></div><div class="box"></div></div>
-    <div class="check" data-b="cosmetics"><div class="tx"><div class="nm">Cosmetics &amp; MatTypes</div><div class="ds">paint types, animations</div></div><div class="box"></div></div>
-    <div class="check" data-b="garage"><div class="tx"><div class="nm">Garage Slots (+50 max)</div><div class="ds">100 coins each, server-validated</div></div><div class="box"></div></div>
-    <button class="go" id="b-boost" style="margin-top:10px">Apply Boost</button>
+    <div class="section">
+      <div class="section-title">Pick what to unlock</div>
+      <div class="card" id="boost-list">
+        <div class="row" data-b="wheels">
+          <div class="text"><div class="title">All wheels</div><div class="desc">Every wheel design</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="brakes">
+          <div class="text"><div class="title">All brakes</div><div class="desc">Every brake variant</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="calipers">
+          <div class="text"><div class="title">All calipers</div><div class="desc">Every caliper color</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="flags">
+          <div class="text"><div class="title">Achievements</div><div class="desc">Every achievement flag</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="equipment">
+          <div class="text"><div class="title">Character clothing</div><div class="desc">All outfits and accessories</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="cosmetics">
+          <div class="text"><div class="title">Paint &amp; animations</div><div class="desc">All paint colors and animations</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="row" data-b="garage">
+          <div class="text"><div class="title">Garage slots</div><div class="desc">Maximum garage capacity</div></div>
+          <div class="toggle"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint center" id="boost-detail">Toggle items, then Apply</div>
   </div>
 
+  <!-- ACCOUNTS -->
   <div class="panel" id="p-add">
-    <div class="hint">Add another account to your active sessions.</div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="ad-email" autocomplete="off" inputmode="email" spellcheck="false">
+    <div class="section">
+      <div class="section-title">Add one account</div>
+      <div class="field">
+        <input type="email" id="ad-email" autocomplete="off" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
+      </div>
+      <div class="field">
+        <input type="password" id="ad-pw" autocomplete="off" placeholder="Password">
+      </div>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="ad-pw" autocomplete="off">
+
+    <div class="section">
+      <div class="section-title">Or paste many</div>
+      <div class="hint" style="margin-bottom:8px">One per line: <code>email:password</code></div>
+      <textarea id="bulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
     </div>
-    <button class="go" id="b-add">Add Account</button>
-    <div class="section">Bulk add</div>
-    <div class="hint">One per line: <code>email:password</code></div>
-    <div class="field">
-      <textarea id="bulk" placeholder="user1@gmail.com:pass1
-user2@gmail.com:pass2" spellcheck="false"></textarea>
-    </div>
-    <button class="go" id="b-bulk">Add All</button>
   </div>
 
+  <!-- AUTOFARM -->
   <div class="panel" id="p-af">
-    <div class="hint">Bulk-add accounts to the 25h Auto Farm cycle. Owner only.</div>
-    <div class="field">
-      <textarea id="afbulk" placeholder="user1@gmail.com:pass1
-user2@gmail.com:pass2" spellcheck="false"></textarea>
+    <div class="section">
+      <div class="section-title">Auto cycle bulk add</div>
+      <div class="hint" style="margin-bottom:8px">Adds accounts to the 25h auto cycle.<br>One per line: <code>email:password</code></div>
+      <textarea id="afbulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
     </div>
-    <button class="go" id="b-afbulk">Add to Auto Farm</button>
   </div>
+
 </div>
+
+<div class="actionbar" id="actionbar">
+  <button class="cta" id="cta" disabled>Pick options</button>
+</div>
+
 <div class="tabbar" id="tabbar"></div>
 
 <script>
 (function(){
-  document.addEventListener('contextmenu', function(e){e.preventDefault();});
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
   document.addEventListener('keydown', function(e){
-    if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&'IJC'.indexOf(e.key.toUpperCase())>=0)||
-       (e.ctrlKey&&'US'.indexOf(e.key.toUpperCase())>=0)){e.preventDefault();return false;}
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && 'IJC'.indexOf(e.key.toUpperCase()) >= 0) ||
+        (e.ctrlKey && 'US'.indexOf(e.key.toUpperCase()) >= 0)) {
+      e.preventDefault(); return false;
+    }
   });
 
   var tg = window.Telegram && window.Telegram.WebApp;
@@ -200,18 +344,31 @@ user2@gmail.com:pass2" spellcheck="false"></textarea>
   var mode  = params.get('mode')  || 'login';
   var admin = params.get('admin') === '1';
 
-  if(!tg || tg.platform === 'unknown'){
-    document.getElementById('block').style.display = 'block';
+  if (!tg || tg.platform === 'unknown') {
+    document.getElementById('gate').style.display = 'block';
     document.getElementById('subtitle').textContent = '—';
+    document.getElementById('actionbar').style.display = 'none';
     return;
   }
   tg.ready();
   tg.expand();
-  if(tg.MainButton) tg.MainButton.hide();
+  if (tg.MainButton) tg.MainButton.hide();
 
+  // light theme tweak (Telegram desktop default)
+  if (tg.colorScheme === 'light') {
+    document.body.style.setProperty('--surface', '#f1f3f6');
+    document.body.style.setProperty('--surface-hi', 'rgba(0,0,0,0.04)');
+    document.body.style.setProperty('--divider', 'rgba(0,0,0,0.07)');
+  }
+
+  function haptic(kind){ try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred(kind || 'light'); }catch(e){} }
+  function selHaptic(){  try{ tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); }catch(e){} }
+  function notif(kind){  try{ tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(kind); }catch(e){} }
+
+  // Tabs depending on mode
   var tabs = (mode === 'login')
     ? [['login','🔐','Sign In']]
-    : [['farm','🚀','Farm'],['boost','📦','Boost'],['add','➕','Accounts']]
+    : [['farm','🚀','Farm'], ['boost','🎁','Boost'], ['add','👥','Accounts']]
         .concat(admin ? [['af','🤖','AutoFarm']] : []);
 
   var tabbar = document.getElementById('tabbar');
@@ -220,120 +377,207 @@ user2@gmail.com:pass2" spellcheck="false"></textarea>
     div.className = 'tab';
     div.dataset.tab = t[0];
     div.innerHTML = '<span class="ico">' + t[1] + '</span>' + t[2];
-    div.addEventListener('click', function(){ activate(t[0]); });
+    div.addEventListener('click', function(){ selHaptic(); activate(t[0]); });
     tabbar.appendChild(div);
   });
-  if(mode === 'login') tabbar.style.display = 'none';
+  if (mode === 'login') tabbar.style.display = 'none';
 
-  function activate(id){
+  document.getElementById('title').textContent = (mode === 'login') ? 'Sign in' : 'CPM2 Control';
+
+  // STATE
+  var state = {
+    tab: tabs[0][0],
+    coins: null,
+    cash: false,
+    boost: {},
+  };
+
+  function activate(id) {
+    state.tab = id;
     var allTabs = document.querySelectorAll('.tab');
-    for(var i=0;i<allTabs.length;i++) allTabs[i].classList.toggle('active', allTabs[i].dataset.tab === id);
+    for (var i=0;i<allTabs.length;i++) allTabs[i].classList.toggle('active', allTabs[i].dataset.tab === id);
     var allPanels = document.querySelectorAll('.panel');
-    for(var j=0;j<allPanels.length;j++) allPanels[j].classList.toggle('active', allPanels[j].id === 'p-' + id);
+    for (var j=0;j<allPanels.length;j++) allPanels[j].classList.toggle('active', allPanels[j].id === 'p-' + id);
     var found = null;
-    for(var k=0;k<tabs.length;k++) if(tabs[k][0] === id) found = tabs[k];
+    for (var k=0;k<tabs.length;k++) if (tabs[k][0] === id) found = tabs[k];
     document.getElementById('subtitle').textContent = found ? found[2] : '';
-  }
-  activate(tabs[0][0]);
-  document.getElementById('title').textContent = (mode === 'login') ? 'CPM2 — Sign In' : 'CPM2 Control';
-
-  // checkbox toggles
-  var checks = document.querySelectorAll('.check');
-  for(var c=0;c<checks.length;c++){
-    (function(row){ row.addEventListener('click', function(){ row.classList.toggle('on'); }); })(checks[c]);
+    refreshCTA();
   }
 
-  // farm preset clicks
-  var farmPresets = document.querySelectorAll('#p-farm .preset');
-  for(var p=0;p<farmPresets.length;p++){
-    (function(card){
-      card.addEventListener('click', function(){
-        var act = card.dataset.act;
-        if(act === 'coins') send({mode: 'farm_coins', target: card.dataset.target});
-        else if(act === 'cash') send({mode: 'farm_cash'});
-        else if(act === 'balance') send({mode: 'balance'});
+  // FARM — coin pills (single-select, tap-again to clear)
+  var pills = document.querySelectorAll('#coins-pills .pill');
+  var coinDescs = {
+    '1000':  '~5 seconds',
+    '2500':  '~10 seconds',
+    '5000':  '~15 seconds',
+    '10000': '~25 seconds',
+    'max':   '~14 minutes',
+  };
+  for (var p=0;p<pills.length;p++) {
+    (function(pill){
+      pill.addEventListener('click', function(){
+        if (state.coins === pill.dataset.coins) {
+          state.coins = null;
+          pill.classList.remove('active');
+        } else {
+          state.coins = pill.dataset.coins;
+          for (var i=0;i<pills.length;i++) pills[i].classList.remove('active');
+          pill.classList.add('active');
+        }
+        document.getElementById('coins-detail').textContent =
+          state.coins ? coinDescs[state.coins] : 'Tap an amount';
+        selHaptic();
+        refreshCTA();
       });
-    })(farmPresets[p]);
+    })(pills[p]);
   }
 
-  function valid(email, pw){
-    return email && email.indexOf('@') > 0 && email.length >= 5 && pw && pw.length >= 4;
+  // FARM — cash toggle
+  var cashRow = document.getElementById('cash-row');
+  if (cashRow) cashRow.addEventListener('click', function(){
+    state.cash = !state.cash;
+    cashRow.classList.toggle('on', state.cash);
+    selHaptic();
+    refreshCTA();
+  });
+
+  // FARM — balance row (immediate submit)
+  var balanceRow = document.getElementById('balance-row');
+  if (balanceRow) balanceRow.addEventListener('click', function(){
+    haptic('light');
+    send({mode: 'balance'});
+  });
+
+  // BOOST — toggle rows
+  var boostRows = document.querySelectorAll('#boost-list .row');
+  for (var b=0;b<boostRows.length;b++) {
+    (function(row){
+      row.addEventListener('click', function(){
+        var key = row.dataset.b;
+        state.boost[key] = !state.boost[key];
+        row.classList.toggle('on', !!state.boost[key]);
+        selHaptic();
+        var n = 0;
+        for (var k in state.boost) if (state.boost[k]) n++;
+        document.getElementById('boost-detail').textContent =
+          n ? (n + ' selected') : 'Toggle items, then Apply';
+        refreshCTA();
+      });
+    })(boostRows[b]);
   }
 
-  var bLogin = document.getElementById('b-login');
-  if(bLogin) bLogin.addEventListener('click', function(){
-    var email = (document.getElementById('li-email').value || '').trim().toLowerCase();
-    var pw    = document.getElementById('li-pw').value;
-    var err   = document.getElementById('li-err');
-    err.textContent = '';
-    if(!valid(email, pw)){ err.textContent = '❌ check email and password'; return; }
-    send({mode: 'login', email: email, password: pw});
+  // CTA logic
+  var cta = document.getElementById('cta');
+  var actionbar = document.getElementById('actionbar');
+
+  function refreshCTA() {
+    var t = state.tab;
+    var label = '', enabled = false;
+    if (t === 'login') {
+      var em = (document.getElementById('li-email').value || '').trim();
+      var pw = document.getElementById('li-pw').value;
+      label = 'Sign In';
+      enabled = em.indexOf('@') > 0 && em.length >= 5 && pw && pw.length >= 4;
+    } else if (t === 'farm') {
+      var any = (state.coins ? 1 : 0) + (state.cash ? 1 : 0);
+      label = any ? 'Apply' : 'Pick options';
+      enabled = any > 0;
+    } else if (t === 'boost') {
+      var bn = 0; for (var k in state.boost) if (state.boost[k]) bn++;
+      label = bn ? ('Apply · ' + bn) : 'Pick items';
+      enabled = bn > 0;
+    } else if (t === 'add') {
+      var em = (document.getElementById('ad-email').value || '').trim();
+      var pw = document.getElementById('ad-pw').value;
+      var bulk = (document.getElementById('bulk').value || '').trim();
+      var single_ok = em.indexOf('@') > 0 && em.length >= 5 && pw && pw.length >= 4;
+      label = bulk ? 'Add list' : 'Add account';
+      enabled = single_ok || bulk.length > 0;
+    } else if (t === 'af') {
+      var bulk = (document.getElementById('afbulk').value || '').trim();
+      label = 'Add to AutoFarm';
+      enabled = bulk.length > 0;
+    }
+    cta.textContent = label;
+    cta.disabled = !enabled;
+  }
+
+  // Live refresh on inputs
+  ['li-email','li-pw','ad-email','ad-pw','bulk','afbulk'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', refreshCTA);
   });
 
-  var bAdd = document.getElementById('b-add');
-  if(bAdd) bAdd.addEventListener('click', function(){
-    var email = (document.getElementById('ad-email').value || '').trim().toLowerCase();
-    var pw    = document.getElementById('ad-pw').value;
-    if(!valid(email, pw)) return;
-    send({mode: 'login', email: email, password: pw});
+  cta.addEventListener('click', function(){
+    if (cta.disabled) return;
+    haptic('medium');
+    var t = state.tab;
+    if (t === 'login') {
+      var em = (document.getElementById('li-email').value || '').trim().toLowerCase();
+      var pw = document.getElementById('li-pw').value;
+      send({mode: 'login', email: em, password: pw});
+    } else if (t === 'farm') {
+      var payload = {mode: 'farm'};
+      if (state.coins) payload.coins = state.coins;
+      if (state.cash)  payload.cash  = true;
+      send(payload);
+    } else if (t === 'boost') {
+      var items = [];
+      for (var k in state.boost) if (state.boost[k]) items.push(k);
+      if (!items.length) return;
+      send({mode: 'boost', items: items});
+    } else if (t === 'add') {
+      var bulk = parseBulk('bulk');
+      if (bulk.length) {
+        send({mode: 'bulk_login', accounts: bulk});
+      } else {
+        var em = (document.getElementById('ad-email').value || '').trim().toLowerCase();
+        var pw = document.getElementById('ad-pw').value;
+        send({mode: 'login', email: em, password: pw});
+      }
+    } else if (t === 'af') {
+      var accs = parseBulk('afbulk');
+      if (!accs.length) return;
+      send({mode: 'af_bulk', accounts: accs});
+    }
   });
 
-  function parseBulk(textareaId){
-    var lines = (document.getElementById(textareaId).value || '')
+  function parseBulk(id) {
+    var lines = (document.getElementById(id).value || '')
       .split('\n').map(function(s){return s.trim();}).filter(Boolean);
     var out = [];
-    for(var i=0;i<lines.length;i++){
+    for (var i=0;i<lines.length;i++) {
       var l = lines[i];
       var idx = l.indexOf(':');
-      if(idx < 1) continue;
+      if (idx < 1) continue;
       var em = l.slice(0, idx).trim().toLowerCase();
       var pw = l.slice(idx + 1);
-      if(em.indexOf('@') > 0 && pw.length >= 4) out.push({email: em, password: pw});
+      if (em.indexOf('@') > 0 && pw.length >= 4) out.push({email: em, password: pw});
     }
     return out;
   }
 
-  var bBulk = document.getElementById('b-bulk');
-  if(bBulk) bBulk.addEventListener('click', function(){
-    var accs = parseBulk('bulk');
-    if(!accs.length) return;
-    send({mode: 'bulk_login', accounts: accs});
-  });
-
-  var bAfBulk = document.getElementById('b-afbulk');
-  if(bAfBulk) bAfBulk.addEventListener('click', function(){
-    var accs = parseBulk('afbulk');
-    if(!accs.length) return;
-    send({mode: 'af_bulk', accounts: accs});
-  });
-
-  var bBoost = document.getElementById('b-boost');
-  if(bBoost) bBoost.addEventListener('click', function(){
-    var on = document.querySelectorAll('#p-boost .check.on');
-    var items = [];
-    for(var i=0;i<on.length;i++) items.push(on[i].dataset.b);
-    if(!items.length) return;
-    send({mode: 'boost', items: items});
-  });
-
-  function send(payload){
-    try{
+  function send(payload) {
+    try {
       tg.sendData(JSON.stringify(payload));
-      success();
-    }catch(e){
+      notif('success');
+      done();
+    } catch(e) {
       var err = document.getElementById('li-err');
-      if(err) err.textContent = '❌ ' + (e.message || 'Send failed');
+      if (err) err.textContent = '❌ ' + (e.message || 'Send failed');
     }
   }
 
-  function success(){
-    document.getElementById('content').innerHTML =
-      '<div style="text-align:center;padding:80px 20px">' +
-      '<div style="font-size:52px;margin-bottom:16px">✅</div>' +
-      '<p style="font-size:15px;color:var(--tg-theme-hint-color,#8899a6)">Sent! Results in chat.</p>' +
-      '</div>';
-    document.getElementById('tabbar').style.display = 'none';
+  function done() {
+    document.getElementById('content').innerHTML = '';
+    document.getElementById('content').appendChild(document.getElementById('done'));
+    document.getElementById('done').style.display = 'block';
+    actionbar.style.display = 'none';
+    tabbar.style.display = 'none';
   }
+
+  // Initial activation
+  activate(tabs[0][0]);
 }());
 </script>
 </body>
