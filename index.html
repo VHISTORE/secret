@@ -1261,11 +1261,15 @@ code{
     if (!accountState) { host.innerHTML = ''; return; }
     var s = accountState;
     var cats = [
-      ['Wheels',     s.wheels,   s.wheels_max  || 250],
-      ['Brakes',     s.brakes,   s.brakes_max  || 64],
-      ['Calipers',   s.calipers, s.calipers_max|| 64],
-      ['Achievements', s.flags,  s.flags_max   || 250],
+      ['Wheels',     s.wheels,    s.wheels_max    || 250],
+      ['Brakes',     s.brakes,    s.brakes_max    || 64],
+      ['Calipers',   s.calipers,  s.calipers_max  || 64],
+      ['Achievements', s.flags,   s.flags_max     || 250],
+      ['Equipment',  s.equipment, s.equipment_max || 12],
     ];
+    if (s.mat_types_full !== null && s.mat_types_full !== undefined) {
+      cats.push(['Paint & anim', s.mat_types_full ? 1 : 0, 1]);
+    }
     var rowsHtml = cats.map(function(c){
       var have = c[1], max = c[2];
       if (have === null || have === undefined) {
@@ -1293,11 +1297,14 @@ code{
   // ── Boost personalization — disable already-completed categories ──────
   function personalizeBoost(){
     if (!accountState) return;
+    var s = accountState;
     var checks = {
-      wheels:   accountState.wheels   !== null && accountState.wheels   >= (accountState.wheels_max   || 250),
-      brakes:   accountState.brakes   !== null && accountState.brakes   >= (accountState.brakes_max   || 64),
-      calipers: accountState.calipers !== null && accountState.calipers >= (accountState.calipers_max || 64),
-      flags:    accountState.flags    !== null && accountState.flags    >= (accountState.flags_max    || 250),
+      wheels:    s.wheels    != null && s.wheels    >= (s.wheels_max    || 250),
+      brakes:    s.brakes    != null && s.brakes    >= (s.brakes_max    || 64),
+      calipers:  s.calipers  != null && s.calipers  >= (s.calipers_max  || 64),
+      flags:     s.flags     != null && s.flags     >= (s.flags_max     || 250),
+      equipment: s.equipment != null && s.equipment >= (s.equipment_max || 12),
+      cosmetics: s.mat_types_full === true,
     };
     var rows = document.querySelectorAll('#boost-list .row');
     for (var i=0;i<rows.length;i++){
