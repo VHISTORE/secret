@@ -50,6 +50,27 @@ body{
   letter-spacing:0.6px;color:var(--hint);
   margin-bottom:9px;padding-left:4px;
 }
+.section-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 4px;margin-bottom:9px;
+}
+.section-row .section-title{margin-bottom:0;padding-left:0;}
+.link-btn{
+  background:transparent;border:none;color:var(--primary);
+  font-size:13px;font-weight:600;cursor:pointer;
+  padding:4px 8px;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+  letter-spacing:0.2px;
+}
+.link-btn:active{opacity:0.55;}
+textarea.bulk-large{min-height:230px;}
+.counter{
+  font-size:12.5px;color:var(--hint);
+  text-align:right;margin-top:8px;
+  padding-right:4px;min-height:18px;
+  font-variant-numeric:tabular-nums;
+}
+.counter.has-invalid{color:var(--danger);}
 
 /* PILLS */
 .pills{
@@ -258,7 +279,10 @@ code{
   <!-- BOOST -->
   <div class="panel" id="p-boost">
     <div class="section">
-      <div class="section-title">Pick what to unlock</div>
+      <div class="section-row">
+        <div class="section-title">Pick what to unlock</div>
+        <button class="link-btn" id="boost-all">All</button>
+      </div>
       <div class="card" id="boost-list">
         <div class="row" data-b="wheels">
           <div class="text"><div class="title">All wheels</div><div class="desc">Every wheel design</div></div>
@@ -306,18 +330,26 @@ code{
     </div>
 
     <div class="section">
-      <div class="section-title">Or paste many</div>
+      <div class="section-row">
+        <div class="section-title">Or paste many</div>
+        <button class="link-btn" id="bulk-clear">Clear</button>
+      </div>
       <div class="hint" style="margin-bottom:8px">One per line: <code>email:password</code></div>
-      <textarea id="bulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
+      <textarea id="bulk" class="bulk-large" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2&#10;user3@gmail.com:pass3" spellcheck="false"></textarea>
+      <div class="counter" id="bulk-count"></div>
     </div>
   </div>
 
   <!-- AUTOFARM -->
   <div class="panel" id="p-af">
     <div class="section">
-      <div class="section-title">Auto cycle bulk add</div>
+      <div class="section-row">
+        <div class="section-title">Auto cycle bulk add</div>
+        <button class="link-btn" id="afbulk-clear">Clear</button>
+      </div>
       <div class="hint" style="margin-bottom:8px">Adds accounts to the 25h auto cycle.<br>One per line: <code>email:password</code></div>
-      <textarea id="afbulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
+      <textarea id="afbulk" class="bulk-large" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2&#10;user3@gmail.com:pass3" spellcheck="false"></textarea>
+      <div class="counter" id="afbulk-count"></div>
     </div>
   </div>
 
@@ -448,8 +480,19 @@ code{
     send({mode: 'balance'});
   });
 
-  // BOOST — toggle rows
+  // BOOST — toggle rows + All/Clear smart button
   var boostRows = document.querySelectorAll('#boost-list .row');
+
+  function syncBoostUI() {
+    var n = 0;
+    for (var k in state.boost) if (state.boost[k]) n++;
+    document.getElementById('boost-detail').textContent =
+      n ? (n + ' selected') : 'Toggle items, then Apply';
+    var allBtn = document.getElementById('boost-all');
+    if (allBtn) allBtn.textContent = (n === boostRows.length && n > 0) ? 'Clear' : 'All';
+    refreshCTA();
+  }
+
   for (var b=0;b<boostRows.length;b++) {
     (function(row){
       row.addEventListener('click', function(){
@@ -457,14 +500,31 @@ code{
         state.boost[key] = !state.boost[key];
         row.classList.toggle('on', !!state.boost[key]);
         selHaptic();
-        var n = 0;
-        for (var k in state.boost) if (state.boost[k]) n++;
-        document.getElementById('boost-detail').textContent =
-          n ? (n + ' selected') : 'Toggle items, then Apply';
-        refreshCTA();
+        syncBoostUI();
       });
     })(boostRows[b]);
   }
+
+  var boostAllBtn = document.getElementById('boost-all');
+  if (boostAllBtn) boostAllBtn.addEventListener('click', function(){
+    // Determine current state — if everything is on, clear; else select all.
+    var allOn = boostRows.length > 0;
+    for (var i=0;i<boostRows.length;i++) {
+      if (!boostRows[i].classList.contains('on')) { allOn = false; break; }
+    }
+    for (var j=0;j<boostRows.length;j++) {
+      var key = boostRows[j].dataset.b;
+      if (allOn) {
+        delete state.boost[key];
+        boostRows[j].classList.remove('on');
+      } else {
+        state.boost[key] = true;
+        boostRows[j].classList.add('on');
+      }
+    }
+    haptic('medium');
+    syncBoostUI();
+  });
 
   // CTA logic
   var cta = document.getElementById('cta');
@@ -502,15 +562,67 @@ code{
     cta.disabled = !enabled;
   }
 
+  // Live counter for bulk textareas — shows "N accounts" or "X valid, Y invalid".
+  function updateBulkCounter(textareaId, counterId) {
+    var el = document.getElementById(textareaId);
+    var counter = document.getElementById(counterId);
+    if (!el || !counter) return;
+    var lines = (el.value || '').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    var valid = 0, invalid = 0;
+    for (var i=0;i<lines.length;i++) {
+      var l = lines[i];
+      var idx = l.indexOf(':');
+      if (idx > 0) {
+        var em = l.slice(0, idx).trim();
+        var pw = l.slice(idx + 1);
+        if (em.indexOf('@') > 0 && em.length >= 5 && pw.length >= 4) valid++;
+        else invalid++;
+      } else { invalid++; }
+    }
+    if (valid === 0 && invalid === 0) {
+      counter.textContent = '';
+      counter.classList.remove('has-invalid');
+    } else if (invalid === 0) {
+      counter.textContent = valid + ' account' + (valid === 1 ? '' : 's');
+      counter.classList.remove('has-invalid');
+    } else {
+      counter.textContent = valid + ' valid · ' + invalid + ' invalid';
+      counter.classList.add('has-invalid');
+    }
+  }
+  function refreshBulkCounters(){
+    updateBulkCounter('bulk',   'bulk-count');
+    updateBulkCounter('afbulk', 'afbulk-count');
+  }
+
+  // Clear buttons for the two bulk textareas.
+  var bulkClear = document.getElementById('bulk-clear');
+  if (bulkClear) bulkClear.addEventListener('click', function(){
+    var ta = document.getElementById('bulk');
+    if (ta) { ta.value = ''; ta.focus(); }
+    haptic('light');
+    refreshBulkCounters();
+    refreshCTA();
+  });
+  var afbulkClear = document.getElementById('afbulk-clear');
+  if (afbulkClear) afbulkClear.addEventListener('click', function(){
+    var ta = document.getElementById('afbulk');
+    if (ta) { ta.value = ''; ta.focus(); }
+    haptic('light');
+    refreshBulkCounters();
+    refreshCTA();
+  });
+
   // Live refresh on inputs. iOS Telegram WebView is flaky with the bare
   // `input` event (autofill paths sometimes skip it), so we attach multiple
   // handlers and a small post-paste delay.
   var liveInputs = document.querySelectorAll('input, textarea');
   for (var li=0; li<liveInputs.length; li++) {
     (function(el){
-      ['input','keyup','change'].forEach(function(ev){ el.addEventListener(ev, refreshCTA); });
-      el.addEventListener('paste', function(){ setTimeout(refreshCTA, 50); });
-      el.addEventListener('blur',  refreshCTA);
+      function tick(){ refreshCTA(); refreshBulkCounters(); }
+      ['input','keyup','change'].forEach(function(ev){ el.addEventListener(ev, tick); });
+      el.addEventListener('paste', function(){ setTimeout(tick, 50); });
+      el.addEventListener('blur',  tick);
     })(liveInputs[li]);
   }
 
