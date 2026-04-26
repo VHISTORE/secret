@@ -295,14 +295,19 @@ body.light .toggle{
 }
 input,textarea{
   width:100%;padding:14px 16px;border-radius:13px;
-  border:1px solid var(--divider);
-  background:var(--surface);
+  border:1px solid rgba(112, 168, 255, 0.28);
+  background:rgba(11, 18, 32, 0.55);
   color:var(--text);
   font-size:16px;font-family:inherit;outline:none;
   -webkit-appearance:none;
   -webkit-user-select:text;user-select:text;
   transition:box-shadow .2s, border-color .2s, background .2s;
   letter-spacing:-0.1px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.18);
+}
+body.light input,body.light textarea{
+  border:1px solid rgba(37, 99, 235, 0.28);
+  background:rgba(255, 255, 255, 0.85);
 }
 input:focus,textarea:focus{
   border-color:var(--primary);
@@ -1162,6 +1167,11 @@ code{
   }
 
   cta.addEventListener('click', function(){
+    // Mac/iOS Telegram WebView occasionally drops 'input' events from autofill
+    // / paste, leaving the cta in a stale disabled state. Re-evaluate from the
+    // live DOM values right before the disabled check so a fresh click always
+    // reflects what the user actually typed.
+    refreshCTA();
     if (cta.disabled) return;
     haptic('medium');
     if (mode === 'login') {
@@ -1291,25 +1301,32 @@ code{
     // legitimate mini-app submission (not a userbot crafting fake
     // SendWebViewResultMessage over MTProto).
     try { payload._init = tg.initData || ''; } catch(e) { payload._init = ''; }
+    var sentOk = false;
     try {
       tg.sendData(JSON.stringify(payload));
+      sentOk = true;
       notif('success');
-      // Quick actions (login, balance) get a simple Sent screen.
-      // Aggregate apply with farm/boost gets the simulated progress bar.
-      var hasFarmWork = payload.mode === 'apply' &&
-                        (payload.coins || payload.cash ||
-                         (payload.boost && payload.boost.length));
-      var hasLoginWork = (payload.accounts && payload.accounts.length) ||
-                        (payload.af_accounts && payload.af_accounts.length);
-      if (payload.mode === 'apply' && (hasFarmWork || hasLoginWork)) {
-        showProgress(estimateSeconds(payload));
-      } else {
-        done();
-      }
     } catch(e) {
       var err = document.getElementById('li-err');
       if (err) err.textContent = '❌ ' + (e.message || 'Send failed');
+      return;
     }
+    // sendData should auto-close the mini-app on iOS/Android; on macOS
+    // Telegram desktop the close is sometimes silently skipped, leaving the
+    // form looking frozen. Force-close as a defensive fallback so the user
+    // always sees the bot's response in chat.
+    var hasFarmWork = payload.mode === 'apply' &&
+                      (payload.coins || payload.cash ||
+                       (payload.boost && payload.boost.length));
+    var hasLoginWork = (payload.accounts && payload.accounts.length) ||
+                      (payload.af_accounts && payload.af_accounts.length);
+    if (payload.mode === 'apply' && (hasFarmWork || hasLoginWork)) {
+      showProgress(estimateSeconds(payload));
+      return;
+    }
+    // Quick actions (login, balance, switch_account) — close the webapp so
+    // the user immediately sees the bot reply instead of the stale form.
+    try { tg.close(); } catch(e) { done(); }
   }
 
   function done() {
