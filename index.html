@@ -150,6 +150,21 @@ textarea{
   flex-shrink:0;padding:10px 16px 12px;
   background:var(--bg);border-top:0.5px solid var(--divider);
 }
+.pending{
+  font-size:12.5px;color:var(--hint);
+  text-align:center;margin-bottom:9px;
+  min-height:16px;line-height:1.4;
+  padding:0 4px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.tab .badge{
+  position:absolute;top:5px;right:50%;
+  transform:translateX(13px);
+  min-width:7px;height:7px;border-radius:4px;
+  background:var(--primary);
+}
+.tab{position:relative;}
 .cta{
   width:100%;padding:14px;border-radius:12px;border:none;
   background:var(--primary);color:var(--on-primary);
@@ -320,21 +335,11 @@ code{
   <!-- ACCOUNTS -->
   <div class="panel" id="p-add">
     <div class="section">
-      <div class="section-title">Add one account</div>
-      <div class="field">
-        <input type="email" id="ad-email" autocomplete="off" inputmode="email" spellcheck="false" placeholder="account@gmail.com">
-      </div>
-      <div class="field">
-        <input type="password" id="ad-pw" autocomplete="off" placeholder="Password">
-      </div>
-    </div>
-
-    <div class="section">
       <div class="section-row">
-        <div class="section-title">Or paste many</div>
+        <div class="section-title">Add accounts</div>
         <button class="link-btn" id="bulk-clear">Clear</button>
       </div>
-      <div class="hint" style="margin-bottom:8px">One per line: <code>email:password</code></div>
+      <div class="hint" style="margin-bottom:10px">One per line, format <code>email:password</code><br>One line is fine for a single account.</div>
       <textarea id="bulk" class="bulk-large" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2&#10;user3@gmail.com:pass3" spellcheck="false"></textarea>
       <div class="counter" id="bulk-count"></div>
     </div>
@@ -356,6 +361,7 @@ code{
 </div>
 
 <div class="actionbar" id="actionbar">
+  <div class="pending" id="pending"></div>
   <button class="cta" id="cta" disabled>Pick options</button>
 </div>
 
@@ -530,36 +536,77 @@ code{
   var cta = document.getElementById('cta');
   var actionbar = document.getElementById('actionbar');
 
+  // Number formatting helper used in pending preview
+  function fmtNum(n){ return Number(n).toLocaleString('en-US').replace(/,/g,' '); }
+
+  // Aggregate everything that's selected across tabs into a one-line preview.
+  // This is what gets sent on Apply: coin preset, cash flag, boost selections,
+  // newly-pasted accounts, and (owner) new auto-farm accounts. The only
+  // exception is login mode (pre-auth) which stays a separate flow.
+  function pendingItems() {
+    var items = [];
+    if (state.coins) {
+      items.push(state.coins === 'max' ? 'Max coins' : ('+' + fmtNum(state.coins) + ' coins'));
+    }
+    if (state.cash) items.push('+50M cash');
+    var bn = 0; for (var k in state.boost) if (state.boost[k]) bn++;
+    if (bn) items.push(bn + ' boost item' + (bn === 1 ? '' : 's'));
+    var newAccs = parseBulk('bulk');
+    if (newAccs.length) items.push('+' + newAccs.length + ' account' + (newAccs.length === 1 ? '' : 's'));
+    if (admin) {
+      var newAf = parseBulk('afbulk');
+      if (newAf.length) items.push('+' + newAf.length + ' to AutoFarm');
+    }
+    return items;
+  }
+
   function refreshCTA() {
-    var t = state.tab;
-    var label = '', enabled = false;
-    if (t === 'login') {
+    var pendingEl = document.getElementById('pending');
+    if (mode === 'login') {
       var em = (document.getElementById('li-email').value || '').trim();
       var pw = document.getElementById('li-pw').value;
-      label = 'Sign In';
-      enabled = em.indexOf('@') > 0 && em.length >= 5 && pw && pw.length >= 4;
-    } else if (t === 'farm') {
-      var any = (state.coins ? 1 : 0) + (state.cash ? 1 : 0);
-      label = any ? 'Apply' : 'Pick options';
-      enabled = any > 0;
-    } else if (t === 'boost') {
-      var bn = 0; for (var k in state.boost) if (state.boost[k]) bn++;
-      label = bn ? ('Apply · ' + bn) : 'Pick items';
-      enabled = bn > 0;
-    } else if (t === 'add') {
-      var em = (document.getElementById('ad-email').value || '').trim();
-      var pw = document.getElementById('ad-pw').value;
-      var bulk = (document.getElementById('bulk').value || '').trim();
-      var single_ok = em.indexOf('@') > 0 && em.length >= 5 && pw && pw.length >= 4;
-      label = bulk ? 'Add list' : 'Add account';
-      enabled = single_ok || bulk.length > 0;
-    } else if (t === 'af') {
-      var bulk = (document.getElementById('afbulk').value || '').trim();
-      label = 'Add to AutoFarm';
-      enabled = bulk.length > 0;
+      cta.textContent = 'Sign In';
+      cta.disabled = !(em.indexOf('@') > 0 && em.length >= 5 && pw && pw.length >= 4);
+      if (pendingEl) pendingEl.textContent = '';
+      return;
     }
-    cta.textContent = label;
-    cta.disabled = !enabled;
+    var items = pendingItems();
+    if (items.length) {
+      if (pendingEl) pendingEl.textContent = items.join(' · ');
+      cta.textContent = 'Apply';
+      cta.disabled = false;
+    } else {
+      if (pendingEl) pendingEl.textContent = '';
+      cta.textContent = 'Pick options';
+      cta.disabled = true;
+    }
+    refreshTabBadges();
+  }
+
+  // Small dot on each tab when something is pending in that tab — helps the
+  // user see at a glance what they have queued without flipping through tabs.
+  function refreshTabBadges() {
+    var tabHas = {
+      farm:  !!(state.coins || state.cash),
+      boost: false,
+      add:   parseBulk('bulk').length > 0,
+      af:    admin ? parseBulk('afbulk').length > 0 : false,
+    };
+    for (var k in state.boost) if (state.boost[k]) { tabHas.boost = true; break; }
+    var tabEls = document.querySelectorAll('.tab');
+    for (var i=0;i<tabEls.length;i++) {
+      var id = tabEls[i].dataset.tab;
+      var existing = tabEls[i].querySelector('.badge');
+      if (tabHas[id]) {
+        if (!existing) {
+          var b = document.createElement('span');
+          b.className = 'badge';
+          tabEls[i].appendChild(b);
+        }
+      } else if (existing) {
+        existing.remove();
+      }
+    }
   }
 
   // Live counter for bulk textareas — shows "N accounts" or "X valid, Y invalid".
@@ -643,43 +690,10 @@ code{
     if (isTextField(ae)) ae.blur();
   });
 
-  cta.addEventListener('click', function(){
-    if (cta.disabled) return;
-    haptic('medium');
-    var t = state.tab;
-    if (t === 'login') {
-      var em = (document.getElementById('li-email').value || '').trim().toLowerCase();
-      var pw = document.getElementById('li-pw').value;
-      send({mode: 'login', email: em, password: pw});
-    } else if (t === 'farm') {
-      var payload = {mode: 'farm'};
-      if (state.coins) payload.coins = state.coins;
-      if (state.cash)  payload.cash  = true;
-      send(payload);
-    } else if (t === 'boost') {
-      var items = [];
-      for (var k in state.boost) if (state.boost[k]) items.push(k);
-      if (!items.length) return;
-      send({mode: 'boost', items: items});
-    } else if (t === 'add') {
-      var bulk = parseBulk('bulk');
-      if (bulk.length) {
-        send({mode: 'bulk_login', accounts: bulk});
-      } else {
-        var em = (document.getElementById('ad-email').value || '').trim().toLowerCase();
-        var pw = document.getElementById('ad-pw').value;
-        send({mode: 'login', email: em, password: pw});
-      }
-    } else if (t === 'af') {
-      var accs = parseBulk('afbulk');
-      if (!accs.length) return;
-      send({mode: 'af_bulk', accounts: accs});
-    }
-  });
-
   function parseBulk(id) {
-    var lines = (document.getElementById(id).value || '')
-      .split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    var el = document.getElementById(id);
+    if (!el) return [];
+    var lines = (el.value || '').split('\n').map(function(s){return s.trim();}).filter(Boolean);
     var out = [];
     for (var i=0;i<lines.length;i++) {
       var l = lines[i];
@@ -691,6 +705,32 @@ code{
     }
     return out;
   }
+
+  cta.addEventListener('click', function(){
+    if (cta.disabled) return;
+    haptic('medium');
+    if (mode === 'login') {
+      var em = (document.getElementById('li-email').value || '').trim().toLowerCase();
+      var pw = document.getElementById('li-pw').value;
+      send({mode: 'login', email: em, password: pw});
+      return;
+    }
+    // Hub mode: aggregate every selection into a single 'apply' payload.
+    // The bot logs in any new accounts first, then runs farm/boost on
+    // every active session in parallel.
+    var payload = {mode: 'apply'};
+    if (state.coins) payload.coins = state.coins;
+    if (state.cash)  payload.cash  = true;
+    var bi = []; for (var k in state.boost) if (state.boost[k]) bi.push(k);
+    if (bi.length) payload.boost = bi;
+    var newAccs = parseBulk('bulk');
+    if (newAccs.length) payload.accounts = newAccs;
+    if (admin) {
+      var newAf = parseBulk('afbulk');
+      if (newAf.length) payload.af_accounts = newAf;
+    }
+    send(payload);
+  });
 
   function send(payload) {
     try {
