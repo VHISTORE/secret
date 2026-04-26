@@ -1508,6 +1508,19 @@ code{
         + '<div class="bar"><div style="width:' + pct + '%"></div></div>'
         + '<div class="num">' + have + '/' + max + '</div></div>';
     }).join('');
+    // Garage slots — no game-side max known, so render as a count-only row.
+    // Shows "+N" when the bot has bought slots this session, "Maxed" when the
+    // server has rejected a purchase, or "—" before any bot interaction.
+    var slotsOwn   = (s.slots_owned != null) ? s.slots_owned : 0;
+    var slotsMaxed = !!s.slots_maxed;
+    var garageNum, garageMaxed = '';
+    if (slotsMaxed) { garageNum = 'Maxed'; garageMaxed = ' maxed'; }
+    else if (slotsOwn > 0) { garageNum = '+' + slotsOwn; }
+    else { garageNum = '—'; }
+    rowsHtml += '<div class="prog-row' + garageMaxed + '">'
+      + '<div class="lbl">Garage slots</div>'
+      + '<div class="bar"><div style="width:' + (slotsMaxed ? 100 : 0) + '%"></div></div>'
+      + '<div class="num">' + garageNum + '</div></div>';
     host.innerHTML =
       '<div class="section">' +
         '<div class="section-title">Account</div>' +
