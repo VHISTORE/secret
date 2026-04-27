@@ -454,6 +454,87 @@ textarea.bulk-large{min-height:240px;}
 .cta:disabled::before{display:none;}
 .cta:not(:disabled):active{transform:scale(0.975);filter:brightness(0.92);}
 
+/* TIERS — pricing & buy cards */
+.tiers-list{display:flex;flex-direction:column;gap:10px;}
+.tier-card{
+  background:var(--surface);border:1px solid var(--divider);
+  border-radius:var(--radius-card);padding:14px 16px;
+  display:flex;flex-direction:column;gap:6px;
+  position:relative;transition:border-color .2s, transform .15s, box-shadow .25s;
+}
+.tier-card.popular{
+  border-color:var(--primary);
+  box-shadow:var(--shadow-glow);
+}
+.tier-card .ribbon{
+  position:absolute;top:-8px;right:14px;
+  background:linear-gradient(135deg, var(--primary-2), var(--primary));
+  color:var(--on-primary);font-size:10px;font-weight:700;letter-spacing:0.5px;
+  padding:3px 8px;border-radius:8px;text-transform:uppercase;
+}
+.tier-card .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.tier-card .name{font-size:16px;font-weight:700;letter-spacing:-0.1px;}
+.tier-card .price{font-size:18px;font-weight:800;color:var(--text);}
+.tier-card .price .strike{
+  text-decoration:line-through;color:var(--hint-2);font-weight:600;
+  font-size:14px;margin-right:6px;
+}
+.tier-card .price .promo-badge{
+  display:inline-block;background:rgba(248, 113, 113, 0.18);
+  color:var(--danger);font-size:10px;font-weight:700;letter-spacing:0.3px;
+  padding:2px 6px;border-radius:6px;margin-left:6px;text-transform:uppercase;
+}
+.tier-card .feats{
+  font-size:12.5px;color:var(--text-2);line-height:1.5;
+}
+.tier-card .feats b{color:var(--primary);}
+.tier-card .buy-btn{
+  margin-top:6px;padding:10px 14px;border-radius:10px;
+  background:linear-gradient(135deg, var(--primary-2), var(--primary));
+  color:var(--on-primary);font-weight:700;font-size:14px;
+  border:none;cursor:pointer;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .15s, filter .2s, opacity .15s;
+}
+.tier-card .buy-btn:active{transform:scale(0.97);filter:brightness(0.92);}
+.tier-card.current{opacity:0.85;border-color:var(--success);}
+.tier-card.current .buy-btn{
+  background:var(--surface-2);color:var(--text-2);cursor:default;
+}
+.tier-card.current .buy-btn::before{content:'✓ Current plan';}
+.tier-card.locked .buy-btn{background:var(--surface-2);color:var(--hint);}
+
+/* FAQ — accordion */
+.faq-list{display:flex;flex-direction:column;gap:8px;}
+.faq-cat{margin-top:8px;}
+.faq-cat:first-child{margin-top:0;}
+.faq-cat h3{
+  font-size:14px;font-weight:700;color:var(--primary);
+  letter-spacing:-0.1px;margin:0 0 8px 0;padding:0 4px;
+}
+.faq-item{
+  background:var(--surface);border:1px solid var(--divider);
+  border-radius:12px;overflow:hidden;
+  transition:border-color .2s;
+}
+.faq-item summary{
+  padding:12px 14px;cursor:pointer;list-style:none;
+  font-size:13.5px;font-weight:600;color:var(--text);
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{
+  content:'+';font-size:18px;font-weight:300;color:var(--hint);
+  transition:transform .2s;flex-shrink:0;
+}
+.faq-item[open] summary::after{transform:rotate(45deg);color:var(--primary);}
+.faq-item .a{
+  padding:0 14px 12px 14px;font-size:13px;color:var(--text-2);
+  line-height:1.55;
+}
+.faq-item .a b{color:var(--text);}
+
 /* TABS */
 .tabbar{
   flex-shrink:0;display:flex;
@@ -874,6 +955,36 @@ code{
     </div>
   </div>
 
+  <!-- TIERS — pricing & buy -->
+  <div class="panel" id="p-tiers">
+    <div class="section">
+      <div class="section-title">Subscription plans</div>
+      <div class="hint" style="margin-bottom:10px">
+        Real server-side farming for CPM2. Pay once via @CryptoBot — activates in ~30 seconds.
+      </div>
+      <div id="tiers-list" class="tiers-list"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Top-up packs</div>
+      <div class="hint" style="margin-bottom:10px">
+        Hit your monthly cap mid-cycle? Buy extra account slots without upgrading your plan. Available on Month / 3M / 6M tiers.
+      </div>
+      <div id="topups-list" class="tiers-list"></div>
+    </div>
+    <div class="section">
+      <div class="hint center">
+        Existing subscribers: your current plan continues until expiry. On renewal — −10% loyalty discount.
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ — answers to common questions -->
+  <div class="panel" id="p-faq">
+    <div class="section">
+      <div id="faq-list" class="faq-list"></div>
+    </div>
+  </div>
+
 </div>
 
 <div class="actionbar" id="actionbar">
@@ -997,13 +1108,19 @@ code{
       '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     af:
       '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+    tiers:
+      '<svg viewBox="0 0 24 24"><polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21.5 12 18 5.5 21.5 7 14.5 2 9.5 9 8.5 12 2"/></svg>',
+    faq:
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
   };
 
-  // Tabs depending on mode
+  // Tabs depending on mode. Tiers + FAQ always visible — they're how users
+  // self-serve upgrades and answers without bothering the owner.
   var tabs = (mode === 'login')
     ? [['login','Sign In']]
     : [['farm','Farm'], ['boost','Boost'], ['add','Accounts']]
-        .concat(admin ? [['af','AutoFarm']] : []);
+        .concat(admin ? [['af','AutoFarm']] : [])
+        .concat([['tiers','Tiers'], ['faq','FAQ']]);
 
   var tabbar = document.getElementById('tabbar');
   tabs.forEach(function(t){
@@ -1043,6 +1160,10 @@ code{
     var found = null;
     for (var k=0;k<tabs.length;k++) if (tabs[k][0] === id) found = tabs[k];
     document.getElementById('subtitle').textContent = found ? found[1] : '';
+    // Tiers / FAQ are read-only / inline-buy tabs — hide the global CTA
+    // (Apply button) so they don't suggest a no-op action.
+    var ab = document.getElementById('actionbar');
+    if (ab) ab.style.display = (id === 'tiers' || id === 'faq') ? 'none' : 'block';
     refreshCTA();
   }
 
@@ -1608,6 +1729,218 @@ code{
     }
   }
 
+  // ── Tiers — pricing & buy buttons ──────────────────────────────────────
+  // Source of truth lives in the bot's TIER_LIMITS / TIER_PRICE_USD; this
+  // mini-app mirrors them statically. Promo prices kick in via the bot's
+  // `_is_promo_active()` window — when accountState.promo=true we render
+  // strikethrough originals + promo cents.
+  var TIER_DATA = [
+    { id:'week',     name:'Week',       reg:25,  promo:19,  popular:false, feats:[
+      'Coins (Max) farm + Cash farm',
+      '<b>30/day</b>, <b>100/week</b> accounts',
+      'Bulk login: 5 at a time',
+      'Drag-target coins not included' ]},
+    { id:'month',    name:'Month',      reg:50,  promo:39,  popular:false, feats:[
+      'All farm features (incl. targeted coins)',
+      '<b>30/day</b>, <b>200/month</b> accounts',
+      'Bulk login: 10 at a time',
+      'Anchor tier — full personal kit' ]},
+    { id:'3month',   name:'3 Months',   reg:130, promo:99,  popular:true,  feats:[
+      'Everything in Month',
+      '<b>+ AutoFarm</b> (bot grinds while you sleep)',
+      '<b>+ Reset Push</b> notifications',
+      '<b>100/day</b>, <b>800/cycle</b> accounts',
+      'Bulk login: 25 at a time' ]},
+    { id:'6month',   name:'6 Months',   reg:240, promo:185, popular:false, feats:[
+      'Everything in 3 Months',
+      '<b>+ Priority Queue</b> at peak load',
+      '<b>200/day</b>, <b>2,000/cycle</b> accounts',
+      'Bulk login: 50 at a time' ]},
+    { id:'lifetime', name:'Lifetime',   reg:499, promo:349, popular:false, feats:[
+      'Everything in 6 Months',
+      '<b>+ Reseller Mode</b> (10 promo codes/mo, 40% commission)',
+      '<b>Unlimited</b> monthly cap',
+      'Bulk login: 100 at a time',
+      'Pay once — never again' ]},
+  ];
+
+  var TOPUP_DATA = [
+    { id:'small',  accs:50,  price:10, label:'Small'  },
+    { id:'medium', accs:200, price:32, label:'Medium', popular:true },
+    { id:'large',  accs:500, price:70, label:'Large'  },
+  ];
+
+  function renderTiers(){
+    var host = document.getElementById('tiers-list');
+    if (!host) return;
+    var promo = !!(accountState && accountState.promo);
+    var currentTier = (accountState && accountState.tier) || '';
+    host.innerHTML = '';
+    TIER_DATA.forEach(function(t){
+      var card = document.createElement('div');
+      card.className = 'tier-card' + (t.popular ? ' popular' : '')
+                     + (currentTier === t.id ? ' current' : '');
+      var priceHtml = promo
+        ? '<span class="strike">$'+t.reg+'</span>$'+t.promo+'<span class="promo-badge">PROMO</span>'
+        : '$'+t.reg;
+      var featsHtml = '';
+      t.feats.forEach(function(f){ featsHtml += '• '+f+'<br>'; });
+      card.innerHTML =
+        (t.popular ? '<div class="ribbon">Most Popular</div>' : '') +
+        '<div class="head">' +
+          '<div class="name">'+t.name+'</div>' +
+          '<div class="price">'+priceHtml+'</div>' +
+        '</div>' +
+        '<div class="feats">'+featsHtml+'</div>' +
+        '<button class="buy-btn" data-tier="'+t.id+'">'+
+          (currentTier === t.id ? '✓ Current plan' : 'Buy '+t.name)+
+        '</button>';
+      host.appendChild(card);
+    });
+    // Wire up buy buttons
+    var btns = host.querySelectorAll('.buy-btn');
+    for (var i=0;i<btns.length;i++){
+      btns[i].addEventListener('click', function(e){
+        var tier = e.currentTarget.dataset.tier;
+        if (e.currentTarget.parentElement.classList.contains('current')) return;
+        selHaptic();
+        send({ mode:'buy', kind:'tier', sub:tier });
+      });
+    }
+  }
+
+  function renderTopups(){
+    var host = document.getElementById('topups-list');
+    if (!host) return;
+    host.innerHTML = '';
+    var canTopup = (accountState && accountState.tier
+                    && ['month','3month','6month','legacy'].indexOf(accountState.tier) >= 0);
+    if (!canTopup) {
+      host.innerHTML = '<div class="hint center" style="padding:14px">' +
+        'Top-ups become available when you have a Month / 3M / 6M plan.' +
+        '</div>';
+      return;
+    }
+    TOPUP_DATA.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'tier-card' + (p.popular ? ' popular' : '');
+      card.innerHTML =
+        (p.popular ? '<div class="ribbon">Best value</div>' : '') +
+        '<div class="head">' +
+          '<div class="name">'+p.label+' · +'+p.accs+' accs</div>' +
+          '<div class="price">$'+p.price+'</div>' +
+        '</div>' +
+        '<div class="feats">' +
+          '• Adds <b>+'+p.accs+' accounts</b> to your current cycle<br>' +
+          '• Resets when your subscription cycle rolls over<br>' +
+          '• Daily cap unchanged (anti-burst)' +
+        '</div>' +
+        '<button class="buy-btn" data-pack="'+p.id+'">Buy +'+p.accs+' for $'+p.price+'</button>';
+      host.appendChild(card);
+    });
+    var btns = host.querySelectorAll('.buy-btn');
+    for (var i=0;i<btns.length;i++){
+      btns[i].addEventListener('click', function(e){
+        var pack = e.currentTarget.dataset.pack;
+        selHaptic();
+        send({ mode:'buy', kind:'topup', sub:pack });
+      });
+    }
+  }
+
+  // ── FAQ ─────────────────────────────────────────────────────────────────
+  // Static FAQ — opsec-clean (no internal endpoint names, no exact reward
+  // numbers, all features described in user-facing language). Content is
+  // designed to pre-empt the most common questions hitting the owner's DMs.
+  var FAQ_DATA = [
+    { cat: '🎯 How does it work?', items: [
+      { q: 'What does the bot actually do?',
+        a: 'The bot communicates directly with the game\'s server and writes credits to your profile. The server validates and stores them permanently. It\'s a <b>server-side operation, not a client mod</b> — no game patching, no trade-ban risk.' },
+      { q: 'Will I get banned?',
+        a: 'No. The bot doesn\'t modify the game client and doesn\'t inject anything. All operations look like standard server transactions — the game can\'t distinguish them from honestly-earned rewards.' },
+    ]},
+    { cat: '📊 Limits — how they\'re counted', items: [
+      { q: 'What does "200 accounts per month" actually mean?',
+        a: 'Unique CPM2 accounts (by email) used during the month. Not actions, not farms — just distinct accounts.' },
+      { q: 'If I login the same account today and tomorrow — is that 1 or 2?',
+        a: '<b>One.</b> Same email = same slot in your quota, no matter how many times you re-login.' },
+      { q: 'If I farmed coins in the morning and cash in the evening — 1 or 2?',
+        a: '<b>One.</b> A slot is counted by account, not by operation. Do as many actions on a single account as you like — one slot.' },
+      { q: 'When do limits reset?',
+        a: '<b>Daily</b> — every 24 hours at 00:00 UTC.<br><b>Monthly</b> — individual to each user, 30 days from your subscription activation. Bought today → your monthly resets after 30 days. Always a full 30-day window regardless of when you bought.' },
+      { q: 'Can I farm many accounts at the same time?',
+        a: 'Yes, within your tier\'s <b>Bulk login</b> limit. The bot processes them in parallel.' },
+      { q: 'Does account age matter?',
+        a: 'No, all CPM2 accounts are processed identically regardless of registration date.' },
+    ]},
+    { cat: '⚙️ Coins, Cash, Boost — how they work', items: [
+      { q: 'What\'s "Max coins" vs a specific number (1000–10000)?',
+        a: '<b>Max</b> — the standard daily coin grant. Available once per 24h per account.<br><br><b>Specific amount (1000–10000)</b> — a targeted credit request. The bot communicates with the server to determine <b>how many coins are safe to add to this specific account without raising flags</b>. The exact amount can\'t be guaranteed — could be 1000, could be 10000, depending on what the server allows. <b>Anti-ban safety takes priority over hitting your exact number.</b>' },
+      { q: 'Why do different accounts get different amounts?',
+        a: 'The game\'s server keeps internal counters per account. The bot doesn\'t fight them — it queries the safe ceiling and farms within it. This is what lets you farm <b>without raising suspicion</b> long-term.' },
+      { q: 'Max coins — how many times per day?',
+        a: 'Once per account per day. After claim, wait until 00:00 UTC — then available again.' },
+      { q: 'Cash — how many times can I farm?',
+        a: 'As many as you want, up to a high server-side limit (depends on the account\'s state). Cash is incremental, not a daily claim.' },
+      { q: 'Coins and Cash at the same time?',
+        a: 'Yes, they\'re independent. Farm both in parallel.' },
+      { q: 'Boost — All Wheels / Calipers / Brakes / etc.?',
+        a: 'A full server-side unlock of the corresponding category. One run = all wheels yours forever, one run = all calipers, etc. No need to grind in-game coins.' },
+      { q: 'Can I be online in the game while the bot farms?',
+        a: 'Better not. Sync issues are possible. Wait for "done" → then login and see the new balance.' },
+    ]},
+    { cat: '💳 Subscription & payment', items: [
+      { q: 'How do I pay?',
+        a: 'Via <b>@CryptoBot in Telegram</b>. USDT or TON. One tap → pick currency → pay → subscription activates in ~30 seconds.' },
+      { q: 'Can I split payment?',
+        a: 'No — single payment. Tight budget? Get Week ($19 promo) or Month ($39 promo) first, upgrade later by paying the difference.' },
+      { q: 'If new features get added during my plan — do I pay again?',
+        a: '<b>No.</b> All new features are available free until your current subscription expires. You only pay on renewal.' },
+      { q: 'Does the subscription auto-renew?',
+        a: 'No — only manual. 7 days before expiry you\'ll get a reminder + <b>−10% loyalty discount</b> on any tier.' },
+      { q: 'Can I upgrade mid-subscription?',
+        a: 'Yes. Pay the difference, the upgrade activates immediately, your remaining old period rolls over.' },
+      { q: 'I hit my monthly cap — what now?',
+        a: 'Buy a top-up pack ($10/$32/$70 for +50/+200/+500 accounts) to extend the current cycle. Top-ups evaporate when the cycle rolls over (anti-stockpile).' },
+    ]},
+    { cat: '🚀 Premium features (3M+)', items: [
+      { q: 'AutoFarm — what is it?',
+        a: 'The bot farms all your accounts on schedule automatically — every day in the background, you can sleep. Available from <b>3 Months</b> tier.' },
+      { q: 'Reset Push?',
+        a: 'The bot pings you in Telegram when your accounts\' daily limit resets and you can farm coins again. Never miss a reset. From <b>3M</b>.' },
+      { q: 'Priority Queue?',
+        a: 'At peak load, your operations go first in the queue. From <b>6M</b>.' },
+      { q: 'Reseller Mode?',
+        a: 'On <b>Lifetime</b> you get 10 promo codes per month + your personal referral link. Sell access to others, earn 40% of their payments.' },
+    ]},
+    { cat: '🔐 Security & privacy', items: [
+      { q: 'Where do you store my password?',
+        a: 'An encrypted token cache, locally on the bot\'s server. Auto-cleared on timeout or manually via /logout. <b>Plain passwords are never stored.</b>' },
+      { q: 'Can someone else see my email?',
+        a: 'No. In chat, your email is masked — only a hash tag remains for owner recognition. The full email lives only in the bot\'s database.' },
+      { q: 'Can the bot get my account banned?',
+        a: 'No. All operations look like normal in-game activity. The bot doesn\'t expose your account to the game client or to anyone else.' },
+    ]},
+  ];
+
+  function renderFAQ(){
+    var host = document.getElementById('faq-list');
+    if (!host) return;
+    host.innerHTML = '';
+    FAQ_DATA.forEach(function(cat){
+      var catEl = document.createElement('div');
+      catEl.className = 'faq-cat';
+      catEl.innerHTML = '<h3>'+cat.cat+'</h3>';
+      cat.items.forEach(function(it){
+        var d = document.createElement('details');
+        d.className = 'faq-item';
+        d.innerHTML = '<summary>'+it.q+'</summary><div class="a">'+it.a+'</div>';
+        catEl.appendChild(d);
+      });
+      host.appendChild(catEl);
+    });
+  }
+
   // ── Active-account chip + picker ──────────────────────────────────────
   function renderAccChip(){
     if (!accountState || !accountState.active_email_mask) return;
@@ -1671,6 +2004,9 @@ code{
       renderStats();
       personalizeBoost();
       renderAccChip();
+      renderTiers();
+      renderTopups();
+      renderFAQ();
       activate(tabs[0][0]);
     }, 1450);
   }
@@ -1681,6 +2017,9 @@ code{
   } else {
     activate(tabs[0][0]);
     if (mode === 'hub') renderAccChip();
+    renderTiers();
+    renderTopups();
+    renderFAQ();
   }
 }());
 </script>
