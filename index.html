@@ -454,6 +454,34 @@ textarea.bulk-large{min-height:240px;}
 .cta:disabled::before{display:none;}
 .cta:not(:disabled):active{transform:scale(0.975);filter:brightness(0.92);}
 
+/* TRIAL banner + locked controls */
+.trial-banner{
+  background:linear-gradient(135deg, rgba(248, 113, 113, 0.18) 0%, rgba(76, 201, 240, 0.14) 100%);
+  border:1px solid rgba(248, 113, 113, 0.35);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:14px;
+  font-size:13px;color:var(--text);
+  cursor:pointer;text-align:center;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .15s, box-shadow .25s, border-color .2s;
+}
+.trial-banner:active{transform:scale(0.98);}
+.trial-banner b{color:var(--danger);}
+.trial-banner .upsell{
+  display:inline-block;color:var(--primary);font-weight:700;
+  text-decoration:underline;text-underline-offset:2px;margin-left:4px;
+}
+.pill.locked, .row.locked, #boost-all.locked{
+  position:relative;opacity:0.55;
+}
+.pill.locked::after, .row.locked::after{
+  content:'🔒';position:absolute;top:6px;right:8px;font-size:11px;
+  pointer-events:none;
+}
+.pill.locked{filter:grayscale(0.4);}
+.pill.locked:active, .row.locked:active{transform:none;filter:grayscale(0.4);}
+
 /* TIERS — pricing & buy cards */
 .tiers-list{display:flex;flex-direction:column;gap:10px;}
 .tier-card{
@@ -1179,6 +1207,13 @@ code{
   for (var p=0;p<pills.length;p++) {
     (function(pill){
       pill.addEventListener('click', function(){
+        // Trial / no-sub: any farm tap redirects to Tiers tab — they need
+        // to buy a plan before they can farm. Specific-number pills
+        // (1000-10000) additionally require Drag access (Month+ tier).
+        if (isTrialMode()) { nudgeToTiers('Coin farm'); return; }
+        if (pill.dataset.coins !== 'max' && !hasFeat('drag')) {
+          nudgeToTiers('Targeted coin farm (1k-10k)'); return;
+        }
         if (state.coins === pill.dataset.coins) {
           state.coins = null;
           pill.classList.remove('active');
@@ -1198,6 +1233,7 @@ code{
   // FARM — cash toggle
   var cashRow = document.getElementById('cash-row');
   if (cashRow) cashRow.addEventListener('click', function(){
+    if (isTrialMode()) { nudgeToTiers('Cash farm'); return; }
     state.cash = !state.cash;
     cashRow.classList.toggle('on', state.cash);
     selHaptic();
@@ -1227,6 +1263,7 @@ code{
   for (var b=0;b<boostRows.length;b++) {
     (function(row){
       row.addEventListener('click', function(){
+        if (isTrialMode() || !hasFeat('boost')) { nudgeToTiers('Boost'); return; }
         var key = row.dataset.b;
         state.boost[key] = !state.boost[key];
         row.classList.toggle('on', !!state.boost[key]);
@@ -1238,6 +1275,7 @@ code{
 
   var boostAllBtn = document.getElementById('boost-all');
   if (boostAllBtn) boostAllBtn.addEventListener('click', function(){
+    if (isTrialMode() || !hasFeat('boost')) { nudgeToTiers('Boost'); return; }
     // Determine current state — if everything is on, clear; else select all.
     var allOn = boostRows.length > 0;
     for (var i=0;i<boostRows.length;i++) {
@@ -1729,6 +1767,59 @@ code{
     }
   }
 
+  // ── Trial banner + visual lock indicators ──────────────────────────────
+  function renderTrialBanner(){
+    if (mode !== 'hub') return;
+    var trial = isTrialMode();
+    var farmPanel = document.getElementById('p-farm');
+    var boostPanel = document.getElementById('p-boost');
+    var banner = document.getElementById('trial-banner');
+    if (banner) banner.remove();
+    if (!trial) return;
+    // Inject a sticky upsell banner at the top of Farm and Boost panels.
+    function makeBanner(){
+      var b = document.createElement('div');
+      b.id = 'trial-banner';
+      b.className = 'trial-banner';
+      b.innerHTML = '🔒 <b>Trial — preview only.</b> Sign in works, but ' +
+                    'farming requires a paid plan. <span class="upsell">Tap here → 💎 Tiers</span>';
+      b.addEventListener('click', function(){ activate('tiers'); });
+      return b;
+    }
+    if (farmPanel) farmPanel.insertBefore(makeBanner(), farmPanel.firstChild);
+    if (boostPanel) boostPanel.insertBefore(makeBanner(), boostPanel.firstChild);
+    // Add a `.locked` class to all interactive farm controls for visual cue.
+    var locks = document.querySelectorAll('#coins-pills .pill, #cash-row, #boost-list .row, #boost-all');
+    for (var i=0;i<locks.length;i++) locks[i].classList.add('locked');
+  }
+
+  // ── Trial / no-sub gating ──────────────────────────────────────────────
+  // accountState.can.farm  — false for trial / no-sub users.
+  // accountState.can.drag  — false unless tier ≥ Month.
+  // accountState.can.circuit — same.
+  // accountState.can.boost — same.
+  // When can.farm is false, every farm/boost interaction redirects to the
+  // Tiers tab with a sales nudge instead of hitting the bot. This is the
+  // primary conversion mechanic for free users — they see the product
+  // surface but can't actually use it without paying.
+  function isTrialMode(){
+    if (!accountState || !accountState.can) return false;
+    return !accountState.can.farm;
+  }
+  function hasFeat(feat){
+    if (!accountState || !accountState.can) return true;
+    return !!accountState.can[feat];
+  }
+  function nudgeToTiers(label){
+    try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('warning'); } catch(_){}
+    var msg = label
+      ? '🔒 ' + label + ' requires a paid plan.'
+      : '🔒 Farming requires a paid plan.';
+    var hint = document.getElementById('coins-detail');
+    if (hint) hint.innerHTML = msg + ' Tap <b>💎 Tiers</b> below to upgrade.';
+    activate('tiers');
+  }
+
   // ── Tiers — pricing & buy buttons ──────────────────────────────────────
   // Source of truth lives in the bot's TIER_LIMITS / TIER_PRICE_USD; this
   // mini-app mirrors them statically. Promo prices kick in via the bot's
@@ -2007,19 +2098,29 @@ code{
       renderTiers();
       renderTopups();
       renderFAQ();
-      activate(tabs[0][0]);
+      renderTrialBanner();
+      activate(initialTab());
     }, 1450);
+  }
+
+  // start_tab=tiers|faq lets the bot link a Welcome-card button straight
+  // to the relevant tab. Falls back to the first tab.
+  function initialTab(){
+    var requested = params.get('start_tab') || '';
+    for (var i=0;i<tabs.length;i++) if (tabs[i][0] === requested) return requested;
+    return tabs[0][0];
   }
 
   // Initial activation — for hub mode with state, ceremony first; otherwise direct.
   if (mode === 'hub' && accountState){
     showFetch();
   } else {
-    activate(tabs[0][0]);
+    activate(initialTab());
     if (mode === 'hub') renderAccChip();
     renderTiers();
     renderTopups();
     renderFAQ();
+    renderTrialBanner();
   }
 }());
 </script>
