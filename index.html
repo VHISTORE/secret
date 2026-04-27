@@ -454,6 +454,34 @@ textarea.bulk-large{min-height:240px;}
 .cta:disabled::before{display:none;}
 .cta:not(:disabled):active{transform:scale(0.975);filter:brightness(0.92);}
 
+/* PROMO redeem field */
+.promo-field{
+  display:flex;gap:8px;align-items:stretch;
+  margin-bottom:6px;
+}
+.promo-field .input-wrap{flex:1;min-width:0;}
+.promo-field input{
+  width:100%;padding:11px 14px;
+  border:1px solid var(--divider);border-radius:10px;
+  background:var(--surface);color:var(--text);
+  font-size:14px;font-family:inherit;letter-spacing:0.5px;
+  text-transform:uppercase;
+}
+.promo-field input:focus{
+  outline:none;border-color:var(--primary);
+  box-shadow:0 0 0 2px var(--neon-soft);
+}
+.promo-redeem-btn{
+  padding:11px 18px;border-radius:10px;
+  background:linear-gradient(135deg, var(--primary-2), var(--primary));
+  color:var(--on-primary);font-weight:700;font-size:14px;
+  border:none;cursor:pointer;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .15s, filter .2s;
+  flex-shrink:0;
+}
+.promo-redeem-btn:active{transform:scale(0.97);filter:brightness(0.92);}
+
 /* TRIAL banner + locked controls */
 .trial-banner{
   background:linear-gradient(135deg, rgba(248, 113, 113, 0.18) 0%, rgba(76, 201, 240, 0.14) 100%);
@@ -991,6 +1019,21 @@ code{
         Real server-side farming for CPM2. Pay once via @CryptoBot — activates in ~30 seconds.
       </div>
       <div id="tiers-list" class="tiers-list"></div>
+    </div>
+    <!-- Promo code redemption -->
+    <div class="section">
+      <div class="section-title">Have a promo code?</div>
+      <div class="hint" style="margin-bottom:10px">
+        Enter a code from a Reseller (−30%) or your loyalty voucher (−10%).
+        The discount auto-applies to your next tier purchase.
+      </div>
+      <div class="field promo-field">
+        <div class="input-wrap">
+          <input type="text" id="promo-input" placeholder="CPM2-XXXX" autocomplete="off" spellcheck="false" autocapitalize="characters">
+        </div>
+        <button class="link-btn promo-redeem-btn" id="promo-redeem">Redeem</button>
+      </div>
+      <div class="hint" id="promo-status"></div>
     </div>
     <div class="section">
       <div class="section-title">Top-up packs</div>
@@ -1900,6 +1943,28 @@ code{
     }
   }
 
+  function wirePromoRedeem(){
+    var input = document.getElementById('promo-input');
+    var btn = document.getElementById('promo-redeem');
+    var status = document.getElementById('promo-status');
+    if (!input || !btn) return;
+    btn.addEventListener('click', function(){
+      var code = (input.value || '').trim().toUpperCase();
+      if (!code) {
+        status.innerHTML = '⚠️ Enter a code first.';
+        return;
+      }
+      // Auto-prefix CPM2- if user typed only the suffix (e.g. "A3F1" → "CPM2-A3F1")
+      if (!code.startsWith('CPM2-')) code = 'CPM2-' + code;
+      selHaptic();
+      send({ mode: 'redeem_promo', code: code });
+      status.innerHTML = '⏳ Validating <code>' + code + '</code>…';
+    });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
+    });
+  }
+
   function renderTopups(){
     var host = document.getElementById('topups-list');
     if (!host) return;
@@ -2099,6 +2164,7 @@ code{
       renderTopups();
       renderFAQ();
       renderTrialBanner();
+      wirePromoRedeem();
       activate(initialTab());
     }, 1450);
   }
@@ -2121,6 +2187,7 @@ code{
     renderTopups();
     renderFAQ();
     renderTrialBanner();
+    wirePromoRedeem();
   }
 }());
 </script>
