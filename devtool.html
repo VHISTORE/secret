@@ -252,8 +252,8 @@
     box-shadow:0 0 8px var(--accent);
   }
 
-  /* ── Slider (custom amount) ─────────────────────────────────────────── */
-  .slider-row{
+  /* ── Reveal panel (shown when toggle is ON) ─────────────────────────── */
+  .reveal{
     display:none;
     margin-top:10px;
     padding:10px;
@@ -261,58 +261,91 @@
     border-radius:8px;
     border:1px solid var(--line);
   }
-  .slider-row.show{display:block;animation:fadeIn 0.2s;}
-  .slider-head{
-    display:flex;align-items:center;justify-content:space-between;
+  .reveal.show{display:block;animation:fadeIn 0.2s;}
+  .reveal-label{
+    font-size:10px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.08em;
     margin-bottom:8px;
   }
-  .slider-head .lbl{
-    font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:0.06em;
+
+  /* ── Pills (preset coin amounts — single-select) ────────────────────── */
+  .pills{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:6px;
   }
-  .slider-head .val{
-    font-size:13px;color:var(--accent);font-weight:600;
-    font-variant-numeric:tabular-nums;
-  }
-  input[type=range]{
-    -webkit-appearance:none;appearance:none;
-    width:100%;height:4px;
-    background:var(--panel-hi);
-    border-radius:999px;
-    outline:none;
-    cursor:pointer;
-  }
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;appearance:none;
-    width:18px;height:18px;border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 10px var(--accent);
-    cursor:pointer;
-    border:2px solid var(--bg);
-  }
-  input[type=range]::-moz-range-thumb{
-    width:18px;height:18px;border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 10px var(--accent);
-    cursor:pointer;
-    border:2px solid var(--bg);
-  }
-  .preset-row{
-    display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;
-  }
-  .preset{
-    flex:1;min-width:0;
-    padding:6px 4px;
-    font-size:10px;letter-spacing:0.04em;
+  .pill{
+    padding:9px 6px;
+    font-size:11px;letter-spacing:0.04em;
     border:1px solid var(--line);
     background:transparent;color:var(--text-2);
-    border-radius:6px;cursor:pointer;
-    font-family:var(--mono);
+    border-radius:8px;cursor:pointer;
+    font-family:var(--mono);font-weight:600;
+    text-align:center;
+    transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pill:active{transform:scale(0.96);}
+  .pill:hover{border-color:var(--accent);color:var(--accent);}
+  .pill.active{
+    background:var(--panel-hi);
+    border-color:var(--accent);
+    color:var(--accent);
+    box-shadow:0 0 10px rgba(76, 201, 240, 0.18) inset;
+  }
+
+  /* ── Checklist (boost picker) ───────────────────────────────────────── */
+  .check-list{
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .check-list .check-row{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 4px;
+    border-bottom:1px dashed var(--line);
+    cursor:pointer;
+  }
+  .check-list .check-row:last-child{border-bottom:none;}
+  .check-list .check-row:active{background:var(--panel-2);}
+  .check-list .check-row .info{flex:1;min-width:0;}
+  .check-list .check-row .ttl{
+    font-size:12px;color:var(--text);font-weight:600;
+  }
+  .check-list .check-row .desc{
+    font-size:10px;color:var(--hint);margin-top:1px;
+  }
+  .checkbox{
+    width:18px;height:18px;flex-shrink:0;
+    border:1.5px solid var(--line);
+    border-radius:4px;
+    background:transparent;
+    position:relative;
     transition:all 0.15s;
   }
-  .preset:hover{border-color:var(--accent);color:var(--accent);}
-  .preset.active{
-    background:var(--panel-hi);border-color:var(--accent);color:var(--accent);
+  .check-row.checked .checkbox{
+    background:var(--accent);
+    border-color:var(--accent);
+    box-shadow:0 0 8px var(--accent);
   }
+  .check-row.checked .checkbox::after{
+    content:'✓';
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--on-accent);
+    font-size:13px;font-weight:700;
+    font-family:-apple-system,sans-serif;
+  }
+  .checklist-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:6px;
+  }
+  .link-btn{
+    background:none;border:none;
+    color:var(--accent);
+    font-family:var(--mono);font-size:10px;
+    text-transform:uppercase;letter-spacing:0.08em;
+    cursor:pointer;padding:4px 0;
+  }
+  .link-btn:active{opacity:0.6;}
 
   /* ── Empty state for not-yet-built tabs ─────────────────────────────── */
   .empty{
@@ -434,24 +467,21 @@
         <div class="card-icon">🪙</div>
         <div class="card-title">
           <div class="name">Full Coins</div>
-          <div class="desc">Boost coins from every source · max by default</div>
+          <div class="desc">Coins from every source · max by default</div>
         </div>
       </div>
       <div class="toggle-row">
-        <span class="lbl">Custom amount</span>
+        <span class="lbl">Pick amount</span>
         <div class="toggle" data-toggle="coins"></div>
       </div>
-      <div class="slider-row" data-slider="coins">
-        <div class="slider-head">
-          <span class="lbl">Amount</span>
-          <span class="val" data-val="coins">10 000</span>
-        </div>
-        <input type="range" data-range="coins" min="100" max="100000" step="100" value="10000">
-        <div class="preset-row">
-          <button class="preset" data-preset-coins="1000">1K</button>
-          <button class="preset" data-preset-coins="10000">10K</button>
-          <button class="preset" data-preset-coins="50000">50K</button>
-          <button class="preset" data-preset-coins="100000">MAX</button>
+      <div class="reveal" data-reveal="coins">
+        <div class="reveal-label">Amount</div>
+        <div class="pills" data-pills="coins">
+          <div class="pill" data-coins="1000">+1 000</div>
+          <div class="pill" data-coins="2500">+2 500</div>
+          <div class="pill" data-coins="5000">+5 000</div>
+          <div class="pill" data-coins="10000">+10 000</div>
+          <div class="pill" data-coins="max" style="grid-column:span 2;">MAX</div>
         </div>
       </div>
       <div class="card-body" style="display:block;margin-top:12px;">
@@ -465,24 +495,47 @@
         <div class="card-icon">⚡</div>
         <div class="card-title">
           <div class="name">Full Boost</div>
-          <div class="desc">Apply all boosts · pick coins for boost cost</div>
+          <div class="desc">Apply all boosts · or pick which</div>
         </div>
       </div>
       <div class="toggle-row">
-        <span class="lbl">Custom amount</span>
+        <span class="lbl">Pick boosts</span>
         <div class="toggle" data-toggle="boost"></div>
       </div>
-      <div class="slider-row" data-slider="boost">
-        <div class="slider-head">
-          <span class="lbl">Amount</span>
-          <span class="val" data-val="boost">10 000</span>
+      <div class="reveal" data-reveal="boost">
+        <div class="checklist-head">
+          <div class="reveal-label">Select boosts</div>
+          <button class="link-btn" id="boost-all">All</button>
         </div>
-        <input type="range" data-range="boost" min="100" max="100000" step="100" value="10000">
-        <div class="preset-row">
-          <button class="preset" data-preset-boost="1000">1K</button>
-          <button class="preset" data-preset-boost="10000">10K</button>
-          <button class="preset" data-preset-boost="50000">50K</button>
-          <button class="preset" data-preset-boost="100000">MAX</button>
+        <div class="check-list" id="boost-checklist">
+          <div class="check-row" data-b="wheels">
+            <div class="info"><div class="ttl">All wheels</div><div class="desc">Every wheel design</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="brakes">
+            <div class="info"><div class="ttl">All brakes</div><div class="desc">Every brake variant</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="calipers">
+            <div class="info"><div class="ttl">All calipers</div><div class="desc">Every caliper color</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="flags">
+            <div class="info"><div class="ttl">Achievements</div><div class="desc">Every achievement flag</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="equipment">
+            <div class="info"><div class="ttl">Character clothing</div><div class="desc">All outfits and accessories</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="cosmetics">
+            <div class="info"><div class="ttl">Paint &amp; animations</div><div class="desc">All paint colors and animations</div></div>
+            <div class="checkbox"></div>
+          </div>
+          <div class="check-row" data-b="garage">
+            <div class="info"><div class="ttl">Garage slots</div><div class="desc">100 coins per slot · until cap</div></div>
+            <div class="checkbox"></div>
+          </div>
         </div>
       </div>
       <div class="card-body" style="display:block;margin-top:12px;">
@@ -589,36 +642,51 @@
     try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
   }));
 
-  // ── Custom-amount toggles ────────────────────────────────────────
+  // ── Toggles → reveal pick-amount / pick-boosts panel ─────────────
   document.querySelectorAll('.toggle').forEach(tog => {
     tog.addEventListener('click', () => {
       tog.classList.toggle('on');
       const fn = tog.dataset.toggle;
-      const slider = document.querySelector(`.slider-row[data-slider="${fn}"]`);
-      slider?.classList.toggle('show', tog.classList.contains('on'));
+      const reveal = document.querySelector(`.reveal[data-reveal="${fn}"]`);
+      reveal?.classList.toggle('show', tog.classList.contains('on'));
       try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
     });
   });
 
-  // ── Sliders + presets ────────────────────────────────────────────
-  const fmt = n => Number(n).toLocaleString('en-US').replace(/,/g,' ');
-  document.querySelectorAll('input[type=range]').forEach(r => {
-    const fn = r.dataset.range;
-    const valEl = document.querySelector(`.val[data-val="${fn}"]`);
-    const upd = () => { valEl.textContent = fmt(r.value); };
-    r.addEventListener('input', upd);
-    upd();
-  });
-  document.querySelectorAll('[data-preset-coins], [data-preset-boost]').forEach(p => {
-    p.addEventListener('click', () => {
-      const fn = p.hasAttribute('data-preset-coins') ? 'coins' : 'boost';
-      const v = p.getAttribute(`data-preset-${fn}`);
-      const r = document.querySelector(`input[data-range="${fn}"]`);
-      r.value = v; r.dispatchEvent(new Event('input'));
-      // Visual select state
-      document.querySelectorAll(`[data-preset-${fn}]`).forEach(x => x.classList.toggle('active', x === p));
-      try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
+  // ── Coin pills (single-select, tap-again to clear) ───────────────
+  // State lives on the .pills container as data-selected. Mirrors the
+  // original mini-app's farm-tab UX so users feel at home.
+  document.querySelectorAll('[data-pills]').forEach(group => {
+    group.addEventListener('click', e => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      const v = pill.dataset.coins;
+      const isActive = pill.classList.contains('active');
+      group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      if (!isActive) {
+        pill.classList.add('active');
+        group.dataset.selected = v;
+      } else {
+        delete group.dataset.selected;
+      }
+      try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
     });
+  });
+
+  // ── Boost checklist (multi-select) ───────────────────────────────
+  document.querySelectorAll('#boost-checklist .check-row').forEach(row => {
+    row.addEventListener('click', () => {
+      row.classList.toggle('checked');
+      try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+    });
+  });
+  // "All" link — toggle: if anything unchecked, check all; else clear.
+  document.getElementById('boost-all')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const rows = document.querySelectorAll('#boost-checklist .check-row');
+    const anyOff = [...rows].some(r => !r.classList.contains('checked'));
+    rows.forEach(r => r.classList.toggle('checked', anyOff));
+    try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
   });
 
   // ── Toast helper ─────────────────────────────────────────────────
@@ -646,16 +714,39 @@
   document.querySelectorAll('[data-run]').forEach(b => {
     b.addEventListener('click', () => {
       const fn = b.dataset.run;
-      let amount = 'max';
-      if (fn === 'coins' || fn === 'boost') {
-        const tog = document.querySelector(`.toggle[data-toggle="${fn}"]`);
+      const payload = { action: 'devtool', fn };
+
+      if (fn === 'coins') {
+        // Toggle OFF → max. Toggle ON but no pill → also default to max
+        // so the run-button is never blocking; user-friendliness > strict.
+        const tog = document.querySelector('.toggle[data-toggle="coins"]');
+        const group = document.querySelector('[data-pills="coins"]');
+        const sel = tog?.classList.contains('on') ? group?.dataset.selected : null;
+        payload.amount = sel || 'max';
+      } else if (fn === 'boost') {
+        const tog = document.querySelector('.toggle[data-toggle="boost"]');
         if (tog?.classList.contains('on')) {
-          amount = document.querySelector(`input[data-range="${fn}"]`).value;
+          // Custom selection — collect ticked boost ids.
+          const picked = [...document.querySelectorAll('#boost-checklist .check-row.checked')]
+            .map(r => r.dataset.b);
+          if (!picked.length) {
+            toast('No boosts selected', 'err');
+            try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
+            return;
+          }
+          payload.boosts = picked;
+        } else {
+          payload.boosts = 'all';
         }
+      } else if (fn === 'cash') {
+        payload.amount = 'max';
       }
-      const payload = { action: 'devtool', fn, amount };
-      logLine(`run ${fn} amount=${amount}`, 'info');
-      toast(`▶ ${fn.toUpperCase()} · ${amount}`, 'ok');
+
+      const summary = fn === 'boost'
+        ? `boosts=${Array.isArray(payload.boosts) ? payload.boosts.join(',') : payload.boosts}`
+        : `amount=${payload.amount}`;
+      logLine(`run ${fn} ${summary}`, 'info');
+      toast(`▶ ${fn.toUpperCase()}`, 'ok');
       try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
       try {
         // Backend handler for this payload is pending; sendData is a
