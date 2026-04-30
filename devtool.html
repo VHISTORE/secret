@@ -637,6 +637,54 @@
   }
   .stat-meta b{color:var(--text-2);font-weight:600;}
 
+  /* ── Generated pool block (Accounts tab) ─────────────────────────── */
+  .gen-pool{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:14px;
+  }
+  .gen-pool .pool-head{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;
+  }
+  .gen-pool .pool-head .ico{
+    width:30px;height:30px;border-radius:7px;
+    background:var(--panel-hi);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;flex-shrink:0;
+  }
+  .gen-pool .pool-head .info{flex:1;min-width:0;}
+  .gen-pool .pool-head .info .num{
+    font-size:18px;font-weight:700;color:var(--accent);
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 8px rgba(76, 201, 240, 0.4);
+  }
+  .gen-pool .pool-head .info .lbl{
+    font-size:10px;color:var(--hint);text-transform:uppercase;
+    letter-spacing:0.06em;margin-top:1px;
+  }
+  .gen-pool .actions{
+    display:flex;gap:8px;margin-bottom:10px;
+  }
+  .gen-pool .actions .btn{flex:1;}
+  .gen-pool .preview{
+    background:#000;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-family:var(--mono);font-size:10.5px;
+    color:var(--text-2);
+    line-height:1.55;
+    max-height:130px;overflow-y:auto;
+    -webkit-user-select:text;user-select:text;
+  }
+  .gen-pool .preview .em{color:var(--accent-3);}
+  .gen-pool .preview .pw{color:var(--text-2);}
+  .gen-pool .preview .more{color:var(--hint);text-align:center;padding-top:4px;}
+
   /* ── Action grid (Accounts tab) ──────────────────────────────────── */
   .action-grid{
     display:grid;
@@ -1099,6 +1147,12 @@
         <div class="sub">Login + password / file</div>
       </div>
     </div>
+    <!-- Generated pool (rendered when state.gen.total > 0) -->
+    <div id="gen-pool-block" style="display:none;">
+      <div class="section-label">Generated pool</div>
+      <div class="gen-pool" id="gen-pool"></div>
+    </div>
+
     <div class="section-label">Sessions</div>
     <div class="empty">
       <div class="icon">👥</div>
@@ -1196,8 +1250,9 @@
       </div>
     </div>
     <div class="field" style="font-size:11px;color:var(--hint);line-height:1.5;">
-      Fresh accounts will be created on the CPM2 backend with random
-      credentials. They appear in your sessions list once ready.
+      Fresh accounts will be registered on Firebase with random credentials.
+      Max <b>200</b> per request. The bot writes them to your seller pool
+      and replies with a copy-friendly message + .txt file in chat.
     </div>
   </div>
   <div class="modal-foot">
@@ -1592,6 +1647,78 @@
 
   renderLive(state.logs?.live);
   renderPassive(state.logs?.passive);
+
+  // ── Generated accounts pool rendering + actions ───────────────────
+  // The bot embeds the most recent ~20 accounts (full email+password) in
+  // the state blob so Copy works without a server round-trip. Larger
+  // pools are downloadable via sendData → bot replies with .txt in chat.
+  function renderGenPool(gen){
+    if (!gen || !gen.total) return;
+    const wrap  = document.getElementById('gen-pool');
+    const block = document.getElementById('gen-pool-block');
+    const recent = gen.recent || [];
+    const more = Math.max(0, gen.total - recent.length);
+    let preview = recent.slice(0, 6).map(a =>
+      `<div><span class="em">${escHtml(a.email)}</span>:<span class="pw">${escHtml(a.password)}</span></div>`
+    ).join('');
+    if (recent.length > 6) preview += `<div class="more">… +${recent.length - 6} more in copy/download</div>`;
+    if (!recent.length) preview = `<div class="more">pool stored on server — tap Download to fetch</div>`;
+    wrap.innerHTML = `
+      <div class="pool-head">
+        <div class="ico">✨</div>
+        <div class="info">
+          <div class="num">${escHtml(gen.total)}</div>
+          <div class="lbl">accounts in your pool</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="gen-copy">📋 Copy${recent.length < gen.total ? ' visible' : ''}</button>
+        <button class="btn" id="gen-download">📥 Download .txt</button>
+      </div>
+      <div class="preview">${preview}</div>
+    `;
+    block.style.display = '';
+
+    // Copy = recent slice (full email:password lines). For the full pool
+    // the user taps Download so the bot re-emits the .txt — keeps the
+    // URL blob from blowing past Telegram's ~2KB cap.
+    document.getElementById('gen-copy')?.addEventListener('click', async () => {
+      if (!recent.length) {
+        toast('Nothing to copy locally — use Download', 'err');
+        return;
+      }
+      const text = recent.map(a => `${a.email}:${a.password}`).join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        toast(`📋 Copied ${recent.length} line(s)`, 'ok');
+        try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+      } catch(err) {
+        // Fallback for older WebViews — fake a textarea + execCommand.
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select(); document.execCommand('copy');
+          ta.remove();
+          toast(`📋 Copied ${recent.length} line(s)`, 'ok');
+        } catch(e2){
+          toast('Copy unavailable on this client', 'err');
+        }
+      }
+    });
+
+    document.getElementById('gen-download')?.addEventListener('click', () => {
+      try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
+      try {
+        tg?.sendData?.(JSON.stringify({ mode: 'devtool_generated_download' }));
+        toast('📥 Sending to chat…', 'ok');
+      } catch(err) {
+        toast('Download failed: ' + err.message, 'err');
+      }
+    });
+  }
+  renderGenPool(state.gen);
 
   // ── Modal helpers ────────────────────────────────────────────────
   function openModal(name){
