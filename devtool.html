@@ -580,6 +580,204 @@
     100% { opacity:0; transform:translate(-50%, -80px) scale(2.4); filter:blur(8px); }
   }
 
+  /* ── Action grid (Accounts tab) ──────────────────────────────────── */
+  .action-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .action-tile{
+    padding:18px 12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+    text-align:center;
+    transition:all 0.18s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .action-tile:hover{border-color:var(--accent);background:var(--panel-2);}
+  .action-tile:active{transform:scale(0.97);}
+  .action-tile .ico{
+    font-size:26px;display:block;margin-bottom:8px;
+    filter:drop-shadow(0 0 8px rgba(76,201,240,0.35));
+  }
+  .action-tile .ttl{
+    font-size:12px;font-weight:700;color:var(--text);
+    text-transform:uppercase;letter-spacing:0.06em;
+  }
+  .action-tile .sub{
+    font-size:10px;color:var(--hint);margin-top:3px;
+    letter-spacing:0.02em;
+  }
+
+  /* ── Modal ───────────────────────────────────────────────────────── */
+  .backdrop{
+    position:fixed;inset:0;
+    background:rgba(2, 6, 16, 0.7);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    z-index:50;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.18s;
+  }
+  .backdrop.show{opacity:1;pointer-events:auto;}
+  .modal{
+    position:fixed;left:50%;top:50%;
+    transform:translate(-50%, -45%) scale(0.95);
+    width:min(420px, calc(100vw - 28px));
+    max-height:80vh;
+    background:var(--bg-2);
+    border:1px solid var(--accent);
+    border-radius:14px;
+    z-index:51;
+    opacity:0;pointer-events:none;
+    transition:all 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    box-shadow:0 0 40px rgba(76, 201, 240, 0.25), 0 12px 40px rgba(0,0,0,0.6);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+  .modal.show{
+    opacity:1;pointer-events:auto;
+    transform:translate(-50%, -50%) scale(1);
+  }
+  .modal-head{
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(180deg, rgba(76,201,240,0.08), transparent);
+  }
+  .modal-head .mh-icon{font-size:18px;}
+  .modal-head .mh-title{
+    flex:1;font-size:13px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--text);
+  }
+  .modal-head .mh-close{
+    background:none;border:none;
+    color:var(--hint);
+    font-size:20px;cursor:pointer;
+    padding:0 4px;line-height:1;
+    transition:color 0.15s;
+  }
+  .modal-head .mh-close:hover{color:var(--danger);}
+  .modal-body{
+    padding:16px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .modal-foot{
+    padding:12px 16px;
+    border-top:1px solid var(--line);
+    display:flex;gap:8px;justify-content:flex-end;
+  }
+
+  /* Field styling inside modals */
+  .field{margin-bottom:12px;}
+  .field-label{
+    font-size:10px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.08em;
+    margin-bottom:6px;display:block;
+  }
+  .input{
+    width:100%;
+    padding:10px 12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--text);
+    font-family:var(--mono);font-size:13px;
+    outline:none;
+    -webkit-user-select:text;user-select:text;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .input:focus{
+    border-color:var(--accent);
+    background:var(--panel-2);
+    box-shadow:0 0 0 3px rgba(76,201,240,0.12);
+  }
+  .input::placeholder{color:var(--hint);opacity:0.7;}
+  textarea.input{
+    min-height:120px;resize:vertical;line-height:1.4;
+  }
+
+  /* Method chooser (segmented control) */
+  .seg{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:0;
+    border:1px solid var(--line);
+    border-radius:8px;overflow:hidden;
+    margin-bottom:14px;
+  }
+  .seg button{
+    padding:9px 8px;
+    background:transparent;border:none;
+    color:var(--text-2);
+    font-family:var(--mono);font-size:11px;
+    text-transform:uppercase;letter-spacing:0.06em;font-weight:600;
+    cursor:pointer;
+    transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .seg button + button{border-left:1px solid var(--line);}
+  .seg button.active{
+    background:var(--accent);color:var(--on-accent);
+  }
+
+  .file-drop{
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    padding:22px 14px;
+    text-align:center;
+    color:var(--hint);
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .file-drop:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+    background:var(--panel);
+  }
+  .file-drop .ico{font-size:28px;display:block;margin-bottom:6px;}
+  .file-drop .lbl{font-size:12px;font-weight:600;}
+  .file-drop .sub{font-size:10px;margin-top:3px;opacity:0.8;}
+  .file-drop input[type=file]{display:none;}
+  .file-info{
+    margin-top:10px;
+    padding:8px 12px;
+    background:var(--panel);
+    border:1px solid var(--accent);
+    border-radius:8px;
+    font-size:11px;color:var(--text-2);
+    display:none;
+  }
+  .file-info.show{display:block;}
+  .file-info b{color:var(--accent);}
+
+  /* Stepper for account count */
+  .stepper{
+    display:flex;align-items:center;gap:8px;
+  }
+  .stepper button{
+    width:38px;height:38px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--text);
+    font-size:18px;font-weight:700;
+    cursor:pointer;
+    transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .stepper button:hover{border-color:var(--accent);color:var(--accent);}
+  .stepper button:active{transform:scale(0.92);}
+  .stepper input{
+    flex:1;text-align:center;
+    font-size:18px;font-weight:700;
+    color:var(--accent);
+  }
+
   /* ── Toast ──────────────────────────────────────────────────────────── */
   .toast{
     position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
@@ -614,7 +812,7 @@
 <main>
 
   <!-- ── Functions ──────────────────────────────────────────────────── -->
-  <section class="tab-pane active" data-pane="functions">
+  <section class="tab-pane" data-pane="functions">
 
     <div class="section-label">Resources</div>
 
@@ -720,12 +918,25 @@
   </section>
 
   <!-- ── Accounts ──────────────────────────────────────────────────── -->
-  <section class="tab-pane" data-pane="accounts">
-    <div class="section-label">Active sessions</div>
+  <section class="tab-pane active" data-pane="accounts">
+    <div class="section-label">Manage accounts</div>
+    <div class="action-grid">
+      <div class="action-tile" id="act-generate">
+        <span class="ico">✨</span>
+        <div class="ttl">Generate New</div>
+        <div class="sub">Create N fresh accounts</div>
+      </div>
+      <div class="action-tile" id="act-add-existing">
+        <span class="ico">➕</span>
+        <div class="ttl">Add Existing</div>
+        <div class="sub">Login + password / file</div>
+      </div>
+    </div>
+    <div class="section-label">Sessions</div>
     <div class="empty">
       <div class="icon">👥</div>
-      <div class="msg">No accounts wired yet</div>
-      <div class="sub">// pending: account list, switch, sign-in</div>
+      <div class="msg">No accounts yet</div>
+      <div class="sub">// generate or add to populate</div>
     </div>
   </section>
 
@@ -749,11 +960,11 @@
 </main>
 
 <nav>
-  <button class="tab active" data-tab="functions">
-    <span class="ico">⚙️</span><span>functions</span>
-  </button>
-  <button class="tab" data-tab="accounts">
+  <button class="tab active" data-tab="accounts">
     <span class="ico">👥</span><span>accounts</span>
+  </button>
+  <button class="tab" data-tab="functions">
+    <span class="ico">⚙️</span><span>functions</span>
   </button>
   <button class="tab" data-tab="dashboard">
     <span class="ico">📊</span><span>dashboard</span>
@@ -762,6 +973,83 @@
     <span class="ico">📜</span><span>logs</span>
   </button>
 </nav>
+
+<!-- ── Modal: Generate New ─────────────────────────────────────────── -->
+<div class="backdrop" data-backdrop="generate"></div>
+<div class="modal" data-modal="generate">
+  <div class="modal-head">
+    <span class="mh-icon">✨</span>
+    <span class="mh-title">Generate accounts</span>
+    <button class="mh-close" data-close="generate">×</button>
+  </div>
+  <div class="modal-body">
+    <div class="field">
+      <label class="field-label">Number of accounts</label>
+      <div class="stepper">
+        <button type="button" data-step="-1">−</button>
+        <input class="input" type="number" id="gen-count" min="1" max="200" value="10" inputmode="numeric">
+        <button type="button" data-step="+1">+</button>
+      </div>
+    </div>
+    <div class="field" style="font-size:11px;color:var(--hint);line-height:1.5;">
+      Fresh accounts will be created on the CPM2 backend with random
+      credentials. They appear in your sessions list once ready.
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn ghost" data-close="generate">Cancel</button>
+    <button class="btn primary" id="gen-create">Create</button>
+  </div>
+</div>
+
+<!-- ── Modal: Add Existing ─────────────────────────────────────────── -->
+<div class="backdrop" data-backdrop="add"></div>
+<div class="modal" data-modal="add">
+  <div class="modal-head">
+    <span class="mh-icon">➕</span>
+    <span class="mh-title">Add existing account</span>
+    <button class="mh-close" data-close="add">×</button>
+  </div>
+  <div class="modal-body">
+    <div class="seg" id="add-seg">
+      <button type="button" class="active" data-method="manual">Manual</button>
+      <button type="button" data-method="file">File</button>
+    </div>
+
+    <!-- Manual entry -->
+    <div data-method-pane="manual">
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="input" type="email" id="add-email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="account@gmail.com">
+      </div>
+      <div class="field">
+        <label class="field-label">Password</label>
+        <input class="input" type="password" id="add-pw" autocomplete="off" placeholder="••••••">
+      </div>
+      <div class="field" style="font-size:11px;color:var(--hint);">
+        Or paste multiple lines as <code>email:password</code> below.
+      </div>
+      <div class="field">
+        <textarea class="input" id="add-bulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <!-- File upload -->
+    <div data-method-pane="file" style="display:none;">
+      <label class="file-drop" id="add-drop">
+        <span class="ico">📁</span>
+        <div class="lbl">Choose .txt file</div>
+        <div class="sub">One per line: <code>email:password</code></div>
+        <input type="file" id="add-file" accept=".txt,text/plain">
+      </label>
+      <div class="file-info" id="add-file-info"></div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn ghost" data-close="add">Cancel</button>
+    <button class="btn primary" id="add-submit">Add</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -993,6 +1281,122 @@
     const payload = buildPayload();
     if (!payload.items.length) return;
     ignite(payload);
+  });
+
+  // ── Modal helpers ────────────────────────────────────────────────
+  function openModal(name){
+    document.querySelector(`.backdrop[data-backdrop="${name}"]`)?.classList.add('show');
+    document.querySelector(`.modal[data-modal="${name}"]`)?.classList.add('show');
+    try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
+  }
+  function closeModal(name){
+    document.querySelector(`.backdrop[data-backdrop="${name}"]`)?.classList.remove('show');
+    document.querySelector(`.modal[data-modal="${name}"]`)?.classList.remove('show');
+  }
+  document.querySelectorAll('[data-close]').forEach(b => {
+    b.addEventListener('click', () => closeModal(b.dataset.close));
+  });
+  document.querySelectorAll('.backdrop').forEach(b => {
+    b.addEventListener('click', () => closeModal(b.dataset.backdrop));
+  });
+
+  // ── Accounts: tile dispatch ──────────────────────────────────────
+  document.getElementById('act-generate')?.addEventListener('click', () => openModal('generate'));
+  document.getElementById('act-add-existing')?.addEventListener('click', () => openModal('add'));
+
+  // ── Generate modal: stepper + create ─────────────────────────────
+  const genInput = document.getElementById('gen-count');
+  document.querySelectorAll('[data-step]').forEach(b => {
+    b.addEventListener('click', () => {
+      const d = parseInt(b.dataset.step, 10) || 0;
+      const cur = parseInt(genInput.value, 10) || 1;
+      const next = Math.max(1, Math.min(200, cur + d));
+      genInput.value = next;
+      try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+    });
+  });
+  document.getElementById('gen-create')?.addEventListener('click', () => {
+    const n = Math.max(1, Math.min(200, parseInt(genInput.value, 10) || 0));
+    if (!n) { toast('Enter a number', 'err'); return; }
+    const payload = { action: 'devtool_generate_accounts', count: n };
+    logLine(`generate ${n} account(s)`, 'info');
+    try { tg?.sendData?.(JSON.stringify(payload)); } catch(e){ logLine(`sendData: ${e.message}`,'err'); }
+    closeModal('generate');
+    toast(`✨ Generating ${n}`, 'ok');
+    try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+  });
+
+  // ── Add Existing modal: seg control + manual + file ──────────────
+  const addSeg = document.getElementById('add-seg');
+  addSeg?.addEventListener('click', e => {
+    const b = e.target.closest('button[data-method]');
+    if (!b) return;
+    addSeg.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('[data-method-pane]').forEach(p => {
+      p.style.display = (p.dataset.methodPane === b.dataset.method) ? '' : 'none';
+    });
+  });
+
+  const fileInput = document.getElementById('add-file');
+  const fileInfo  = document.getElementById('add-file-info');
+  let pendingFileText = '';
+  fileInput?.addEventListener('change', () => {
+    const f = fileInput.files?.[0];
+    if (!f) return;
+    if (f.size > 1024 * 1024) {
+      toast('File too large (>1MB)', 'err');
+      fileInput.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingFileText = String(reader.result || '');
+      const lines = pendingFileText.split(/\r?\n/).filter(l => l.includes(':'));
+      fileInfo.innerHTML = `<b>${f.name}</b> · ${lines.length} valid line(s)`;
+      fileInfo.classList.add('show');
+    };
+    reader.onerror = () => toast('Read failed', 'err');
+    reader.readAsText(f);
+  });
+
+  document.getElementById('add-submit')?.addEventListener('click', () => {
+    const method = addSeg.querySelector('button.active')?.dataset.method || 'manual';
+    let pairs = [];
+    if (method === 'manual') {
+      const email = document.getElementById('add-email').value.trim();
+      const pw    = document.getElementById('add-pw').value;
+      const bulk  = document.getElementById('add-bulk').value.trim();
+      if (email && pw) pairs.push({ email, password: pw });
+      if (bulk) {
+        bulk.split(/\r?\n/).forEach(line => {
+          const [e, ...rest] = line.split(':');
+          const p = rest.join(':').trim();
+          if (e?.trim() && p) pairs.push({ email: e.trim(), password: p });
+        });
+      }
+    } else {
+      pendingFileText.split(/\r?\n/).forEach(line => {
+        const [e, ...rest] = line.split(':');
+        const p = rest.join(':').trim();
+        if (e?.trim() && p) pairs.push({ email: e.trim(), password: p });
+      });
+    }
+    if (!pairs.length) {
+      toast('No valid accounts', 'err');
+      try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
+      return;
+    }
+    const payload = { action: 'devtool_add_accounts', accounts: pairs };
+    logLine(`add ${pairs.length} account(s) via ${method}`, 'info');
+    try { tg?.sendData?.(JSON.stringify(payload)); } catch(e){ logLine(`sendData: ${e.message}`,'err'); }
+    closeModal('add');
+    toast(`➕ Added ${pairs.length}`, 'ok');
+    try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+    // Reset form
+    document.getElementById('add-email').value = '';
+    document.getElementById('add-pw').value    = '';
+    document.getElementById('add-bulk').value  = '';
+    fileInput.value = ''; pendingFileText = '';
+    fileInfo.classList.remove('show');
   });
 
   // ── BackButton wiring (Telegram chrome) ──────────────────────────
