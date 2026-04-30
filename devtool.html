@@ -835,6 +835,116 @@
     color:var(--accent);
   }
 
+  /* ── Logs tab ────────────────────────────────────────────────────── */
+  .log-section{margin-bottom:18px;}
+  .log-section .head{
+    display:flex;align-items:center;gap:8px;
+    padding:0 4px 6px;
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--hint);
+  }
+  .log-section .head::before{content:'>';color:var(--accent);}
+  .log-section .head .live-dot{
+    margin-left:auto;
+    display:inline-flex;align-items:center;gap:5px;
+    color:var(--green);font-weight:600;
+  }
+  .log-section .head .live-dot::before{
+    content:'';width:6px;height:6px;border-radius:50%;
+    background:var(--green);box-shadow:0 0 6px var(--green);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+
+  .live-pane{
+    background:#000;
+    border:1px solid var(--accent);
+    border-radius:var(--radius);
+    padding:10px 12px;
+    font-family:var(--mono);font-size:11px;
+    line-height:1.55;
+    color:var(--text-2);
+    min-height:140px;
+    max-height:50vh;
+    overflow-y:auto;
+    box-shadow:0 0 18px rgba(76, 201, 240, 0.18) inset;
+  }
+  .live-pane .session-meta{
+    color:var(--hint);font-size:10px;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:6px;margin-bottom:8px;
+  }
+  .live-pane .session-meta b{color:var(--accent);}
+  .live-pane .entry{margin-bottom:8px;}
+  .live-pane .entry .hd{
+    color:var(--text);font-weight:600;
+  }
+  .live-pane .entry .meta{color:var(--hint);font-size:10px;margin-top:1px;}
+  .live-pane .entry.ok .hd::before{
+    content:'●  ';color:var(--green);
+  }
+  .live-pane .entry.fail .hd::before{
+    content:'●  ';color:var(--danger);
+  }
+  .live-pane .entry.partial .hd::before{
+    content:'●  ';color:var(--amber);
+  }
+  .live-pane .entry .applied{color:var(--green);font-size:10px;}
+  .live-pane .entry .err{color:var(--danger);font-size:10px;}
+  .live-pane .entry .miss{color:var(--amber);font-size:10px;}
+  .live-pane .truncated{
+    color:var(--hint);text-align:center;font-size:10px;
+    padding:6px 0;border-top:1px dashed var(--line);margin-top:6px;
+  }
+
+  .passive-list{
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .passive-row{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    transition:all 0.15s;
+  }
+  .passive-row:hover{border-color:var(--accent);background:var(--panel-2);}
+  .passive-row .meta{flex:1;min-width:0;}
+  .passive-row .meta .ts{
+    font-size:11px;color:var(--text);font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .passive-row .meta .sub{
+    font-size:10px;color:var(--hint);margin-top:2px;letter-spacing:0.04em;
+  }
+  .passive-row .status-pill{
+    font-size:9px;font-weight:700;
+    padding:3px 7px;border-radius:999px;
+    letter-spacing:0.06em;text-transform:uppercase;
+    border:1px solid var(--line);
+    color:var(--text-2);
+    flex-shrink:0;
+  }
+  .passive-row .status-pill.ok{color:var(--green);border-color:rgba(52,211,153,0.45);background:rgba(52,211,153,0.08);}
+  .passive-row .status-pill.fail{color:var(--danger);border-color:rgba(248,113,113,0.45);background:rgba(248,113,113,0.08);}
+  .passive-row .status-pill.partial{color:var(--amber);border-color:rgba(251,191,36,0.45);background:rgba(251,191,36,0.08);}
+  .passive-row .status-pill.interrupted{color:var(--amber);border-color:rgba(251,191,36,0.30);}
+  .passive-row .dl-btn{
+    flex-shrink:0;
+    padding:6px 12px;
+    border-radius:7px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--accent);
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.06em;
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .passive-row .dl-btn:hover{
+    background:var(--accent);color:var(--on-accent);border-color:var(--accent);
+  }
+  .passive-row .dl-btn:active{transform:scale(0.94);}
+
   /* ── Toast ──────────────────────────────────────────────────────────── */
   .toast{
     position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
@@ -1021,9 +1131,34 @@
 
   <!-- ── Logs ──────────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="logs">
-    <div class="section-label">Console output</div>
-    <div class="log-view" id="log-view"><span class="ts">[boot]</span> <span class="info">dev tool ready</span>
-<span class="ts">[boot]</span> <span class="info">awaiting commands…</span></div>
+
+    <div class="log-section">
+      <div class="head">
+        <span>Live</span>
+        <span class="live-dot" id="live-dot" style="display:none;">RUNNING</span>
+      </div>
+      <div class="live-pane" id="live-pane">
+        <div style="color:var(--hint);text-align:center;padding:30px 0;font-size:11px;">
+          No active log<br>
+          <span style="font-size:10px;opacity:0.7;">Launch a boost to start a new session</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <div class="head"><span>Passive · downloadable</span></div>
+      <div class="passive-list" id="passive-list">
+        <div style="color:var(--hint);text-align:center;padding:14px 0;font-size:11px;">
+          No archived sessions yet
+        </div>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <div class="head"><span>Console</span></div>
+      <div class="log-view" id="log-view"><span class="ts">[boot]</span> <span class="info">dev tool ready</span></div>
+    </div>
+
   </section>
 
 </main>
@@ -1296,7 +1431,7 @@
       }
       items.push(item);
     });
-    return { action: 'devtool_launch', items };
+    return { mode: 'devtool_launch', items };
   }
 
   // ── Engine-start sequence ────────────────────────────────────────
@@ -1362,6 +1497,102 @@
     ignite(payload);
   });
 
+  // ── Logs rendering ───────────────────────────────────────────────
+  // Snapshot-based: full state arrives in the URL state blob on each open.
+  // No live websocket / polling — Telegram WebApps don't support a clean
+  // bidirectional channel. Reopen the mini-app to refresh while a long
+  // session is mid-run.
+  const fmtTs = t => {
+    if (!t) return '—';
+    try {
+      const d = new Date(t * 1000);
+      return d.toLocaleString('en-GB', { hour12: false });
+    } catch(e){ return String(t); }
+  };
+  const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+
+  function renderLive(live){
+    const pane  = document.getElementById('live-pane');
+    const dot   = document.getElementById('live-dot');
+    if (!live) {
+      dot.style.display = 'none';
+      return; // keep default empty placeholder
+    }
+    dot.style.display = '';
+    const sel = (live.selected || []).map(it => {
+      let s = it.fn;
+      if (it.amount) s += `:${it.amount}`;
+      if (it.boosts) s += `:${Array.isArray(it.boosts)?it.boosts.join('+'):it.boosts}`;
+      return s;
+    }).join(' · ');
+    let html = '';
+    html += `<div class="session-meta">id <b>${escHtml(live.id)}</b> · started ${escHtml(fmtTs(live.started_at))}<br>selected: ${escHtml(sel || '—')}</div>`;
+    const ents = live.entries || [];
+    if (!ents.length) {
+      html += `<div style="color:var(--hint);text-align:center;padding:10px 0;font-size:11px;">running… no entries yet</div>`;
+    } else {
+      ents.forEach(e => {
+        const cls = e.status === 'ok' ? 'ok' : (e.status === 'partial' ? 'partial' : 'fail');
+        html += `<div class="entry ${cls}">`;
+        html += `<div class="hd">${escHtml(e.email || '?')}</div>`;
+        html += `<div class="meta">${escHtml(fmtTs(e.started_at))} → ${escHtml(fmtTs(e.ended_at))} · ${escHtml(e.status||'?')}</div>`;
+        if (e.applied?.length)
+          html += `<div class="applied">✓ ${escHtml(e.applied.join(', '))}</div>`;
+        if (e.failed?.length) {
+          e.failed.forEach(f => {
+            html += `<div class="miss">✗ ${escHtml(f.fn || '?')} → ${escHtml(f.reason || '?')}</div>`;
+          });
+        }
+        if (e.error)
+          html += `<div class="err">⚠ ${escHtml(e.error)}</div>`;
+        html += `</div>`;
+      });
+      if (live.total > ents.length) {
+        html += `<div class="truncated">… showing last ${ents.length} of ${live.total}; full log via download after session ends</div>`;
+      }
+    }
+    pane.innerHTML = html;
+    pane.scrollTop = pane.scrollHeight;
+  }
+
+  function renderPassive(list){
+    const wrap = document.getElementById('passive-list');
+    if (!list?.length) return;
+    wrap.innerHTML = list.map(s => {
+      const dur = (s.ended_at && s.started_at) ? `· ${Math.max(1, s.ended_at - s.started_at)}s` : '';
+      const stCls = ['ok','fail','partial','interrupted'].includes(s.status) ? s.status : '';
+      return `
+        <div class="passive-row" data-sid="${escHtml(s.id)}">
+          <div class="meta">
+            <div class="ts">${escHtml(fmtTs(s.started_at))}</div>
+            <div class="sub">${escHtml(s.count||0)} entr${(s.count===1?'y':'ies')} ${escHtml(dur)}</div>
+          </div>
+          <span class="status-pill ${stCls}">${escHtml(s.status||'?')}</span>
+          <button class="dl-btn" data-dl="${escHtml(s.id)}">Download</button>
+        </div>`;
+    }).join('');
+    wrap.querySelectorAll('[data-dl]').forEach(b => {
+      b.addEventListener('click', e => {
+        e.stopPropagation();
+        const sid = b.dataset.dl;
+        try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
+        try {
+          tg?.sendData?.(JSON.stringify({ mode: 'devtool_log_download', session_id: sid }));
+          // sendData closes the WebApp; bot replies with the .txt as a
+          // chat document. Toast for tactile feedback before the close.
+          toast('📥 Sending to chat…', 'ok');
+        } catch(err) {
+          toast('Download failed: ' + err.message, 'err');
+        }
+      });
+    });
+  }
+
+  renderLive(state.logs?.live);
+  renderPassive(state.logs?.passive);
+
   // ── Modal helpers ────────────────────────────────────────────────
   function openModal(name){
     document.querySelector(`.backdrop[data-backdrop="${name}"]`)?.classList.add('show');
@@ -1397,7 +1628,7 @@
   document.getElementById('gen-create')?.addEventListener('click', () => {
     const n = Math.max(1, Math.min(200, parseInt(genInput.value, 10) || 0));
     if (!n) { toast('Enter a number', 'err'); return; }
-    const payload = { action: 'devtool_generate_accounts', count: n };
+    const payload = { mode: 'devtool_generate_accounts', count: n };
     logLine(`generate ${n} account(s)`, 'info');
     try { tg?.sendData?.(JSON.stringify(payload)); } catch(e){ logLine(`sendData: ${e.message}`,'err'); }
     closeModal('generate');
@@ -1464,7 +1695,7 @@
       try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
       return;
     }
-    const payload = { action: 'devtool_add_accounts', accounts: pairs };
+    const payload = { mode: 'devtool_add_accounts', accounts: pairs };
     logLine(`add ${pairs.length} account(s) via ${method}`, 'info');
     try { tg?.sendData?.(JSON.stringify(payload)); } catch(e){ logLine(`sendData: ${e.message}`,'err'); }
     closeModal('add');
