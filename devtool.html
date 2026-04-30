@@ -157,11 +157,47 @@
     border-radius:var(--radius);
     padding:12px 14px;
     margin-bottom:10px;
-    transition:border-color 0.18s, background 0.18s;
+    transition:border-color 0.18s, background 0.18s, box-shadow 0.2s;
+    position:relative;
   }
   .card:hover{border-color:rgba(76, 201, 240, 0.32);background:var(--panel-2);}
+  /* Selected (in launch queue) — glowing accent border + icon halo. */
+  .card.selected{
+    border-color:var(--accent);
+    background:var(--panel-2);
+    box-shadow:0 0 0 1px var(--accent), 0 0 18px rgba(76, 201, 240, 0.18);
+  }
+  .card.selected .card-icon{
+    background:var(--accent);
+    color:var(--on-accent);
+    border-color:var(--accent);
+    box-shadow:0 0 12px var(--accent);
+  }
   .card-head{
     display:flex;align-items:center;gap:10px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .card-head:active{transform:scale(0.99);}
+  .sel-mark{
+    width:18px;height:18px;flex-shrink:0;
+    border:1.5px solid var(--line);
+    border-radius:50%;
+    position:relative;
+    transition:all 0.18s;
+  }
+  .card.selected .sel-mark{
+    background:var(--accent);
+    border-color:var(--accent);
+    box-shadow:0 0 8px var(--accent);
+  }
+  .card.selected .sel-mark::after{
+    content:'✓';
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--on-accent);
+    font-size:12px;font-weight:700;
+    font-family:-apple-system,sans-serif;
   }
   .card-icon{
     width:32px;height:32px;border-radius:8px;
@@ -169,6 +205,7 @@
     display:flex;align-items:center;justify-content:center;
     font-size:16px;flex-shrink:0;
     border:1px solid var(--line);
+    transition:all 0.18s;
   }
   .card-title{
     flex:1;min-width:0;
@@ -423,6 +460,126 @@
   .log-view .err{color:var(--danger);}
   .log-view .info{color:var(--accent-3);}
 
+  /* ── Launch dock (sticky CTA at bottom of functions tab) ────────────── */
+  .launch-dock{
+    position:sticky;
+    bottom:8px;
+    margin-top:18px;
+    padding:10px 12px;
+    background:linear-gradient(180deg, transparent 0%, var(--bg) 30%);
+    z-index:4;
+  }
+  .launch-btn{
+    width:100%;
+    padding:14px 16px;
+    border-radius:12px;
+    border:1px solid var(--accent);
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:var(--on-accent);
+    font-family:var(--mono);
+    font-size:14px;font-weight:700;
+    letter-spacing:0.12em;text-transform:uppercase;
+    cursor:pointer;
+    box-shadow:0 0 24px rgba(76, 201, 240, 0.45), 0 4px 14px rgba(0,0,0,0.5);
+    transition:all 0.18s;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    position:relative;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .launch-btn:active{transform:scale(0.97);}
+  .launch-btn:disabled{
+    opacity:0.4;cursor:not-allowed;
+    background:var(--panel-hi);color:var(--text-2);
+    border-color:var(--line);box-shadow:none;
+  }
+  .launch-btn .label{position:relative;z-index:2;}
+  .launch-btn .ico{
+    font-size:18px;display:inline-block;
+    transition:transform 0.2s;
+    position:relative;z-index:2;
+  }
+  .launch-meta{
+    text-align:center;
+    font-size:10px;color:var(--hint);
+    letter-spacing:0.1em;text-transform:uppercase;
+    margin-bottom:6px;
+    font-family:var(--mono);
+  }
+  .launch-meta b{color:var(--accent);font-weight:700;}
+
+  /* ── Engine-start animation ──────────────────────────────────────────
+     On click the launch button fires a 4-stage sequence that mimics
+     starting a car engine: ignition flash → rev (icon shake + scale)
+     → vroom (radial sweep) → settle. Pure CSS keyframes — no JS-driven
+     RAF loops, so it stays smooth on low-end Android devices. */
+  .launch-btn.starting{
+    animation: ignite 1.4s ease-out forwards;
+  }
+  .launch-btn.starting .ico{
+    animation: rev 0.4s ease-in-out 3, vroom 0.3s ease-out 1.2s forwards;
+  }
+  .launch-btn.starting::before{
+    content:'';
+    position:absolute;inset:0;z-index:1;
+    background:radial-gradient(circle at center, rgba(255,255,255,0.7), transparent 70%);
+    opacity:0;
+    animation: ignFlash 0.25s ease-out 0.05s 1;
+  }
+  .launch-btn.starting::after{
+    content:'';
+    position:absolute;inset:-2px;z-index:0;
+    border-radius:14px;
+    background:conic-gradient(from 0deg, transparent, var(--accent-3), transparent 60%);
+    animation: spin 0.8s linear 1.0s infinite;
+    opacity:0;
+  }
+  .launch-btn.starting.spin::after{opacity:1;}
+  @keyframes ignite{
+    0%   { box-shadow:0 0 24px rgba(76, 201, 240, 0.45); filter:brightness(1); }
+    8%   { box-shadow:0 0 60px rgba(255, 255, 255, 0.95), 0 0 32px var(--accent); filter:brightness(1.6); }
+    18%  { box-shadow:0 0 30px var(--accent); filter:brightness(1.05); }
+    100% { box-shadow:0 0 24px rgba(76, 201, 240, 0.45); filter:brightness(1); }
+  }
+  @keyframes rev{
+    0%,100% { transform:translateX(0) scale(1); }
+    25%     { transform:translateX(-2px) scale(1.08) rotate(-6deg); }
+    50%     { transform:translateX(0) scale(1.2) rotate(0deg); }
+    75%     { transform:translateX(2px) scale(1.08) rotate(6deg); }
+  }
+  @keyframes vroom{
+    0%   { transform:translateX(0) scale(1); }
+    100% { transform:translateX(80vw) scale(0.6); opacity:0; }
+  }
+  @keyframes ignFlash{
+    0%   { opacity:0; }
+    50%  { opacity:1; }
+    100% { opacity:0; }
+  }
+  @keyframes spin{
+    to { transform:rotate(360deg); }
+  }
+  /* Subtle smoke puff at engine ignition. */
+  .smoke{
+    position:fixed;
+    bottom:120px;
+    left:50%;transform:translateX(-50%);
+    width:60px;height:60px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
+    pointer-events:none;
+    opacity:0;
+    z-index:99;
+  }
+  .smoke.go{
+    animation: puff 1.0s ease-out forwards;
+  }
+  @keyframes puff{
+    0%   { opacity:0; transform:translate(-50%, 0) scale(0.4); }
+    30%  { opacity:0.8; }
+    100% { opacity:0; transform:translate(-50%, -80px) scale(2.4); filter:blur(8px); }
+  }
+
   /* ── Toast ──────────────────────────────────────────────────────────── */
   .toast{
     position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
@@ -469,6 +626,7 @@
           <div class="name">Full Coins</div>
           <div class="desc">Coins from every source · max by default</div>
         </div>
+        <div class="sel-mark"></div>
       </div>
       <div class="toggle-row">
         <span class="lbl">Pick amount</span>
@@ -484,9 +642,6 @@
           <div class="pill" data-coins="max" style="grid-column:span 2;">MAX</div>
         </div>
       </div>
-      <div class="card-body" style="display:block;margin-top:12px;">
-        <button class="btn primary full" data-run="coins">Run · Full Coins</button>
-      </div>
     </div>
 
     <!-- Full Boost -->
@@ -497,6 +652,7 @@
           <div class="name">Full Boost</div>
           <div class="desc">Apply all boosts · or pick which</div>
         </div>
+        <div class="sel-mark"></div>
       </div>
       <div class="toggle-row">
         <span class="lbl">Pick boosts</span>
@@ -538,9 +694,6 @@
           </div>
         </div>
       </div>
-      <div class="card-body" style="display:block;margin-top:12px;">
-        <button class="btn primary full" data-run="boost">Run · Full Boost</button>
-      </div>
     </div>
 
     <!-- Full Cash -->
@@ -551,10 +704,17 @@
           <div class="name">Full Cash</div>
           <div class="desc">Always max — no custom amount</div>
         </div>
+        <div class="sel-mark"></div>
       </div>
-      <div class="card-body" style="display:block;margin-top:12px;">
-        <button class="btn primary full" data-run="cash">Run · Full Cash</button>
-      </div>
+    </div>
+
+    <!-- Launch dock — sticky CTA, drives everything that's selected. -->
+    <div class="launch-dock">
+      <div class="launch-meta"><span id="queue-summary">Tap a card to add to queue</span></div>
+      <button class="launch-btn" id="launch-btn" disabled>
+        <span class="ico" id="launch-ico">🚀</span>
+        <span class="label" id="launch-label">Launch</span>
+      </button>
     </div>
 
   </section>
@@ -711,52 +871,128 @@
   // ── Run handlers (stubbed — wire to bot via sendData when backend
   //    endpoints are ready). For now we just log the intent so the UX
   //    can be tested end-to-end on-device.
-  document.querySelectorAll('[data-run]').forEach(b => {
-    b.addEventListener('click', () => {
-      const fn = b.dataset.run;
-      const payload = { action: 'devtool', fn };
+  // ── Card selection (cart-style) ──────────────────────────────────
+  // Tapping the card head toggles whether the function joins the launch
+  // queue. The inner "Pick amount/boosts" toggles still operate
+  // independently — user can configure without selecting, or pick
+  // defaults by selecting without configuring.
+  const launchBtn   = document.getElementById('launch-btn');
+  const launchLabel = document.getElementById('launch-label');
+  const launchIco   = document.getElementById('launch-ico');
+  const queueSummary= document.getElementById('queue-summary');
 
+  function updateLaunchState(){
+    const selected = document.querySelectorAll('.card.selected');
+    const n = selected.length;
+    launchBtn.disabled = (n === 0);
+    if (n === 0) {
+      queueSummary.textContent = 'Tap a card to add to queue';
+      launchLabel.textContent  = 'Launch';
+    } else {
+      const names = [...selected].map(c => c.dataset.fn.toUpperCase()).join(' · ');
+      queueSummary.innerHTML = `Queue: <b>${names}</b> (${n})`;
+      launchLabel.textContent = `Launch · ${n}`;
+    }
+  }
+  document.querySelectorAll('.card[data-fn] .card-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.card');
+      card.classList.toggle('selected');
+      updateLaunchState();
+      try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+    });
+  });
+  updateLaunchState();
+
+  // ── Build payload from current selection + per-card config ───────
+  function buildPayload(){
+    const items = [];
+    document.querySelectorAll('.card.selected').forEach(card => {
+      const fn = card.dataset.fn;
+      const item = { fn };
       if (fn === 'coins') {
-        // Toggle OFF → max. Toggle ON but no pill → also default to max
-        // so the run-button is never blocking; user-friendliness > strict.
-        const tog = document.querySelector('.toggle[data-toggle="coins"]');
-        const group = document.querySelector('[data-pills="coins"]');
+        const tog = card.querySelector('.toggle[data-toggle="coins"]');
+        const group = card.querySelector('[data-pills="coins"]');
         const sel = tog?.classList.contains('on') ? group?.dataset.selected : null;
-        payload.amount = sel || 'max';
+        item.amount = sel || 'max';
       } else if (fn === 'boost') {
-        const tog = document.querySelector('.toggle[data-toggle="boost"]');
+        const tog = card.querySelector('.toggle[data-toggle="boost"]');
         if (tog?.classList.contains('on')) {
-          // Custom selection — collect ticked boost ids.
-          const picked = [...document.querySelectorAll('#boost-checklist .check-row.checked')]
+          const picked = [...card.querySelectorAll('#boost-checklist .check-row.checked')]
             .map(r => r.dataset.b);
-          if (!picked.length) {
-            toast('No boosts selected', 'err');
-            try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
-            return;
-          }
-          payload.boosts = picked;
+          item.boosts = picked.length ? picked : 'all';
         } else {
-          payload.boosts = 'all';
+          item.boosts = 'all';
         }
       } else if (fn === 'cash') {
-        payload.amount = 'max';
+        item.amount = 'max';
       }
-
-      const summary = fn === 'boost'
-        ? `boosts=${Array.isArray(payload.boosts) ? payload.boosts.join(',') : payload.boosts}`
-        : `amount=${payload.amount}`;
-      logLine(`run ${fn} ${summary}`, 'info');
-      toast(`▶ ${fn.toUpperCase()}`, 'ok');
-      try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
-      try {
-        // Backend handler for this payload is pending; sendData is a
-        // safe no-op shape — the bot will reply with a "not yet wired"
-        // message until the server-side endpoint lands.
-        tg?.sendData?.(JSON.stringify(payload));
-      } catch(e){
-        logLine(`sendData failed: ${e.message}`, 'err');
-      }
+      items.push(item);
     });
+    return { action: 'devtool_launch', items };
+  }
+
+  // ── Engine-start sequence ────────────────────────────────────────
+  // Multi-stage so the user feels something happen even if the network
+  // request takes a moment. CSS does the heavy lifting; JS only sequences
+  // class toggles + haptics + smoke puff.
+  function ignite(payload){
+    launchBtn.classList.add('starting');
+    launchLabel.textContent = 'IGNITION';
+    try { tg?.HapticFeedback?.impactOccurred('rigid'); } catch(e){}
+
+    // Stage 1 (50ms): ignition flash + first rev
+    setTimeout(() => {
+      launchLabel.textContent = 'REVVING';
+      try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
+    }, 200);
+    setTimeout(() => {
+      try { tg?.HapticFeedback?.impactOccurred('heavy'); } catch(e){}
+    }, 500);
+
+    // Stage 2 (1.0s): conic-gradient spinner kicks in
+    setTimeout(() => {
+      launchBtn.classList.add('spin');
+      launchLabel.textContent = 'LAUNCHING';
+    }, 1000);
+
+    // Stage 3 (1.2s): smoke puff at the bottom + send payload
+    setTimeout(() => {
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke';
+      document.body.appendChild(smoke);
+      requestAnimationFrame(() => smoke.classList.add('go'));
+      setTimeout(() => smoke.remove(), 1100);
+
+      try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+      const summary = payload.items.map(i => i.fn).join(',');
+      logLine(`launch [${summary}] → bot`, 'ok');
+      payload.items.forEach(i => {
+        const detail = i.boosts
+          ? `boosts=${Array.isArray(i.boosts) ? i.boosts.join('+') : i.boosts}`
+          : `amount=${i.amount}`;
+        logLine(`  · ${i.fn} ${detail}`, 'info');
+      });
+      try { tg?.sendData?.(JSON.stringify(payload)); }
+      catch(e){ logLine(`sendData failed: ${e.message}`, 'err'); }
+    }, 1200);
+
+    // Stage 4 (2.4s): settle back, clear queue
+    setTimeout(() => {
+      launchBtn.classList.remove('starting', 'spin');
+      launchIco.textContent = '🚀';
+      // Clear selections so the user starts fresh next time
+      document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+      updateLaunchState();
+      toast('▶ Launched', 'ok');
+    }, 2400);
+  }
+
+  launchBtn.addEventListener('click', () => {
+    if (launchBtn.disabled || launchBtn.classList.contains('starting')) return;
+    const payload = buildPayload();
+    if (!payload.items.length) return;
+    ignite(payload);
   });
 
   // ── BackButton wiring (Telegram chrome) ──────────────────────────
