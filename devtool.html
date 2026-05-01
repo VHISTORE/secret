@@ -425,7 +425,7 @@
   nav{
     flex:0 0 auto;
     display:grid;
-    grid-template-columns:repeat(4, 1fr);
+    grid-template-columns:repeat(5, 1fr);
     background:var(--bg-2);
     border-top:1px solid var(--line);
     padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
@@ -440,18 +440,26 @@
   }
   .tab{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:3px;
-    padding:8px 4px;
+    gap:2px;
+    padding:7px 2px;
     border:none;background:transparent;cursor:pointer;
     color:var(--hint);
-    font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
+    font-family:var(--mono);font-size:9px;letter-spacing:0.04em;
     text-transform:uppercase;
     border-radius:8px;
     transition:color 0.18s, background 0.18s;
     -webkit-tap-highlight-color:transparent;
+    min-width:0;            /* allow grid item to shrink past content */
+    overflow:hidden;
+  }
+  .tab span:last-child{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
   }
   .tab .ico{
-    font-size:18px;line-height:1;
+    font-size:17px;line-height:1;
     transition:transform 0.18s, filter 0.18s;
   }
   .tab.active{
