@@ -1439,6 +1439,28 @@
         <div class="delta" data-i18n="alltime_seller">all time · this seller</div>
       </div>
     </div>
+
+    <div class="section-label" data-i18n="my_plan">My plan</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="ico">🎫</div>
+        <div class="lbl" data-i18n="tier_lbl">Tier</div>
+        <div class="num" id="plan-tier" style="font-size:18px;">—</div>
+        <div class="delta" id="plan-expires" data-i18n="plan_active">active</div>
+      </div>
+      <div class="stat-card">
+        <div class="ico">📅</div>
+        <div class="lbl" data-i18n="day_quota">Today's quota</div>
+        <div class="num" id="quota-day">—</div>
+        <div class="delta" id="quota-day-bar"></div>
+      </div>
+      <div class="stat-card">
+        <div class="ico">📆</div>
+        <div class="lbl" data-i18n="month_quota">Cycle quota</div>
+        <div class="num" id="quota-month">—</div>
+        <div class="delta" id="quota-month-bar"></div>
+      </div>
+    </div>
     <div class="stat-meta">
       <span data-i18n="tracked_since">Tracked since</span> <b id="stat-since" data-i18n="launch_lc">launch</b> <span data-i18n="counters_update">· counters update on each successful run</span>
     </div>
@@ -1652,7 +1674,7 @@
       m_add_paste:'Or paste multiple lines as email:password below.',
       m_add_choose:'Choose .txt file',m_add_oneperline:'One per line: email:password',
       pending_label:'Pending add (will run on Launch)',pending_sub:'queued for verify + add',
-      accs_in_batch:'accounts in latest batch',copy:'Copy',copy_visible:'Copy visible',dl_txt:'Download .txt',pool_server:'pool stored on server — tap Download to fetch',more_in_dl:'more in copy/download',more:'more',download:'Download',
+      accs_in_batch:'accounts in latest batch',copy:'Copy',copy_visible:'Copy visible',dl_txt:'Download .txt',pool_server:'pool stored on server — tap Download to fetch',more_in_dl:'more in copy/download',my_plan:'My plan',plan_active:'active',day_quota:'Today',month_quota:'Cycle',more:'more',download:'Download',
     },
     ru:{
       app_devtool:'Dev Tool',connected:'подключено',
@@ -1697,7 +1719,7 @@
       m_add_paste:'Или вставь несколько строк в формате email:password ниже.',
       m_add_choose:'Выбрать .txt файл',m_add_oneperline:'По одному на строку: email:password',
       pending_label:'Ждут добавления (запустятся по кнопке)',pending_sub:'в очереди на проверку + добавление',
-      accs_in_batch:'аков в последнем батче',copy:'Копировать',copy_visible:'Копировать видимые',dl_txt:'Скачать .txt',pool_server:'пул на сервере — нажми Скачать',more_in_dl:'ещё в копии/скачивании',more:'ещё',download:'Скачать',
+      accs_in_batch:'аков в последнем батче',copy:'Копировать',copy_visible:'Копировать видимые',dl_txt:'Скачать .txt',pool_server:'пул на сервере — нажми Скачать',more_in_dl:'ещё в копии/скачивании',my_plan:'Мой план',plan_active:'активен',day_quota:'Сегодня',month_quota:'Цикл',more:'ещё',download:'Скачать',
     },
     es:{
       app_devtool:'Dev Tool',connected:'conectado',
@@ -1742,7 +1764,7 @@
       m_add_paste:'O pega varias líneas como email:password abajo.',
       m_add_choose:'Elegir archivo .txt',m_add_oneperline:'Una por línea: email:password',
       pending_label:'Pendientes (se añaden al lanzar)',pending_sub:'en cola para verificar + añadir',
-      accs_in_batch:'cuentas en el último lote',copy:'Copiar',copy_visible:'Copiar visibles',dl_txt:'Descargar .txt',pool_server:'pool en el servidor — toca Descargar',more_in_dl:'más en copia/descarga',more:'más',download:'Descargar',
+      accs_in_batch:'cuentas en el último lote',copy:'Copiar',copy_visible:'Copiar visibles',dl_txt:'Descargar .txt',pool_server:'pool en el servidor — toca Descargar',more_in_dl:'más en copia/descarga',my_plan:'Mi plan',plan_active:'activo',day_quota:'Hoy',month_quota:'Ciclo',more:'más',download:'Descargar',
     },
     pt:{
       app_devtool:'Dev Tool',connected:'conectado',
@@ -1787,7 +1809,7 @@
       m_add_paste:'Ou cola várias linhas como email:senha abaixo.',
       m_add_choose:'Escolher arquivo .txt',m_add_oneperline:'Uma por linha: email:senha',
       pending_label:'Pendentes (correm ao lançar)',pending_sub:'na fila para verificar + adicionar',
-      accs_in_batch:'contas no último lote',copy:'Copiar',copy_visible:'Copiar visíveis',dl_txt:'Baixar .txt',pool_server:'pool no servidor — toca Baixar',more_in_dl:'mais na cópia/download',more:'mais',download:'Baixar',
+      accs_in_batch:'contas no último lote',copy:'Copiar',copy_visible:'Copiar visíveis',dl_txt:'Baixar .txt',pool_server:'pool no servidor — toca Baixar',more_in_dl:'mais na cópia/download',my_plan:'Meu plano',plan_active:'ativo',day_quota:'Hoje',month_quota:'Ciclo',more:'mais',download:'Baixar',
     },
     de:{
       app_devtool:'Dev Tool',connected:'verbunden',
@@ -1832,7 +1854,7 @@
       m_add_paste:'Oder mehrere Zeilen als email:passwort einfügen.',
       m_add_choose:'.txt-Datei wählen',m_add_oneperline:'Eine pro Zeile: email:passwort',
       pending_label:'Ausstehend (laufen beim Start)',pending_sub:'in Warteschlange',
-      accs_in_batch:'Konten im letzten Batch',copy:'Kopieren',copy_visible:'Sichtbare kopieren',dl_txt:'.txt herunterladen',pool_server:'Pool auf Server — Download tippen',more_in_dl:'mehr in Kopie/Download',more:'mehr',download:'Download',
+      accs_in_batch:'Konten im letzten Batch',copy:'Kopieren',copy_visible:'Sichtbare kopieren',dl_txt:'.txt herunterladen',pool_server:'Pool auf Server — Download tippen',more_in_dl:'mehr in Kopie/Download',my_plan:'Mein Plan',plan_active:'aktiv',day_quota:'Heute',month_quota:'Zyklus',more:'mehr',download:'Download',
     },
     fr:{
       app_devtool:'Dev Tool',connected:'connecté',
@@ -1877,7 +1899,7 @@
       m_add_paste:'Ou colle plusieurs lignes email:mdp ci-dessous.',
       m_add_choose:'Choisir un .txt',m_add_oneperline:'Un par ligne : email:mdp',
       pending_label:'En attente (au lancement)',pending_sub:'en file pour vérif + ajout',
-      accs_in_batch:'comptes dans le dernier lot',copy:'Copier',copy_visible:'Copier visibles',dl_txt:'Télécharger .txt',pool_server:'pool sur serveur — Télécharger',more_in_dl:'plus en copie/téléchargement',more:'+',download:'Télécharger',
+      accs_in_batch:'comptes dans le dernier lot',copy:'Copier',copy_visible:'Copier visibles',dl_txt:'Télécharger .txt',pool_server:'pool sur serveur — Télécharger',more_in_dl:'plus en copie/téléchargement',my_plan:'Mon plan',plan_active:'actif',day_quota:'Aujourd\'hui',month_quota:'Cycle',more:'+',download:'Télécharger',
     },
     it:{
       app_devtool:'Dev Tool',connected:'connesso',
@@ -1922,7 +1944,7 @@
       m_add_paste:'Oppure incolla più righe email:password qui sotto.',
       m_add_choose:'Scegli .txt',m_add_oneperline:'Uno per riga: email:password',
       pending_label:'In attesa (al lancio)',pending_sub:'in coda per verifica + aggiunta',
-      accs_in_batch:'account nell\'ultimo lotto',copy:'Copia',copy_visible:'Copia visibili',dl_txt:'Scarica .txt',pool_server:'pool sul server — tocca Scarica',more_in_dl:'altri in copia/download',more:'altro',download:'Scarica',
+      accs_in_batch:'account nell\'ultimo lotto',copy:'Copia',copy_visible:'Copia visibili',dl_txt:'Scarica .txt',pool_server:'pool sul server — tocca Scarica',more_in_dl:'altri in copia/download',my_plan:'Mio piano',plan_active:'attivo',day_quota:'Oggi',month_quota:'Ciclo',more:'altro',download:'Scarica',
     },
     tr:{
       app_devtool:'Dev Tool',connected:'bağlı',
@@ -1967,7 +1989,7 @@
       m_add_paste:'Ya da aşağıya email:şifre satırlarını yapıştır.',
       m_add_choose:'.txt dosyası seç',m_add_oneperline:'Satır başına bir: email:şifre',
       pending_label:'Bekleyen (başlatınca çalışır)',pending_sub:'doğrula + ekle kuyruğunda',
-      accs_in_batch:'son gruptaki hesaplar',copy:'Kopyala',copy_visible:'Görüneni kopyala',dl_txt:'.txt indir',pool_server:'havuz sunucuda — İndir\'e dokun',more_in_dl:'kopya/indirmede daha',more:'daha',download:'İndir',
+      accs_in_batch:'son gruptaki hesaplar',copy:'Kopyala',copy_visible:'Görüneni kopyala',dl_txt:'.txt indir',pool_server:'havuz sunucuda — İndir\'e dokun',more_in_dl:'kopya/indirmede daha',my_plan:'Planım',plan_active:'aktif',day_quota:'Bugün',month_quota:'Döngü',more:'daha',download:'İndir',
     },
   };
   const detectLang = () => {
@@ -2043,6 +2065,54 @@
   const generatedEl = document.getElementById('stat-generated');
   if (boostedEl)   boostedEl.textContent   = fmtNum(stats.boosted);
   if (generatedEl) generatedEl.textContent = fmtNum(stats.generated);
+
+  // Plan + quota dashboard — bot embeds these in the URL state blob.
+  // `-1` on a limit means infinite (owner). `0` ends_at = no expiry / lifetime.
+  (() => {
+    const q = state.quota || {};
+    const sub = state.sub || {};
+    const tierEl = document.getElementById('plan-tier');
+    const expEl  = document.getElementById('plan-expires');
+    if (tierEl) tierEl.textContent = (sub.tier || state.tier || '—').toUpperCase();
+    if (expEl) {
+      const ends = +sub.ends_at || 0;
+      if (state.owner) {
+        expEl.textContent = '∞ owner';
+      } else if (!ends) {
+        expEl.textContent = 'lifetime';
+      } else {
+        const left = ends - Math.floor(Date.now()/1000);
+        const days = Math.max(0, Math.floor(left/86400));
+        expEl.textContent = days <= 0 ? 'expired' :
+                            days === 1 ? '1 day left' : `${days} days left`;
+        if (days <= 7 && days > 0) expEl.style.color = 'var(--amber)';
+      }
+    }
+    const renderBar = (used, lim, numEl, barEl) => {
+      const u = +used || 0;
+      if (lim === -1) {
+        if (numEl) numEl.textContent = `${u} · ∞`;
+        if (barEl) barEl.textContent = 'unlimited';
+        return;
+      }
+      const l = +lim || 0;
+      const pct = l ? Math.min(100, Math.round(u * 100 / l)) : 0;
+      if (numEl) numEl.textContent = `${u} / ${l || '—'}`;
+      if (barEl) {
+        const blocks = 10;
+        const filled = Math.round(pct / 100 * blocks);
+        barEl.textContent = '█'.repeat(filled) + '░'.repeat(blocks - filled) + ` ${pct}%`;
+        barEl.style.color = pct >= 90 ? 'var(--danger)' :
+                            pct >= 70 ? 'var(--amber)' : 'var(--hint)';
+      }
+    };
+    renderBar(q.day_used, q.day_limit,
+              document.getElementById('quota-day'),
+              document.getElementById('quota-day-bar'));
+    renderBar(q.month_used, q.month_limit,
+              document.getElementById('quota-month'),
+              document.getElementById('quota-month-bar'));
+  })();
 
   // ── Tab switching ────────────────────────────────────────────────
   const tabs = document.querySelectorAll('.tab');
