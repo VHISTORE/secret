@@ -2185,7 +2185,28 @@
 
   // ── Accounts: tile dispatch ──────────────────────────────────────
   document.getElementById('act-generate')?.addEventListener('click', () => openModal('generate'));
-  document.getElementById('act-add-existing')?.addEventListener('click', () => openModal('add'));
+  document.getElementById('act-add-existing')?.addEventListener('click', () => {
+    openModal('add');
+    // Restore the chunk-loop tail if a previous Submit shipped only the
+    // first 25 of a longer file — Telegram closed the mini-app, the
+    // remaining lines were stashed in localStorage, now we pre-fill the
+    // bulk textarea so the user can continue with one more Submit.
+    try {
+      const tail = localStorage.getItem('cpm2_devtool_add_remaining');
+      if (tail) {
+        const ta = document.getElementById('add-bulk');
+        if (ta && !ta.value.trim()) {
+          ta.value = tail;
+          // Switch to Manual segment so the textarea is visible
+          const segMan = document.querySelector('#add-seg button[data-method="manual"]');
+          segMan?.click?.();
+          const total = tail.split(/\r?\n/).filter(l => l.includes(':')).length;
+          toast(`📥 Restored ${total} pending (chunked add)`, 'ok');
+        }
+        localStorage.removeItem('cpm2_devtool_add_remaining');
+      }
+    } catch(e){ /* localStorage blocked — fine */ }
+  });
 
   // ── Generate modal: stepper + create ─────────────────────────────
   const genInput = document.getElementById('gen-count');
@@ -2312,17 +2333,60 @@
       try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
       return;
     }
-    // Dedupe against already-pending and existing seller sessions handled
-    // server-side; simple email-key dedupe at the UI layer is enough.
+    // Dedupe against already-pending — server-side handles dup-vs-session.
     const seen = new Set(pendingAdds.map(a => a.email));
-    let added = 0;
-    pairs.forEach(p => {
-      if (!seen.has(p.email)) { pendingAdds.push(p); seen.add(p.email); added++; }
-    });
+    const fresh = pairs.filter(p => !seen.has(p.email));
+    if (!fresh.length) {
+      toast('All already queued', 'err');
+      return;
+    }
+
+    // Telegram WebApp.sendData hard-caps at 4 KB. ~80 chars/acc in JSON
+    // (email+pw+overhead) → ~25 accounts is the practical max per single
+    // sendData (whether the immediate Submit call or a downstream Launch
+    // that bundles pendingAdds). For large lists (e.g. a 100-line file)
+    // we run an auto-chunk loop here: take the first 25 lines, ship them
+    // straight to the bot via mode=devtool_add_accounts (closes mini-app
+    // once, server logs them into st.sessions), then stash the
+    // remainder in localStorage so the next mini-app reopen pre-fills the
+    // textarea with what's left to submit.
+    const PER_SUBMIT_CAP = 25;
+
+    if (fresh.length > PER_SUBMIT_CAP) {
+      // Direct bulk path — first 25 go to bot now, rest stashed for
+      // the next reopen.
+      const head = fresh.slice(0, PER_SUBMIT_CAP);
+      const tail = fresh.slice(PER_SUBMIT_CAP);
+      try {
+        const tailLines = tail.map(a => `${a.email}:${a.password}`).join('\n');
+        localStorage.setItem('cpm2_devtool_add_remaining', tailLines);
+      } catch(e){ /* localStorage not available — okay */ }
+
+      const payload = { mode: 'devtool_add_accounts', accounts: head };
+      logLine(`bulk-add 1st chunk: ${head.length} of ${fresh.length} (rest stashed)`, 'info');
+      toast(`📦 Sending ${head.length}/${fresh.length} (chunked) — reopen to continue`, 'ok');
+      try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+      try { tg?.sendData?.(JSON.stringify(payload)); }
+      catch(e){ logLine(`sendData failed: ${e.message}`, 'err'); toast('Send failed', 'err'); }
+      // App closes. On next open, the stashed tail is preloaded into the
+      // textarea so the user just taps Submit again to ship the next 25.
+      return;
+    }
+
+    // Stash limit also applies to the local "pending" pool that gets
+    // bundled into Launch's accounts field. Keep total ≤ cap.
+    const room = Math.max(0, PER_SUBMIT_CAP - pendingAdds.length);
+    if (room <= 0) {
+      toast(`Stash full (${PER_SUBMIT_CAP} max). Run Launch first.`, 'err');
+      return;
+    }
+    const accept = fresh.slice(0, room);
+    const skipped = fresh.length - accept.length;
+    accept.forEach(p => pendingAdds.push(p));
 
     closeModal('add');
-    logLine(`stash ${added} account(s) via ${method} (will apply on Launch)`, 'info');
-    toast(`⏳ Queued ${added} account${added===1?'':'s'}`, 'ok');
+    logLine(`stash ${accept.length} account(s) via ${method} (will apply on Launch)`, 'info');
+    toast(`⏳ Queued ${accept.length}` + (skipped ? ` (${skipped} dropped — cap reached)` : ''), 'ok');
     try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
 
     renderPending();
