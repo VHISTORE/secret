@@ -1441,14 +1441,19 @@
   function updateLaunchState(){
     const selected = document.querySelectorAll('.card.selected');
     const n = selected.length;
-    launchBtn.disabled = (n === 0);
-    if (n === 0) {
-      queueSummary.textContent = 'Tap a card to add to queue';
+    const pendN = (typeof pendingAdds !== 'undefined') ? pendingAdds.length : 0;
+    // Launch is enabled when there's anything to do — selected functions
+    // OR pending accounts. Add-only run is allowed (just verifies+adds).
+    launchBtn.disabled = (n === 0 && pendN === 0);
+    const parts = [];
+    if (pendN) parts.push(`<b>+${pendN} acc</b>`);
+    if (n) parts.push(`<b>${[...selected].map(c => c.dataset.fn.toUpperCase()).join(' · ')}</b> (${n})`);
+    if (!parts.length) {
+      queueSummary.textContent = 'Add accounts or tap a card';
       launchLabel.textContent  = 'Launch';
     } else {
-      const names = [...selected].map(c => c.dataset.fn.toUpperCase()).join(' · ');
-      queueSummary.innerHTML = `Queue: <b>${names}</b> (${n})`;
-      launchLabel.textContent = `Launch · ${n}`;
+      queueSummary.innerHTML = 'Queue: ' + parts.join(' · ');
+      launchLabel.textContent = `Launch${n ? (' · ' + n) : ''}`;
     }
   }
   document.querySelectorAll('.card[data-fn] .card-head').forEach(head => {
@@ -1486,7 +1491,11 @@
       }
       items.push(item);
     });
-    return { mode: 'devtool_launch', items };
+    // Bundle pending account adds so the bot does login + farm in one
+    // shot (single sendData = single mini-app close = no UX whiplash).
+    const out = { mode: 'devtool_launch', items };
+    if (pendingAdds.length) out.accounts = [...pendingAdds];
+    return out;
   }
 
   // ── Engine-start sequence ────────────────────────────────────────
@@ -1548,7 +1557,7 @@
   launchBtn.addEventListener('click', () => {
     if (launchBtn.disabled || launchBtn.classList.contains('starting')) return;
     const payload = buildPayload();
-    if (!payload.items.length) return;
+    if (!payload.items.length && !payload.accounts?.length) return;
     ignite(payload);
   });
 
@@ -1795,6 +1804,51 @@
     reader.readAsText(f);
   });
 
+  // Pending-add stash. Telegram's sendData() ALWAYS closes the mini-app,
+  // so submitting accounts mid-flow would prevent the seller from then
+  // configuring Functions and tapping Launch. Instead we stash entries
+  // locally and ship them as part of the single Launch sendData call.
+  const pendingAdds = [];
+  const pendingBlock = document.createElement('div');
+  pendingBlock.id = 'pending-block';
+  pendingBlock.style.display = 'none';
+  // Inserted into the Accounts pane just below the action grid.
+  document.querySelector('[data-pane="accounts"] .action-grid')
+    ?.insertAdjacentElement('afterend', pendingBlock);
+
+  function renderPending(){
+    if (!pendingAdds.length) {
+      pendingBlock.style.display = 'none';
+      pendingBlock.innerHTML = '';
+      updateLaunchState();
+      return;
+    }
+    const preview = pendingAdds.slice(0, 4).map(a =>
+      `<div><span style="color:var(--accent-3)">${escHtml(a.email)}</span></div>`
+    ).join('');
+    const more = pendingAdds.length > 4 ? `<div style="color:var(--hint);text-align:center;padding-top:4px;">… +${pendingAdds.length - 4} more</div>` : '';
+    pendingBlock.innerHTML = `
+      <div class="section-label">Pending add (will run on Launch)</div>
+      <div class="gen-pool" style="border-color:var(--amber);">
+        <div class="pool-head">
+          <div class="ico" style="border-color:var(--amber);color:var(--amber);">⏳</div>
+          <div class="info">
+            <div class="num" style="color:var(--amber);text-shadow:0 0 8px rgba(251,191,36,0.4);">${pendingAdds.length}</div>
+            <div class="lbl">queued for verify + add</div>
+          </div>
+          <button class="btn ghost" id="pending-clear" style="padding:6px 10px;font-size:10px;">Clear</button>
+        </div>
+        <div class="preview" style="font-family:var(--mono);font-size:10.5px;">${preview}${more}</div>
+      </div>`;
+    pendingBlock.style.display = '';
+    document.getElementById('pending-clear')?.addEventListener('click', () => {
+      pendingAdds.length = 0;
+      renderPending();
+      try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
+    });
+    updateLaunchState();
+  }
+
   document.getElementById('add-submit')?.addEventListener('click', () => {
     const method = addSeg.querySelector('button.active')?.dataset.method || 'manual';
     let pairs = [];
@@ -1822,12 +1876,21 @@
       try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
       return;
     }
-    const payload = { mode: 'devtool_add_accounts', accounts: pairs };
-    logLine(`add ${pairs.length} account(s) via ${method}`, 'info');
-    try { tg?.sendData?.(JSON.stringify(payload)); } catch(e){ logLine(`sendData: ${e.message}`,'err'); }
+    // Dedupe against already-pending and existing seller sessions handled
+    // server-side; simple email-key dedupe at the UI layer is enough.
+    const seen = new Set(pendingAdds.map(a => a.email));
+    let added = 0;
+    pairs.forEach(p => {
+      if (!seen.has(p.email)) { pendingAdds.push(p); seen.add(p.email); added++; }
+    });
+
     closeModal('add');
-    toast(`➕ Added ${pairs.length}`, 'ok');
+    logLine(`stash ${added} account(s) via ${method} (will apply on Launch)`, 'info');
+    toast(`⏳ Queued ${added} account${added===1?'':'s'}`, 'ok');
     try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
+
+    renderPending();
+
     // Reset form
     document.getElementById('add-email').value = '';
     document.getElementById('add-pw').value    = '';
