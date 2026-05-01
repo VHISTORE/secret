@@ -2231,8 +2231,10 @@
     });
     // Bundle pending account adds so the bot does login + farm in one
     // shot (single sendData = single mini-app close = no UX whiplash).
+    // Compact "email:password" string array — same encoding as the
+    // standalone Add Existing path; bot accepts both forms.
     const out = { mode: 'devtool_launch', items };
-    if (pendingAdds.length) out.accounts = [...pendingAdds];
+    if (pendingAdds.length) out.c = pendingAdds.map(a => `${a.email}:${a.password}`);
     return out;
   }
 
@@ -2824,19 +2826,23 @@
       return;
     }
 
-    // Telegram WebApp.sendData hard-caps at 4 KB. ~80 chars/acc in JSON
-    // (email+pw+overhead) → ~25 accounts is the practical max per single
-    // sendData (whether the immediate Submit call or a downstream Launch
-    // that bundles pendingAdds). For large lists (e.g. a 100-line file)
-    // we run an auto-chunk loop here: take the first 25 lines, ship them
-    // straight to the bot via mode=devtool_add_accounts (closes mini-app
-    // once, server logs them into st.sessions), then stash the
-    // remainder in localStorage so the next mini-app reopen pre-fills the
-    // textarea with what's left to submit.
-    const PER_SUBMIT_CAP = 25;
+    // Telegram WebApp.sendData hard-caps at 4 KB. We encode the pool as a
+    // compact "email:password" string array (mode=c) — ~36 chars/entry vs
+    // ~60 for the verbose dict form, so ~100 accounts fit comfortably in a
+    // single submit. Anything over that is auto-chunked: the first
+    // PER_SUBMIT_CAP go to the bot now, the rest stash in localStorage and
+    // pre-fill the textarea on the next reopen.
+    // 80 leaves ~1 KB headroom for items[] when pendingAdds rides on
+    // Launch, while still fitting comfortably inside Telegram's 4 KB cap
+    // for the standalone devtool_add_accounts path.
+    const PER_SUBMIT_CAP = 80;
+    const buildPayload = (slice) => ({
+      mode: 'devtool_add_accounts',
+      c: slice.map(a => `${a.email}:${a.password}`),
+    });
 
     if (fresh.length > PER_SUBMIT_CAP) {
-      // Direct bulk path — first 25 go to bot now, rest stashed for
+      // Direct bulk path — first batch goes to bot now, rest stashed for
       // the next reopen.
       const head = fresh.slice(0, PER_SUBMIT_CAP);
       const tail = fresh.slice(PER_SUBMIT_CAP);
@@ -2845,14 +2851,14 @@
         localStorage.setItem('cpm2_devtool_add_remaining', tailLines);
       } catch(e){ /* localStorage not available — okay */ }
 
-      const payload = { mode: 'devtool_add_accounts', accounts: head };
+      const payload = buildPayload(head);
       logLine(`bulk-add 1st chunk: ${head.length} of ${fresh.length} (rest stashed)`, 'info');
       toast(`📦 Sending ${head.length}/${fresh.length} (chunked) — reopen to continue`, 'ok');
       try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
       try { tg?.sendData?.(JSON.stringify(payload)); }
       catch(e){ logLine(`sendData failed: ${e.message}`, 'err'); toast('Send failed', 'err'); }
       // App closes. On next open, the stashed tail is preloaded into the
-      // textarea so the user just taps Submit again to ship the next 25.
+      // textarea so the user just taps Submit again.
       return;
     }
 
