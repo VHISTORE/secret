@@ -446,6 +446,62 @@
   .lang-opt.active{color:var(--accent);background:rgba(251,191,36,0.08);}
   .lang-opt .flag{font-size:14px;}
 
+  /* ── Inline API results (rendered in-app instead of via chat) ──────── */
+  .api-result{margin-top:12px;display:none;}
+  .api-result.show{display:block;}
+  .api-result .hd{
+    font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--text-2);margin-bottom:6px;display:flex;
+    align-items:center;justify-content:space-between;
+  }
+  .api-result .hd .cnt{color:var(--accent);font-weight:700;}
+  .api-list{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;max-height:55vh;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .api-row{
+    display:grid;grid-template-columns:1fr auto;gap:6px;
+    padding:9px 11px;border-bottom:1px solid rgba(255,255,255,0.04);
+    font-size:12px;
+  }
+  .api-row:last-child{border-bottom:none;}
+  .api-row .uid{
+    font-family:ui-monospace,monospace;color:var(--text);
+    font-size:12px;
+  }
+  .api-row .meta{font-size:10px;color:var(--text-2);margin-top:2px;}
+  .api-row .badge{
+    align-self:start;padding:2px 7px;border-radius:999px;
+    font-size:10px;background:rgba(251,191,36,0.12);
+    color:var(--accent);border:1px solid rgba(251,191,36,0.3);
+    text-transform:uppercase;letter-spacing:0.05em;font-weight:600;
+  }
+  .api-empty{padding:14px;text-align:center;color:var(--text-2);font-size:12px;}
+  .api-err{
+    padding:10px;border-radius:10px;font-size:12px;
+    background:rgba(239,68,68,0.1);color:#fca5a5;
+    border:1px solid rgba(239,68,68,0.3);
+  }
+  .api-spinner{
+    padding:14px;text-align:center;color:var(--text-2);font-size:12px;
+  }
+  .api-spinner::after{
+    content:'';display:inline-block;width:10px;height:10px;
+    border:2px solid var(--text-2);border-top-color:transparent;
+    border-radius:50%;margin-left:6px;vertical-align:middle;
+    animation:spin 0.7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .mode-pill{
+    display:inline-block;padding:2px 8px;border-radius:999px;
+    font-size:9px;letter-spacing:0.06em;text-transform:uppercase;
+    font-weight:700;margin-left:6px;vertical-align:middle;
+  }
+  .mode-pill.live{background:rgba(34,197,94,0.12);color:#86efac;
+                  border:1px solid rgba(34,197,94,0.3);}
+  .mode-pill.relay{background:rgba(251,191,36,0.1);color:var(--accent);
+                   border:1px solid rgba(251,191,36,0.25);}
 </style>
 </head>
 <body>
@@ -454,7 +510,7 @@
   <div class="crown">👑</div>
   <div class="title">
     <h1 id="screen-title">Dashboard</h1>
-    <div class="sub"><span class="dot"></span><span><span data-i18n="connected">connected</span> · <span id="status-text" data-i18n="live">live</span></span></div>
+    <div class="sub"><span class="dot"></span><span><span data-i18n="connected">connected</span> · <span id="status-text" data-i18n="live">live</span></span><span class="mode-pill relay" id="mode-pill" title="API mode">RELAY</span></div>
   </div>
   <div class="lang-wrap">
     <button class="lang-btn" id="lang-btn" type="button">
@@ -551,6 +607,10 @@
         <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial">
       </div>
       <button class="btn full" id="btn-list-users" data-i18n="list_users">📋 List users</button>
+      <div class="api-result" id="users-result">
+        <div class="hd"><span data-i18n="users_lbl">Users</span><span class="cnt" id="users-count">—</span></div>
+        <div class="api-list" id="users-list"></div>
+      </div>
     </div>
   </section>
 
@@ -587,6 +647,10 @@
 
     <div class="section-label" data-i18n="inspect">Inspect</div>
     <button class="btn full" id="btn-promo-list" data-i18n="list_promos">📋 List active promos</button>
+    <div class="api-result" id="promos-result">
+      <div class="hd"><span data-i18n="promos_lbl">Promos</span><span class="cnt" id="promos-count">—</span></div>
+      <div class="api-list" id="promos-list"></div>
+    </div>
   </section>
 
   <!-- ── Broadcast ────────────────────────────────────────────────── -->
@@ -1053,51 +1117,242 @@
     } catch(e){ toast('Send failed: ' + e.message, 'err'); }
   }
 
-  // ── Action handlers ──────────────────────────────────────────────
-  document.getElementById('btn-state')?.addEventListener('click', () =>
-    send({ mode: 'owner_state' }, '⟳ pulling…'));
+  // ── HTTP API plumbing (live mode) ─────────────────────────────────
+  // Resolution order:
+  //   1. `?api=https://host:port`       — explicit override
+  //   2. <meta name="cpm2-api-base">    — present (even empty) = use it
+  //                                       (empty content = same-origin)
+  //   3. Loaded via http(s) from a host that also serves /api/healthz
+  //      (i.e. the bot's embedded server) — auto same-origin
+  //   4. Otherwise → RELAY (legacy sendData) fallback
+  function resolveApiBase(){
+    const qp = new URLSearchParams(location.search).get('api');
+    if (qp != null) return qp.replace(/\/+$/,'');     // '' allowed = same-origin
+    const m = document.querySelector('meta[name="cpm2-api-base"]');
+    if (m) return (m.content || '').replace(/\/+$/,'');
+    // Heuristic: if served from a non-telegram host over http(s),
+    // assume same-origin until /api/healthz disproves it.
+    if (/^https?:$/.test(location.protocol)) return '';
+    return null;
+  }
+  const API_BASE  = resolveApiBase();   // string ('' = same-origin) or null
+  const HAS_INIT  = !!(tg && tg.initData);
+  const LIVE_MODE = (API_BASE !== null) && HAS_INIT;
 
-  document.getElementById('btn-set-tier')?.addEventListener('click', () => {
+  const modePill = document.getElementById('mode-pill');
+  if (modePill) {
+    if (LIVE_MODE) { modePill.classList.remove('relay'); modePill.classList.add('live'); modePill.textContent = 'LIVE'; }
+    else           { modePill.classList.add('relay');    modePill.textContent = 'RELAY'; }
+  }
+
+  async function api(path, {method='GET', body=null} = {}){
+    const opts = {
+      method,
+      headers: {
+        'Authorization': 'tma ' + tg.initData,
+        'Accept':        'application/json',
+      },
+    };
+    if (body != null){
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    const r = await fetch(API_BASE + path, opts);
+    let data = null;
+    try { data = await r.json(); } catch(_) {}
+    if (!r.ok) {
+      const msg = (data && (data.error || data.reason)) || ('HTTP ' + r.status);
+      throw new Error(msg);
+    }
+    return data || {};
+  }
+
+  function fmtDate(ts){
+    if (!ts) return '—';
+    const d = new Date(ts*1000);
+    return d.toISOString().slice(0,10);
+  }
+  function escHtml(s){
+    return String(s).replace(/[&<>"']/g, c =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function showResult(boxId, html){
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    const list = box.querySelector('.api-list');
+    if (list) list.innerHTML = html;
+    box.classList.add('show');
+  }
+  function setSpin(boxId){
+    showResult(boxId, '<div class="api-spinner">loading</div>');
+  }
+  function setError(boxId, msg){
+    showResult(boxId, '<div class="api-err">'+escHtml(msg)+'</div>');
+  }
+
+  // ── Live renderers ───────────────────────────────────────────────
+  async function liveListUsers(tier){
+    setSpin('users-result');
+    try {
+      const qs = tier ? ('?tier=' + encodeURIComponent(tier)) : '';
+      const data = await api('/api/owner/users' + qs);
+      document.getElementById('users-count').textContent =
+        data.total + (data.rows.length < data.total ? (' (showing ' + data.rows.length + ')') : '');
+      if (!data.rows.length) {
+        showResult('users-result', '<div class="api-empty" data-i18n="no_users">'+(t('no_users')||'no users yet')+'</div>');
+        return;
+      }
+      const rows = data.rows.map(r => `
+        <div class="api-row">
+          <div>
+            <div class="uid">${escHtml(r.tg_id)}${r.username ? ' · @'+escHtml(r.username) : ''}</div>
+            <div class="meta">expires ${fmtDate(r.expires)}${r.name ? ' · '+escHtml(r.name) : ''}</div>
+          </div>
+          <span class="badge">${escHtml(r.tier)}</span>
+        </div>`).join('');
+      showResult('users-result', rows);
+    } catch(e) { setError('users-result', e.message); }
+  }
+
+  async function liveListPromos(){
+    setSpin('promos-result');
+    try {
+      const data = await api('/api/owner/promos');
+      const a = data.active || [], rd = data.redeemed || [];
+      document.getElementById('promos-count').textContent =
+        'active=' + a.length + ' · redeemed=' + rd.length;
+      if (!a.length) {
+        showResult('promos-result', '<div class="api-empty">no active promos</div>');
+        return;
+      }
+      const rows = a.slice(0, 80).map(c => `
+        <div class="api-row">
+          <div>
+            <div class="uid">${escHtml(c.code || '?')}</div>
+            <div class="meta">−${escHtml(c.discount || '?')}% · exp ${fmtDate(c.expires_at || 0)}</div>
+          </div>
+          <span class="badge">active</span>
+        </div>`).join('');
+      showResult('promos-result', rows);
+    } catch(e) { setError('promos-result', e.message); }
+  }
+
+  async function liveOwnerState(){
+    try {
+      const data = await api('/api/owner/state');
+      // Reuse the existing snapshot renderer if present
+      try { if (typeof renderSnapshot === 'function') renderSnapshot(data); } catch(_){}
+      document.getElementById('hero-users').textContent = data.users_total ?? '—';
+      const af = data.af || {};
+      document.getElementById('af-count').textContent = af.count ?? '—';
+      document.getElementById('af-state').textContent = af.running ? 'running' : 'idle';
+      if (typeof af.next === 'number' && af.next) {
+        document.getElementById('af-next').textContent = fmtDate(af.next);
+      }
+      document.getElementById('chip-af').textContent    = af.count ?? '—';
+      document.getElementById('chip-state').textContent = af.running ? 'run' : 'idle';
+      document.getElementById('chip-promo').textContent = data.promo_active ?? '—';
+      const tl = document.getElementById('tier-list');
+      if (tl && data.tier_counts){
+        const tc = data.tier_counts;
+        const max = Math.max(1, ...Object.values(tc));
+        tl.innerHTML = Object.entries(tc).map(([k,n]) =>
+          `<div class="tier"><span class="lbl">${escHtml(k)}</span>
+            <div class="bar"><div class="fill" style="width:${(n/max*100).toFixed(1)}%;"></div></div>
+            <span class="n">${n}</span></div>`).join('');
+      }
+      toast('✓ state refreshed', 'ok');
+    } catch(e) { toast('state: ' + e.message, 'err'); }
+  }
+
+  // Auto-refresh state on load when in LIVE mode so the dashboard
+  // reflects current truth instead of whatever the URL blob captured.
+  if (LIVE_MODE) { liveOwnerState(); }
+
+  // ── Action handlers (LIVE → fetch, RELAY → sendData fallback) ────
+  document.getElementById('btn-state')?.addEventListener('click', () => {
+    if (LIVE_MODE) { liveOwnerState(); return; }
+    send({ mode: 'owner_state' }, '⟳ pulling…');
+  });
+
+  document.getElementById('btn-set-tier')?.addEventListener('click', async () => {
     const tg_id = parseInt(document.getElementById('set-tg').value, 10);
     const tier  = document.getElementById('set-tier').value;
     const days  = parseInt(document.getElementById('set-days').value, 10) || 0;
     if (!tg_id) { toast('Bad tg_id', 'err'); return; }
-    send({ mode: 'owner_set_tier', tg_id, tier, days });
+    if (!LIVE_MODE) { send({ mode: 'owner_set_tier', tg_id, tier, days }); return; }
+    try {
+      const r = await api('/api/owner/set_tier', {method:'POST', body:{tg_id, tier, days}});
+      toast(`✅ ${r.tier} for ${r.tg_id} (+${r.days}d)`, 'ok');
+      liveOwnerState();
+    } catch(e) { toast('set_tier: ' + e.message, 'err'); }
   });
-  document.getElementById('btn-remove-user')?.addEventListener('click', () => {
+
+  document.getElementById('btn-remove-user')?.addEventListener('click', async () => {
     const tg_id = parseInt(document.getElementById('set-tg').value, 10);
     if (!tg_id) { toast('Bad tg_id', 'err'); return; }
     if (!confirm(`Remove user ${tg_id} from allowlist?`)) return;
-    send({ mode: 'owner_remove_user', tg_id });
+    if (!LIVE_MODE) { send({ mode: 'owner_remove_user', tg_id }); return; }
+    try {
+      const r = await api('/api/owner/remove_user', {method:'POST', body:{tg_id}});
+      toast(r.ok ? `🗑 removed ${tg_id}` : `⛔ ${tg_id} not in allowlist`, r.ok ? 'ok' : 'err');
+      liveOwnerState();
+    } catch(e) { toast('remove: ' + e.message, 'err'); }
   });
+
   document.getElementById('btn-list-users')?.addEventListener('click', () => {
     const tier = document.getElementById('filter-tier').value.trim();
+    if (LIVE_MODE) { liveListUsers(tier); return; }
     send({ mode: 'owner_users_list', tier });
   });
 
-  document.getElementById('btn-af-run')?.addEventListener('click', () => {
+  document.getElementById('btn-af-run')?.addEventListener('click', async () => {
     if (!confirm('Trigger autofarm cycle on entire pool?')) return;
-    send({ mode: 'owner_af_run_now' });
+    if (!LIVE_MODE) { send({ mode: 'owner_af_run_now' }); return; }
+    try {
+      const r = await api('/api/owner/af_run_now', {method:'POST', body:{}});
+      if (r.ok) toast(`🤖 cycle started (pool=${r.pool})`, 'ok');
+      else      toast(`⏳ ${r.reason}`, 'err');
+    } catch(e) { toast('af_run: ' + e.message, 'err'); }
   });
-  document.getElementById('btn-af-remove')?.addEventListener('click', () => {
+
+  document.getElementById('btn-af-remove')?.addEventListener('click', async () => {
     const email = document.getElementById('af-rm-email').value.trim();
     if (!email) { toast('Bad email', 'err'); return; }
-    send({ mode: 'owner_af_remove', email });
+    if (!LIVE_MODE) { send({ mode: 'owner_af_remove', email }); return; }
+    try {
+      const r = await api('/api/owner/af_remove', {method:'POST', body:{email}});
+      toast(r.ok ? `🗑 removed (pool=${r.pool})` : '⛔ not in autofarm', r.ok ? 'ok' : 'err');
+    } catch(e) { toast('af_rm: ' + e.message, 'err'); }
   });
 
-  document.getElementById('btn-promo-gen')?.addEventListener('click', () => {
+  document.getElementById('btn-promo-gen')?.addEventListener('click', async () => {
     const count = Math.max(1, Math.min(50, parseInt(document.getElementById('promo-count').value, 10) || 1));
-    send({ mode: 'owner_promo_gen', count });
+    if (!LIVE_MODE) { send({ mode: 'owner_promo_gen', count }); return; }
+    try {
+      const r = await api('/api/owner/promo_gen', {method:'POST', body:{count}});
+      if (!r.ok) { toast('promo_gen failed', 'err'); return; }
+      toast(`🎟 generated ${r.codes.length}`, 'ok');
+      liveListPromos();
+    } catch(e) { toast('promo_gen: ' + e.message, 'err'); }
   });
-  document.getElementById('btn-promo-list')?.addEventListener('click', () =>
-    send({ mode: 'owner_promo_list' }));
 
-  document.getElementById('btn-broadcast')?.addEventListener('click', () => {
+  document.getElementById('btn-promo-list')?.addEventListener('click', () => {
+    if (LIVE_MODE) { liveListPromos(); return; }
+    send({ mode: 'owner_promo_list' });
+  });
+
+  document.getElementById('btn-broadcast')?.addEventListener('click', async () => {
     const text = document.getElementById('bc-text').value.trim();
     const tier = document.getElementById('bc-tier').value;
     if (!text) { toast('Empty message', 'err'); return; }
     if (!confirm(`Broadcast to ${tier === 'all' ? 'ALL paid users' : tier + ' tier only'}?\n\n${text.slice(0, 200)}${text.length > 200 ? '…' : ''}`)) return;
-    send({ mode: 'owner_broadcast', text, tier }, '📢 broadcasting…');
+    if (!LIVE_MODE) { send({ mode: 'owner_broadcast', text, tier }, '📢 broadcasting…'); return; }
+    try {
+      const r = await api('/api/owner/broadcast', {method:'POST', body:{text, tier}});
+      toast(`📢 queued ${r.queued} (tier=${r.tier})`, 'ok');
+    } catch(e) { toast('broadcast: ' + e.message, 'err'); }
   });
 
   // BackButton
