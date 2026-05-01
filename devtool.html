@@ -1582,12 +1582,22 @@
   }));
 
   // ── Toggles → reveal pick-amount / pick-boosts panel ─────────────
+  // Turning the toggle ON also auto-selects the card for launch — UX
+  // shortcut so the user doesn't have to separately tap the card header
+  // *and* the toggle. (The Pick toggle is a "I want to customize" signal,
+  // which logically implies "I want to run this", so we couple them.)
   document.querySelectorAll('.toggle').forEach(tog => {
     tog.addEventListener('click', () => {
       tog.classList.toggle('on');
       const fn = tog.dataset.toggle;
       const reveal = document.querySelector(`.reveal[data-reveal="${fn}"]`);
       reveal?.classList.toggle('show', tog.classList.contains('on'));
+      // Auto-select the parent card whenever this toggle is ON.
+      const card = tog.closest('.card[data-fn]');
+      if (card && tog.classList.contains('on')) {
+        card.classList.add('selected');
+        updateLaunchState();
+      }
       try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
     });
   });
@@ -1696,7 +1706,7 @@
     if (pendN) parts.push(`<b>+${pendN} acc</b>`);
     if (n) parts.push(`<b>${[...selected].map(c => c.dataset.fn.toUpperCase()).join(' · ')}</b> (${n})`);
     if (!parts.length) {
-      queueSummary.textContent = 'Add accounts or tap a card';
+      queueSummary.textContent = 'Tap a card header to add it to launch queue';
       launchLabel.textContent  = 'Launch';
     } else {
       queueSummary.innerHTML = 'Queue: ' + parts.join(' · ');
