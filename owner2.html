@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="cpm2-api-base" content="https://face-implemented-berry-repeated.trycloudflare.com">
+<title>CPM2 · Owner Console</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  /* ──────────────────────────────────────────────────────────────────────
+     Owner console — gold-tinted "command bridge" aesthetic. The home
+     screen is always Dashboard; navigation is via a floating iPhone widget
+     (bottom-right) that springs open into a home-screen-style icon grid.
+     Tap an icon → that "app" loads in place. No tab bar, no chrome.
+     ────────────────────────────────────────────────────────────────────── */
+  :root{
+    --bg:        #05080f;
+    --bg-2:      #0a0f1c;
+    --bg-3:      #131c30;
+    --panel:     rgba(251, 191, 36, 0.06);
+    --panel-2:   rgba(251, 191, 36, 0.11);
+    --panel-hi:  rgba(251, 191, 36, 0.18);
+    --line:      rgba(251, 191, 36, 0.24);
+    --line-soft: rgba(251, 191, 36, 0.10);
+    --text:      #f4ecd8;
+    --text-2:    #d4c895;
+    --hint:      #8a7d4f;
+    --hint-2:    #5e542f;
+    --accent:    #fbbf24;
+    --accent-2:  #f59e0b;
+    --accent-3:  #fcd34d;
+    --on-accent: #1a1407;
+    --green:     #34d399;
+    --red:       #f87171;
+    --cyan:      #4cc9f0;
+    --violet:    #a78bfa;
+    --pink:      #f472b6;
+    --mono: ui-monospace,SFMono-Regular,'JetBrains Mono','Fira Code','Menlo','Consolas',monospace;
+    --sans: -apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',Roboto,sans-serif;
+    --shadow-glow: 0 0 22px rgba(251, 191, 36, 0.30), 0 0 4px rgba(251, 191, 36, 0.45) inset;
+    --shadow-pop: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(251,191,36,0.3);
+    --radius: 12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--sans);
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    line-height:1.5;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+  }
+  /* Subtle scanline overlay */
+  body::before{
+    content:'';
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(251, 191, 36, 0.02) 0px,
+      rgba(251, 191, 36, 0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode:screen;
+  }
+  /* Drifting glow */
+  body::after{
+    content:'';
+    position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(50% 40% at 80% 10%, rgba(251, 191, 36, 0.18), transparent 60%),
+      radial-gradient(40% 35% at 15% 90%, rgba(245, 158, 11, 0.14), transparent 60%),
+      radial-gradient(35% 30% at 50% 50%, rgba(252, 211, 77, 0.06), transparent 70%);
+    animation: drift 24s ease-in-out infinite;
+    filter: blur(4px);
+  }
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(2%,-2%) scale(1.05);}}
+
+  /* ── Top bar ─────────────────────────────────────────────────────── */
+  header{
+    flex:0 0 auto;
+    padding:14px 18px 12px;
+    display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(180deg, rgba(251,191,36,0.06), transparent);
+  }
+  .crown{
+    width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:var(--on-accent);font-size:18px;
+    box-shadow:var(--shadow-glow);
+    flex-shrink:0;
+  }
+  .title{flex:1;min-width:0;}
+  .title h1{
+    font-size:14px;font-weight:700;letter-spacing:0.04em;
+    color:var(--text);text-transform:uppercase;
+    font-family:var(--mono);
+  }
+  .title .sub{
+    font-size:11px;color:var(--hint);
+    display:flex;align-items:center;gap:6px;margin-top:2px;
+    font-family:var(--mono);
+  }
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 6px var(--accent);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .home-btn{
+    background:transparent;border:1px solid var(--line);color:var(--accent);
+    padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;
+    display:none;
+  }
+  .home-btn.show{display:inline-block;}
+  .home-btn:active{transform:scale(0.96);}
+
+  /* ── Main scroll ─────────────────────────────────────────────────── */
+  main{
+    flex:1 1 auto;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:18px 16px 100px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .pane{display:none;animation:fadeUp 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);}
+  .pane.active{display:block;}
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(12px) scale(0.99);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+
+  .section-label{
+    font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--hint);
+    padding:0 4px 8px;
+    font-family:var(--mono);
+  }
+  .section-label::before{content:'>';color:var(--accent);margin-right:6px;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line-soft);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+
+  /* ── Dashboard hero ─────────────────────────────────────────────── */
+  .hero{
+    background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(245,158,11,0.08));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 20px 16px;
+    margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:'';
+    position:absolute;right:-30%;top:-50%;
+    width:80%;height:160%;
+    background:radial-gradient(circle, rgba(252,211,77,0.18), transparent 60%);
+    pointer-events:none;
+    animation:heroPulse 6s ease-in-out infinite;
+  }
+  @keyframes heroPulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+  .hero .lbl{
+    font-size:10px;color:var(--hint);text-transform:uppercase;
+    letter-spacing:0.12em;font-family:var(--mono);
+  }
+  .hero .num{
+    font-size:42px;font-weight:800;color:var(--accent);
+    text-shadow:0 0 22px rgba(251,191,36,0.5);
+    font-variant-numeric:tabular-nums;
+    margin:6px 0 4px;line-height:1;
+    font-family:var(--mono);
+  }
+  .hero .delta{
+    font-size:11px;color:var(--text-2);font-family:var(--mono);
+  }
+
+  /* ── Stat chip grid ─────────────────────────────────────────────── */
+  .chip-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;
+  }
+  .chip{
+    padding:12px 10px;
+    background:var(--panel);
+    border:1px solid var(--line-soft);
+    border-radius:10px;
+    text-align:center;
+  }
+  .chip .v{
+    font-size:18px;font-weight:700;color:var(--accent);
+    font-variant-numeric:tabular-nums;font-family:var(--mono);
+  }
+  .chip .l{
+    font-size:9px;color:var(--hint);text-transform:uppercase;
+    letter-spacing:0.08em;margin-top:2px;
+  }
+
+  /* ── Tier bars ──────────────────────────────────────────────────── */
+  .tier-list{padding:0 4px;}
+  .tier-row{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 0;
+    border-bottom:1px dashed var(--line-soft);
+  }
+  .tier-row:last-child{border-bottom:none;}
+  .tier-row .name{
+    font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--text);
+    width:88px;flex-shrink:0;font-family:var(--mono);
+  }
+  .tier-row .bar{
+    flex:1;height:6px;background:rgba(251,191,36,0.06);
+    border-radius:999px;overflow:hidden;
+  }
+  .tier-row .fill{
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-3));
+    box-shadow:0 0 8px rgba(251,191,36,0.4);
+    transition:width 0.6s ease;
+  }
+  .tier-row .n{
+    font-size:11px;color:var(--text);font-weight:600;
+    width:48px;text-align:right;font-family:var(--mono);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ── Quick action row ────────────────────────────────────────────── */
+  .qa-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  }
+  .qa{
+    padding:14px 12px;
+    background:var(--panel);
+    border:1px solid var(--line-soft);
+    border-radius:12px;
+    cursor:pointer;
+    text-align:left;
+    transition:all 0.15s;
+  }
+  .qa:active{transform:scale(0.97);}
+  .qa:hover{border-color:var(--line);background:var(--panel-2);}
+  .qa .ico{font-size:22px;}
+  .qa .ttl{font-size:12px;font-weight:700;color:var(--text);margin-top:4px;
+           text-transform:uppercase;letter-spacing:0.04em;font-family:var(--mono);}
+  .qa .desc{font-size:10px;color:var(--hint);margin-top:1px;}
+
+  /* ── Forms ───────────────────────────────────────────────────────── */
+  .field{margin-bottom:10px;}
+  .field-label{
+    font-size:10px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.08em;
+    margin-bottom:6px;display:block;font-family:var(--mono);
+  }
+  .input,.select{
+    width:100%;padding:11px 13px;
+    background:var(--panel);border:1px solid var(--line-soft);
+    border-radius:9px;color:var(--text);
+    font-family:var(--mono);font-size:13px;
+    outline:none;-webkit-user-select:text;user-select:text;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .input:focus,.select:focus{
+    border-color:var(--accent);background:var(--panel-2);
+    box-shadow:0 0 0 3px rgba(251,191,36,0.15);
+  }
+  textarea.input{min-height:130px;resize:vertical;line-height:1.5;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:11px 16px;border-radius:10px;
+    border:1px solid var(--line-soft);background:var(--panel-2);
+    color:var(--text);font-family:var(--mono);font-size:12px;font-weight:700;
+    letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;
+    transition:all 0.15s;-webkit-tap-highlight-color:transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .btn.primary{
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:var(--on-accent);border-color:transparent;box-shadow:var(--shadow-glow);
+  }
+  .btn.full{width:100%;}
+  .btn.danger{color:var(--red);border-color:rgba(248,113,113,0.4);}
+  .btn-row{display:flex;gap:8px;}
+  .btn-row .btn{flex:1;}
+
+  /* ── Toast ───────────────────────────────────────────────────────── */
+  .toast{
+    position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
+    background:var(--bg-2);border:1px solid var(--accent);
+    color:var(--text);padding:10px 16px;border-radius:8px;
+    font-size:12px;box-shadow:var(--shadow-glow);
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s, transform 0.2s;
+    z-index:200;max-width:80%;text-align:center;
+    font-family:var(--mono);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ──────────────────────────────────────────────────────────────────
+     iPhone navigation widget — floating bottom-right. Tap → home screen
+     overlay slides up with the app grid. Each icon swaps the active
+     pane in <main>.
+     ────────────────────────────────────────────────────────────────── */
+  .iphone-fab{
+    position:fixed;
+    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    right:18px;
+    width:64px;height:120px;
+    z-index:90;
+    background:transparent;border:none;cursor:pointer;
+    transition:transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+    -webkit-tap-highlight-color:transparent;
+    filter:drop-shadow(0 8px 22px rgba(251,191,36,0.35));
+  }
+  .iphone-fab:active{transform:scale(0.92);}
+  .iphone-fab svg{width:100%;height:100%;display:block;}
+
+  /* Backdrop + home-screen sheet */
+  .home-back{
+    position:fixed;inset:0;
+    background:rgba(2, 6, 16, 0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    z-index:100;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.25s;
+  }
+  .home-back.show{opacity:1;pointer-events:auto;}
+
+  .home-sheet{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    padding:24px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, rgba(15, 20, 35, 0.94), rgba(5, 8, 15, 0.98));
+    border-top:1px solid var(--line);
+    border-radius:24px 24px 0 0;
+    transform:translateY(100%);
+    transition:transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    z-index:101;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.6);
+  }
+  .home-sheet.show{transform:translateY(0);}
+  .home-sheet .grip{
+    width:38px;height:4px;border-radius:999px;
+    background:rgba(251,191,36,0.4);
+    margin:0 auto 18px;
+  }
+  .home-sheet .head{
+    text-align:center;
+    font-size:11px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.16em;
+    margin-bottom:18px;font-family:var(--mono);
+  }
+
+  .app-grid{
+    display:grid;grid-template-columns:repeat(4, 1fr);
+    gap:14px 4px;
+  }
+  .app{
+    display:flex;flex-direction:column;align-items:center;
+    gap:6px;
+    padding:6px;
+    background:transparent;border:none;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app:active{transform:scale(0.94);}
+  .app .icon{
+    width:62px;height:62px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;
+    background:linear-gradient(135deg, rgba(251,191,36,0.20), rgba(245,158,11,0.30));
+    border:1px solid rgba(251,191,36,0.45);
+    box-shadow:0 6px 18px rgba(0,0,0,0.5),
+               0 0 14px rgba(251,191,36,0.25),
+               0 1px 0 rgba(255,255,255,0.1) inset;
+    position:relative;
+    overflow:hidden;
+  }
+  /* Accent variants per app — gives the home grid a colourful real-iOS
+     feel rather than a wall of gold. */
+  .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#fde68a;}
+  .app[data-tab="users"]     .icon{background:linear-gradient(135deg,#4cc9f0,#3a82d6);border-color:#7dd3fc;}
+  .app[data-tab="autofarm"]  .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
+  .app[data-tab="promo"]     .icon{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:#c4b5fd;}
+  .app[data-tab="broadcast"] .icon{background:linear-gradient(135deg,#f472b6,#ec4899);border-color:#f9a8d4;}
+  .app[data-tab="logs"]      .icon{background:linear-gradient(135deg,#64748b,#475569);border-color:#94a3b8;}
+
+  .app .icon::after{
+    content:'';position:absolute;top:0;left:0;right:0;height:50%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    pointer-events:none;
+  }
+  .app .label{
+    font-size:11px;color:var(--text-2);font-family:var(--sans);
+    font-weight:500;
+  }
+  .app.active .icon{
+    box-shadow:0 0 0 3px var(--accent),
+               0 6px 18px rgba(0,0,0,0.5),
+               0 0 22px rgba(251,191,36,0.5);
+  }
+
+  /* ── Language switcher ──────────────────────────────────────────────── */
+  .lang-wrap{position:relative;flex-shrink:0;margin-right:6px;}
+  .lang-btn{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:5px 9px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);
+    color:var(--text-2);font-size:11px;font-weight:600;
+    cursor:pointer;letter-spacing:0.04em;
+    -webkit-tap-highlight-color:transparent;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .lang-btn:hover,.lang-btn.open{
+    border-color:rgba(251,191,36,0.5);color:var(--accent);
+  }
+  .lang-btn .chev{font-size:8px;opacity:0.7;}
+  .lang-menu{
+    position:absolute;top:calc(100% + 6px);right:0;
+    min-width:140px;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:5px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.55);
+    display:none;flex-direction:column;z-index:60;
+  }
+  .lang-menu.open{display:flex;}
+  .lang-opt{
+    padding:8px 10px;border-radius:8px;
+    font-size:12px;color:var(--text);cursor:pointer;
+    display:flex;align-items:center;gap:8px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lang-opt:hover{background:var(--panel-2);color:var(--accent);}
+  .lang-opt.active{color:var(--accent);background:rgba(251,191,36,0.08);}
+  .lang-opt .flag{font-size:14px;}
+
+  /* ── Inline API results (rendered in-app instead of via chat) ──────── */
+  .api-result{margin-top:12px;display:none;}
+  .api-result.show{display:block;}
+  .api-result .hd{
+    font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--text-2);margin-bottom:6px;display:flex;
+    align-items:center;justify-content:space-between;
+  }
+  .api-result .hd .cnt{color:var(--accent);font-weight:700;}
+  .api-list{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;max-height:55vh;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .api-row{
+    display:grid;grid-template-columns:1fr auto;gap:6px;
+    padding:9px 11px;border-bottom:1px solid rgba(255,255,255,0.04);
+    font-size:12px;
+  }
+  .api-row:last-child{border-bottom:none;}
+  .api-row .uid{
+    font-family:ui-monospace,monospace;color:var(--text);
+    font-size:12px;
+  }
+  .api-row .meta{font-size:10px;color:var(--text-2);margin-top:2px;}
+  .api-row .badge{
+    align-self:start;padding:2px 7px;border-radius:999px;
+    font-size:10px;background:rgba(251,191,36,0.12);
+    color:var(--accent);border:1px solid rgba(251,191,36,0.3);
+    text-transform:uppercase;letter-spacing:0.05em;font-weight:600;
+  }
+  .api-empty{padding:14px;text-align:center;color:var(--text-2);font-size:12px;}
+  .api-err{
+    padding:10px;border-radius:10px;font-size:12px;
+    background:rgba(239,68,68,0.1);color:#fca5a5;
+    border:1px solid rgba(239,68,68,0.3);
+  }
+  .api-spinner{
+    padding:14px;text-align:center;color:var(--text-2);font-size:12px;
+  }
+  .api-spinner::after{
+    content:'';display:inline-block;width:10px;height:10px;
+    border:2px solid var(--text-2);border-top-color:transparent;
+    border-radius:50%;margin-left:6px;vertical-align:middle;
+    animation:spin 0.7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .mode-pill{
+    display:inline-block;padding:2px 8px;border-radius:999px;
+    font-size:9px;letter-spacing:0.06em;text-transform:uppercase;
+    font-weight:700;margin-left:6px;vertical-align:middle;
+  }
+  .mode-pill.live{background:rgba(34,197,94,0.12);color:#86efac;
+                  border:1px solid rgba(34,197,94,0.3);}
+  .mode-pill.relay{background:rgba(251,191,36,0.1);color:var(--accent);
+                   border:1px solid rgba(251,191,36,0.25);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crown">👑</div>
+  <div class="title">
+    <h1 id="screen-title">Dashboard</h1>
+    <div class="sub"><span class="dot"></span><span><span data-i18n="connected">connected</span> · <span id="status-text" data-i18n="live">live</span></span><span class="mode-pill relay" id="mode-pill" title="API mode">RELAY</span></div>
+  </div>
+  <div class="lang-wrap">
+    <button class="lang-btn" id="lang-btn" type="button">
+      <span class="flag" id="lang-flag">🇬🇧</span>
+      <span id="lang-code">EN</span>
+      <span class="chev">▼</span>
+    </button>
+    <div class="lang-menu" id="lang-menu"></div>
+  </div>
+  <button class="home-btn" id="back-home" data-i18n="home_btn">← home</button>
+</header>
+
+<main>
+
+  <!-- ── Dashboard ─────────────────────────────────────────────────── -->
+  <section class="pane active" data-pane="dashboard">
+    <div class="hero">
+      <div class="lbl" data-i18n="hero_lbl">Total paid users</div>
+      <div class="num" id="hero-users">—</div>
+      <div class="delta" id="hero-delta" data-i18n="across_tiers">across all tiers</div>
+    </div>
+
+    <div class="chip-grid">
+      <div class="chip"><div class="v" id="chip-af">—</div><div class="l" data-i18n="af_pool">autofarm pool</div></div>
+      <div class="chip"><div class="v" id="chip-promo">—</div><div class="l" data-i18n="promos_active">promos active</div></div>
+      <div class="chip"><div class="v" id="chip-state">—</div><div class="l" data-i18n="af_state_l">af state</div></div>
+    </div>
+
+    <div class="section-label" data-i18n="tier_breakdown">Tier breakdown</div>
+    <div class="card"><div class="tier-list" id="tier-list">—</div></div>
+
+    <div class="section-label" data-i18n="quick_actions">Quick actions</div>
+    <div class="qa-grid">
+      <button class="qa" data-jump="users">
+        <div class="ico">➕</div>
+        <div class="ttl" data-i18n="qa_grant_t">Grant tier</div>
+        <div class="desc" data-i18n="qa_grant_d">add / extend a paid user</div>
+      </button>
+      <button class="qa" data-jump="autofarm">
+        <div class="ico">▶</div>
+        <div class="ttl" data-i18n="qa_af_t">Run AF cycle</div>
+        <div class="desc" data-i18n="qa_af_d">force-trigger autofarm now</div>
+      </button>
+      <button class="qa" data-jump="promo">
+        <div class="ico">🎟</div>
+        <div class="ttl" data-i18n="qa_promo_t">Issue promos</div>
+        <div class="desc" data-i18n="qa_promo_d">generate −30% codes</div>
+      </button>
+      <button class="qa" data-jump="broadcast">
+        <div class="ico">📢</div>
+        <div class="ttl" data-i18n="qa_bc_t">Broadcast</div>
+        <div class="desc" data-i18n="qa_bc_d">message all users</div>
+      </button>
+    </div>
+
+    <div class="section-label" style="margin-top:14px;" data-i18n="refresh">Refresh</div>
+    <button class="btn primary full" id="btn-state" data-i18n="pull_state">⟳ Pull fresh state from bot</button>
+  </section>
+
+  <!-- ── Users ────────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="users">
+    <div class="section-label" data-i18n="grant_extend">Grant / extend tier</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label" data-i18n="tg_uid">Telegram user id</label>
+        <input class="input" type="text" id="set-tg" inputmode="numeric" placeholder="123456789">
+      </div>
+      <div class="field">
+        <label class="field-label" data-i18n="tier_lbl">Tier</label>
+        <select class="select" id="set-tier">
+          <option value="trial">trial</option>
+          <option value="week">week</option>
+          <option value="month" selected>month</option>
+          <option value="3month">3 months</option>
+          <option value="6month">6 months</option>
+          <option value="lifetime">lifetime</option>
+          <option value="legacy">legacy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" data-i18n="days_default">Days (0 = tier default)</label>
+        <input class="input" type="number" id="set-days" min="0" placeholder="0">
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="btn-set-tier" data-i18n="btn_grant">Grant / extend</button>
+        <button class="btn danger" id="btn-remove-user" data-i18n="remove">Remove</button>
+      </div>
+    </div>
+
+    <div class="section-label" data-i18n="inspect">Inspect</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label" data-i18n="filter_tier">Filter by tier (blank = all)</label>
+        <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial">
+      </div>
+      <button class="btn full" id="btn-list-users" data-i18n="list_users">📋 List users</button>
+      <div class="api-result" id="users-result">
+        <div class="hd"><span data-i18n="users_lbl">Users</span><span class="cnt" id="users-count">—</span></div>
+        <div class="api-list" id="users-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AutoFarm ─────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="autofarm">
+    <div class="chip-grid">
+      <div class="chip"><div class="v" id="af-count">—</div><div class="l" data-i18n="in_pool">in pool</div></div>
+      <div class="chip"><div class="v" id="af-state">—</div><div class="l" data-i18n="status_l">status</div></div>
+      <div class="chip"><div class="v" id="af-next">—</div><div class="l" data-i18n="next_run">next run</div></div>
+    </div>
+
+    <div class="section-label" data-i18n="actions">Actions</div>
+    <button class="btn primary full" id="btn-af-run" style="margin-bottom:10px;" data-i18n="run_cycle">▶ Run cycle now</button>
+
+    <div class="card">
+      <div class="field">
+        <label class="field-label" data-i18n="rm_acc_pool">Remove account from pool</label>
+        <input class="input" type="email" id="af-rm-email" placeholder="cpm2_xxx@gmail.com">
+      </div>
+      <button class="btn danger full" id="btn-af-remove" data-i18n="rm_from_af">🗑 Remove from autofarm</button>
+    </div>
+  </section>
+
+  <!-- ── Promo ────────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="promo">
+    <div class="section-label" data-i18n="gen_codes">Generate codes</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label" data-i18n="num_codes">Number of codes (1-50)</label>
+        <input class="input" type="number" id="promo-count" min="1" max="50" value="5">
+      </div>
+      <button class="btn primary full" id="btn-promo-gen" data-i18n="generate">🎟 Generate</button>
+    </div>
+
+    <div class="section-label" data-i18n="inspect">Inspect</div>
+    <button class="btn full" id="btn-promo-list" data-i18n="list_promos">📋 List active promos</button>
+    <div class="api-result" id="promos-result">
+      <div class="hd"><span data-i18n="promos_lbl">Promos</span><span class="cnt" id="promos-count">—</span></div>
+      <div class="api-list" id="promos-list"></div>
+    </div>
+  </section>
+
+  <!-- ── Broadcast ────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="broadcast">
+    <div class="section-label" data-i18n="mass_msg">Mass message</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label" data-i18n="tier_filter">Tier filter</label>
+        <select class="select" id="bc-tier">
+          <option value="all" selected>all paid</option>
+          <option value="trial">trial only</option>
+          <option value="week">week</option>
+          <option value="month">month</option>
+          <option value="3month">3month</option>
+          <option value="6month">6month</option>
+          <option value="lifetime">lifetime</option>
+          <option value="legacy">legacy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" data-i18n="msg_body">Message body (HTML allowed)</label>
+        <textarea class="input" id="bc-text" placeholder="📢 Hello everyone …"></textarea>
+      </div>
+      <button class="btn primary danger full" id="btn-broadcast" data-i18n="send_bc">📢 Send broadcast</button>
+      <div style="font-size:10px;color:var(--hint);margin-top:8px;" data-i18n="bc_warn">
+        ⚠ Mass-send to all matching users. Mini-app closes after send.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Floating iPhone navigation ─────────────────────────────────── -->
+<button class="iphone-fab" id="phone-fab" aria-label="Open apps">
+  <svg viewBox="0 0 64 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <rect x="3" y="3" width="58" height="114" rx="14" ry="14"
+          fill="#0a0f1c" stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="6" y="6" width="52" height="108" rx="11" ry="11"
+          fill="url(#screenGrad)" stroke="rgba(251,191,36,0.2)"/>
+    <!-- Notch -->
+    <rect x="22" y="9" width="20" height="4" rx="2" fill="#000"/>
+    <!-- Screen icons (mini grid) -->
+    <g opacity="0.95">
+      <rect x="11" y="22" width="10" height="10" rx="2.5" fill="#fbbf24"/>
+      <rect x="25" y="22" width="10" height="10" rx="2.5" fill="#4cc9f0"/>
+      <rect x="39" y="22" width="10" height="10" rx="2.5" fill="#34d399"/>
+      <rect x="11" y="36" width="10" height="10" rx="2.5" fill="#a78bfa"/>
+      <rect x="25" y="36" width="10" height="10" rx="2.5" fill="#f472b6"/>
+      <rect x="39" y="36" width="10" height="10" rx="2.5" fill="#64748b"/>
+    </g>
+    <!-- Home indicator -->
+    <rect x="22" y="108" width="20" height="3" rx="1.5" fill="rgba(251,191,36,0.7)"/>
+    <!-- Buttons (volume, side) -->
+    <rect x="1" y="22" width="2" height="10" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <rect x="1" y="36" width="2" height="14" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <rect x="61" y="32" width="2" height="20" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <defs>
+      <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a1407"/>
+        <stop offset="100%" stop-color="#05080f"/>
+      </linearGradient>
+    </defs>
+    <!-- Soft glow ring on hover/active is via filter on parent; subtle shimmer here -->
+  </svg>
+</button>
+
+<!-- Home-screen sheet -->
+<div class="home-back" id="home-back"></div>
+<div class="home-sheet" id="home-sheet">
+  <div class="grip"></div>
+  <div class="head" data-i18n="owner_apps">Owner Apps</div>
+  <div class="app-grid" id="app-grid">
+    <button class="app" data-tab="dashboard"><div class="icon">📊</div><div class="label" data-i18n="app_dashboard">Dashboard</div></button>
+    <button class="app" data-tab="users"><div class="icon">👥</div><div class="label" data-i18n="app_users">Users</div></button>
+    <button class="app" data-tab="autofarm"><div class="icon">🤖</div><div class="label" data-i18n="app_autofarm">AutoFarm</div></button>
+    <button class="app" data-tab="promo"><div class="icon">🎟</div><div class="label" data-i18n="app_promo">Promo</div></button>
+    <button class="app" data-tab="broadcast"><div class="icon">📢</div><div class="label" data-i18n="app_broadcast">Broadcast</div></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+  const tg = window.Telegram?.WebApp;
+  try { tg?.ready(); tg?.expand(); } catch(e){}
+  try { tg?.setHeaderColor?.('#05080f'); tg?.setBackgroundColor?.('#05080f'); } catch(e){}
+
+  // Decode state blob from ?s=...
+  const state = (() => {
+    try {
+      const qs = new URLSearchParams(location.search);
+      const s = qs.get('s'); if (!s) return {};
+      const b64 = s.replace(/-/g,'+').replace(/_/g,'/');
+      const json = atob(b64 + '==='.slice((b64.length + 3) % 4));
+      return JSON.parse(decodeURIComponent(escape(json)));
+    } catch(e){ return {}; }
+  })();
+
+  // ── i18n ─────────────────────────────────────────────────────────
+  const LANGS = [
+    {code:'en', label:'EN', flag:'🇬🇧', name:'English'},
+    {code:'ru', label:'RU', flag:'🇷🇺', name:'Русский'},
+    {code:'es', label:'ES', flag:'🇪🇸', name:'Español'},
+    {code:'pt', label:'PT', flag:'🇵🇹', name:'Português'},
+    {code:'de', label:'DE', flag:'🇩🇪', name:'Deutsch'},
+    {code:'fr', label:'FR', flag:'🇫🇷', name:'Français'},
+    {code:'it', label:'IT', flag:'🇮🇹', name:'Italiano'},
+    {code:'tr', label:'TR', flag:'🇹🇷', name:'Türkçe'},
+  ];
+  const I18N = {
+    en:{
+      connected:'connected',live:'live',home_btn:'← home',
+      owner_apps:'Owner Apps',app_dashboard:'Dashboard',app_users:'Users',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Broadcast',
+      hero_lbl:'Total paid users',across_tiers:'across all tiers',
+      af_pool:'autofarm pool',promos_active:'promos active',af_state_l:'af state',
+      tier_breakdown:'Tier breakdown',quick_actions:'Quick actions',
+      qa_grant_t:'Grant tier',qa_grant_d:'add / extend a paid user',
+      qa_af_t:'Run AF cycle',qa_af_d:'force-trigger autofarm now',
+      qa_promo_t:'Issue promos',qa_promo_d:'generate −30% codes',
+      qa_bc_t:'Broadcast',qa_bc_d:'message all users',
+      refresh:'Refresh',pull_state:'⟳ Pull fresh state from bot',
+      grant_extend:'Grant / extend tier',tg_uid:'Telegram user id',tier_lbl:'Tier',
+      days_default:'Days (0 = tier default)',btn_grant:'Grant / extend',remove:'Remove',
+      inspect:'Inspect',filter_tier:'Filter by tier (blank = all)',list_users:'📋 List users',
+      in_pool:'in pool',status_l:'status',next_run:'next run',
+      actions:'Actions',run_cycle:'▶ Run cycle now',
+      rm_acc_pool:'Remove account from pool',rm_from_af:'🗑 Remove from autofarm',
+      gen_codes:'Generate codes',num_codes:'Number of codes (1-50)',generate:'🎟 Generate',list_promos:'📋 List active promos',
+      mass_msg:'Mass message',tier_filter:'Tier filter',msg_body:'Message body (HTML allowed)',send_bc:'📢 Send broadcast',
+      bc_warn:'⚠ Mass-send to all matching users. Mini-app closes after send.',
+      no_users:'no users yet',
+    },
+    ru:{
+      connected:'подключено',live:'онлайн',home_btn:'← домой',
+      owner_apps:'Приложения',app_dashboard:'Панель',app_users:'Юзеры',app_autofarm:'Автофарм',app_promo:'Промо',app_broadcast:'Рассылка',
+      hero_lbl:'Всего платных юзеров',across_tiers:'по всем тирам',
+      af_pool:'пул автофарма',promos_active:'активные промо',af_state_l:'статус АФ',
+      tier_breakdown:'Разбивка по тирам',quick_actions:'Быстрые действия',
+      qa_grant_t:'Выдать тир',qa_grant_d:'добавить / продлить юзера',
+      qa_af_t:'Запустить АФ',qa_af_d:'форс-старт автофарма',
+      qa_promo_t:'Выпустить промо',qa_promo_d:'сгенерить коды −30%',
+      qa_bc_t:'Рассылка',qa_bc_d:'сообщение всем юзерам',
+      refresh:'Обновить',pull_state:'⟳ Подтянуть свежий стейт',
+      grant_extend:'Выдать / продлить тир',tg_uid:'Telegram user id',tier_lbl:'Тир',
+      days_default:'Дней (0 = по умолчанию)',btn_grant:'Выдать / продлить',remove:'Удалить',
+      inspect:'Просмотр',filter_tier:'Фильтр по тиру (пусто = все)',list_users:'📋 Список юзеров',
+      in_pool:'в пуле',status_l:'статус',next_run:'следующий запуск',
+      actions:'Действия',run_cycle:'▶ Запустить цикл',
+      rm_acc_pool:'Удалить аккаунт из пула',rm_from_af:'🗑 Удалить из автофарма',
+      gen_codes:'Сгенерить коды',num_codes:'Количество кодов (1-50)',generate:'🎟 Сгенерить',list_promos:'📋 Активные промо',
+      mass_msg:'Массовое сообщение',tier_filter:'Фильтр по тиру',msg_body:'Текст (HTML разрешён)',send_bc:'📢 Отправить рассылку',
+      bc_warn:'⚠ Отправка всем подходящим. Миниапп закроется после отправки.',
+      no_users:'юзеров пока нет',
+    },
+    es:{
+      connected:'conectado',live:'en vivo',home_btn:'← inicio',
+      owner_apps:'Apps del Dueño',app_dashboard:'Panel',app_users:'Usuarios',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Difusión',
+      hero_lbl:'Usuarios pagos totales',across_tiers:'en todos los niveles',
+      af_pool:'pool autofarm',promos_active:'promos activos',af_state_l:'estado AF',
+      tier_breakdown:'Por niveles',quick_actions:'Acciones rápidas',
+      qa_grant_t:'Dar nivel',qa_grant_d:'añadir / extender pago',
+      qa_af_t:'Ciclo AF',qa_af_d:'lanzar autofarm ya',
+      qa_promo_t:'Emitir promos',qa_promo_d:'generar códigos −30%',
+      qa_bc_t:'Difusión',qa_bc_d:'mensaje a todos',
+      refresh:'Refrescar',pull_state:'⟳ Traer estado del bot',
+      grant_extend:'Dar / extender nivel',tg_uid:'ID Telegram',tier_lbl:'Nivel',
+      days_default:'Días (0 = por defecto)',btn_grant:'Dar / extender',remove:'Quitar',
+      inspect:'Inspeccionar',filter_tier:'Filtrar por nivel (vacío = todos)',list_users:'📋 Listar usuarios',
+      in_pool:'en pool',status_l:'estado',next_run:'próxima ejec.',
+      actions:'Acciones',run_cycle:'▶ Lanzar ciclo',
+      rm_acc_pool:'Quitar cuenta del pool',rm_from_af:'🗑 Quitar de autofarm',
+      gen_codes:'Generar códigos',num_codes:'Número de códigos (1-50)',generate:'🎟 Generar',list_promos:'📋 Promos activos',
+      mass_msg:'Mensaje masivo',tier_filter:'Filtro de nivel',msg_body:'Texto (HTML permitido)',send_bc:'📢 Enviar difusión',
+      bc_warn:'⚠ Envío masivo a todos los usuarios. La mini-app se cierra al enviar.',
+      no_users:'sin usuarios todavía',
+    },
+    pt:{
+      connected:'conectado',live:'ao vivo',home_btn:'← início',
+      owner_apps:'Apps do Dono',app_dashboard:'Painel',app_users:'Usuários',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Transmissão',
+      hero_lbl:'Total de usuários pagos',across_tiers:'em todos os níveis',
+      af_pool:'pool autofarm',promos_active:'promos ativos',af_state_l:'estado AF',
+      tier_breakdown:'Por nível',quick_actions:'Ações rápidas',
+      qa_grant_t:'Conceder nível',qa_grant_d:'adicionar / estender pago',
+      qa_af_t:'Ciclo AF',qa_af_d:'forçar autofarm agora',
+      qa_promo_t:'Emitir promos',qa_promo_d:'gerar códigos −30%',
+      qa_bc_t:'Transmissão',qa_bc_d:'mensagem para todos',
+      refresh:'Atualizar',pull_state:'⟳ Puxar estado do bot',
+      grant_extend:'Conceder / estender nível',tg_uid:'ID Telegram',tier_lbl:'Nível',
+      days_default:'Dias (0 = padrão)',btn_grant:'Conceder / estender',remove:'Remover',
+      inspect:'Inspecionar',filter_tier:'Filtrar por nível (vazio = todos)',list_users:'📋 Listar usuários',
+      in_pool:'no pool',status_l:'estado',next_run:'próxima exec.',
+      actions:'Ações',run_cycle:'▶ Iniciar ciclo',
+      rm_acc_pool:'Remover conta do pool',rm_from_af:'🗑 Remover do autofarm',
+      gen_codes:'Gerar códigos',num_codes:'Número de códigos (1-50)',generate:'🎟 Gerar',list_promos:'📋 Promos ativos',
+      mass_msg:'Mensagem em massa',tier_filter:'Filtro de nível',msg_body:'Texto (HTML permitido)',send_bc:'📢 Enviar transmissão',
+      bc_warn:'⚠ Envio em massa. Mini-app fecha após enviar.',
+      no_users:'sem usuários ainda',
+    },
+    de:{
+      connected:'verbunden',live:'live',home_btn:'← start',
+      owner_apps:'Owner Apps',app_dashboard:'Übersicht',app_users:'Nutzer',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Rundsenden',
+      hero_lbl:'Bezahlte Nutzer gesamt',across_tiers:'über alle Tiers',
+      af_pool:'AutoFarm-Pool',promos_active:'aktive Promos',af_state_l:'AF-Status',
+      tier_breakdown:'Tier-Aufschlüsselung',quick_actions:'Schnellaktionen',
+      qa_grant_t:'Tier vergeben',qa_grant_d:'Zahler hinzufügen / verlängern',
+      qa_af_t:'AF-Zyklus',qa_af_d:'AutoFarm jetzt starten',
+      qa_promo_t:'Promos ausgeben',qa_promo_d:'−30%-Codes erzeugen',
+      qa_bc_t:'Rundsenden',qa_bc_d:'Nachricht an alle',
+      refresh:'Aktualisieren',pull_state:'⟳ Aktuellen Stand vom Bot holen',
+      grant_extend:'Tier vergeben / verlängern',tg_uid:'Telegram-ID',tier_lbl:'Tier',
+      days_default:'Tage (0 = Standard)',btn_grant:'Vergeben / verlängern',remove:'Entfernen',
+      inspect:'Inspizieren',filter_tier:'Nach Tier filtern (leer = alle)',list_users:'📋 Nutzer auflisten',
+      in_pool:'im Pool',status_l:'Status',next_run:'nächster Lauf',
+      actions:'Aktionen',run_cycle:'▶ Zyklus jetzt starten',
+      rm_acc_pool:'Konto aus Pool entfernen',rm_from_af:'🗑 Aus AutoFarm entfernen',
+      gen_codes:'Codes generieren',num_codes:'Anzahl Codes (1-50)',generate:'🎟 Erzeugen',list_promos:'📋 Aktive Promos',
+      mass_msg:'Massennachricht',tier_filter:'Tier-Filter',msg_body:'Nachricht (HTML erlaubt)',send_bc:'📢 Senden',
+      bc_warn:'⚠ Massensendung. Mini-App schließt nach dem Senden.',
+      no_users:'noch keine Nutzer',
+    },
+    fr:{
+      connected:'connecté',live:'en direct',home_btn:'← accueil',
+      owner_apps:'Apps Propriétaire',app_dashboard:'Tableau',app_users:'Utilisateurs',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Diffusion',
+      hero_lbl:'Utilisateurs payants',across_tiers:'tous niveaux',
+      af_pool:'pool autofarm',promos_active:'promos actives',af_state_l:'état AF',
+      tier_breakdown:'Par niveau',quick_actions:'Actions rapides',
+      qa_grant_t:'Donner niveau',qa_grant_d:'ajouter / prolonger',
+      qa_af_t:'Cycle AF',qa_af_d:'lancer autofarm',
+      qa_promo_t:'Émettre promos',qa_promo_d:'générer codes −30%',
+      qa_bc_t:'Diffusion',qa_bc_d:'message à tous',
+      refresh:'Rafraîchir',pull_state:'⟳ Récupérer état du bot',
+      grant_extend:'Donner / prolonger niveau',tg_uid:'ID Telegram',tier_lbl:'Niveau',
+      days_default:'Jours (0 = défaut)',btn_grant:'Donner / prolonger',remove:'Retirer',
+      inspect:'Inspecter',filter_tier:'Filtrer par niveau (vide = tous)',list_users:'📋 Lister utilisateurs',
+      in_pool:'en pool',status_l:'statut',next_run:'prochain',
+      actions:'Actions',run_cycle:'▶ Lancer cycle',
+      rm_acc_pool:'Retirer du pool',rm_from_af:'🗑 Retirer d’autofarm',
+      gen_codes:'Générer codes',num_codes:'Nombre de codes (1-50)',generate:'🎟 Générer',list_promos:'📋 Promos actives',
+      mass_msg:'Message de masse',tier_filter:'Filtre niveau',msg_body:'Message (HTML autorisé)',send_bc:'📢 Envoyer',
+      bc_warn:'⚠ Envoi de masse. Mini-app se ferme après envoi.',
+      no_users:'aucun utilisateur',
+    },
+    it:{
+      connected:'connesso',live:'live',home_btn:'← home',
+      owner_apps:'App Owner',app_dashboard:'Pannello',app_users:'Utenti',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Trasmissione',
+      hero_lbl:'Utenti paganti totali',across_tiers:'su tutti i livelli',
+      af_pool:'pool autofarm',promos_active:'promo attivi',af_state_l:'stato AF',
+      tier_breakdown:'Per livello',quick_actions:'Azioni rapide',
+      qa_grant_t:'Dai livello',qa_grant_d:'aggiungi / estendi pagante',
+      qa_af_t:'Ciclo AF',qa_af_d:'forza autofarm ora',
+      qa_promo_t:'Emetti promo',qa_promo_d:'genera codici −30%',
+      qa_bc_t:'Trasmissione',qa_bc_d:'messaggio a tutti',
+      refresh:'Aggiorna',pull_state:'⟳ Prendi stato dal bot',
+      grant_extend:'Dai / estendi livello',tg_uid:'ID Telegram',tier_lbl:'Livello',
+      days_default:'Giorni (0 = default)',btn_grant:'Dai / estendi',remove:'Rimuovi',
+      inspect:'Ispeziona',filter_tier:'Filtra per livello (vuoto = tutti)',list_users:'📋 Elenca utenti',
+      in_pool:'nel pool',status_l:'stato',next_run:'prossima esec.',
+      actions:'Azioni',run_cycle:'▶ Avvia ciclo',
+      rm_acc_pool:'Rimuovi account dal pool',rm_from_af:'🗑 Rimuovi da autofarm',
+      gen_codes:'Genera codici',num_codes:'Numero di codici (1-50)',generate:'🎟 Genera',list_promos:'📋 Promo attivi',
+      mass_msg:'Messaggio di massa',tier_filter:'Filtro livello',msg_body:'Testo (HTML consentito)',send_bc:'📢 Invia trasmissione',
+      bc_warn:'⚠ Invio di massa. La mini-app si chiude dopo l\'invio.',
+      no_users:'nessun utente',
+    },
+    tr:{
+      connected:'bağlı',live:'canlı',home_btn:'← ana',
+      owner_apps:'Owner Apps',app_dashboard:'Panel',app_users:'Kullanıcılar',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Yayın',
+      hero_lbl:'Toplam ödeyen kullanıcı',across_tiers:'tüm kademelerde',
+      af_pool:'autofarm havuzu',promos_active:'aktif promo',af_state_l:'AF durumu',
+      tier_breakdown:'Kademelere göre',quick_actions:'Hızlı işlemler',
+      qa_grant_t:'Kademe ver',qa_grant_d:'kullanıcı ekle/uzat',
+      qa_af_t:'AF döngüsü',qa_af_d:'autofarm başlat',
+      qa_promo_t:'Promo ver',qa_promo_d:'−30% kod üret',
+      qa_bc_t:'Yayın',qa_bc_d:'tüm kullanıcılara mesaj',
+      refresh:'Yenile',pull_state:'⟳ Bot durumunu çek',
+      grant_extend:'Kademe ver / uzat',tg_uid:'Telegram ID',tier_lbl:'Kademe',
+      days_default:'Gün (0 = varsayılan)',btn_grant:'Ver / uzat',remove:'Kaldır',
+      inspect:'İncele',filter_tier:'Kademe filtresi (boş = hepsi)',list_users:'📋 Kullanıcıları listele',
+      in_pool:'havuzda',status_l:'durum',next_run:'sıradaki',
+      actions:'İşlemler',run_cycle:'▶ Döngüyü çalıştır',
+      rm_acc_pool:'Havuzdan hesap çıkar',rm_from_af:'🗑 AutoFarm\'dan çıkar',
+      gen_codes:'Kod üret',num_codes:'Kod sayısı (1-50)',generate:'🎟 Üret',list_promos:'📋 Aktif promolar',
+      mass_msg:'Toplu mesaj',tier_filter:'Kademe filtresi',msg_body:'Mesaj (HTML)',send_bc:'📢 Yayını gönder',
+      bc_warn:'⚠ Toplu gönderim. Mini-app gönderimden sonra kapanır.',
+      no_users:'henüz kullanıcı yok',
+    },
+  };
+  const detectLang = () => {
+    try {
+      const saved = localStorage.getItem('cpm2_lang');
+      if (saved && I18N[saved]) return saved;
+    } catch(e){}
+    const tgLc = (tg?.initDataUnsafe?.user?.language_code || '').toLowerCase().slice(0,2);
+    return I18N[tgLc] ? tgLc : 'en';
+  };
+  let curLang = detectLang();
+  const t = k => (I18N[curLang]||I18N.en)[k] || I18N.en[k] || k;
+  const applyI18n = () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      const v = t(k); if (v) el.textContent = v;
+    });
+    const cur = LANGS.find(l => l.code === curLang) || LANGS[0];
+    const fl = document.getElementById('lang-flag');
+    const lc = document.getElementById('lang-code');
+    if (fl) fl.textContent = cur.flag;
+    if (lc) lc.textContent = cur.label;
+  };
+  const setLang = code => {
+    if (!I18N[code]) return;
+    curLang = code;
+    try { localStorage.setItem('cpm2_lang', code); } catch(e){}
+    applyI18n();
+    document.querySelectorAll('.lang-opt').forEach(o => {
+      o.classList.toggle('active', o.dataset.lang === code);
+    });
+    // Re-translate the dynamic screen-title (set by switchPane).
+    try {
+      const st = document.getElementById('screen-title');
+      if (st && typeof _curPane !== 'undefined') st.textContent = t('app_' + _curPane);
+    } catch(e){}
+  };
+  (() => {
+    const menu = document.getElementById('lang-menu');
+    const btn = document.getElementById('lang-btn');
+    if (!menu || !btn) return;
+    LANGS.forEach(l => {
+      const opt = document.createElement('div');
+      opt.className = 'lang-opt' + (l.code === curLang ? ' active' : '');
+      opt.dataset.lang = l.code;
+      opt.innerHTML = `<span class="flag">${l.flag}</span><span>${l.name}</span>`;
+      opt.addEventListener('click', () => {
+        setLang(l.code);
+        menu.classList.remove('open');
+        btn.classList.remove('open');
+      });
+      menu.appendChild(opt);
+    });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      menu.classList.toggle('open');
+      btn.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      menu.classList.remove('open');
+      btn.classList.remove('open');
+    });
+    applyI18n();
+  })();
+
+  const fmtNum = n => Number(n||0).toLocaleString('en-US').replace(/,/g,' ');
+  const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+  const fmtTs = t => {
+    if (!t) return 'idle';
+    try { return new Date(t * 1000).toLocaleString('en-GB', { hour12: false }); }
+    catch(e){ return String(t); }
+  };
+
+  // ── Render snapshot ──────────────────────────────────────────────
+  function renderSnapshot(s){
+    document.getElementById('hero-users').textContent = fmtNum(s.users_total);
+    const counts = s.tier_counts || {};
+    const total  = Object.values(counts).reduce((a,b) => a + b, 0) || 1;
+    const top    = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    document.getElementById('hero-delta').textContent =
+      top.length ? top.map(([k,n]) => `${k} ${n}`).join(' · ') : t('no_users');
+
+    document.getElementById('chip-af').textContent = fmtNum(s.af?.count);
+    document.getElementById('chip-promo').textContent = fmtNum(s.promo_active);
+    document.getElementById('chip-state').textContent = s.af?.running ? 'live' : 'idle';
+
+    document.getElementById('af-count').textContent = fmtNum(s.af?.count);
+    document.getElementById('af-state').textContent = s.af?.running ? 'running' : 'idle';
+    document.getElementById('af-next').style.fontSize = '11px';
+    document.getElementById('af-next').textContent = s.af?.next ? fmtTs(s.af.next) : 'idle';
+
+    // Tier bars
+    const wrap = document.getElementById('tier-list');
+    if (!Object.keys(counts).length) {
+      wrap.innerHTML = '<div style="color:var(--hint);text-align:center;padding:8px 0;">no users yet</div>';
+    } else {
+      const max = Math.max(...Object.values(counts));
+      wrap.innerHTML = Object.entries(counts).sort((a,b) => b[1] - a[1]).map(([t, n]) => `
+        <div class="tier-row">
+          <span class="name">${escHtml(t)}</span>
+          <div class="bar"><div class="fill" style="width:${(n/max*100).toFixed(1)}%;"></div></div>
+          <span class="n">${fmtNum(n)}</span>
+        </div>`).join('');
+    }
+  }
+  if (state.owner) renderSnapshot(state);
+
+  // ── Pane / tab switching ─────────────────────────────────────────
+  const titleKey = name => 'app_' + name;
+  let _curPane = 'dashboard';
+  function switchPane(name){
+    _curPane = name;
+    document.querySelectorAll('.pane').forEach(p =>
+      p.classList.toggle('active', p.dataset.pane === name));
+    document.querySelectorAll('.app').forEach(a =>
+      a.classList.toggle('active', a.dataset.tab === name));
+    document.getElementById('screen-title').textContent = t(titleKey(name)) || 'Owner';
+    document.getElementById('back-home').classList.toggle('show', name !== 'dashboard');
+    // Scroll to top of <main> so the new pane starts at the top.
+    document.querySelector('main').scrollTop = 0;
+  }
+
+  // App icons
+  document.querySelectorAll('.app').forEach(a => a.addEventListener('click', () => {
+    const name = a.dataset.tab;
+    switchPane(name);
+    closeHome();
+    try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+  }));
+
+  // Quick-action shortcuts on Dashboard
+  document.querySelectorAll('[data-jump]').forEach(b =>
+    b.addEventListener('click', () => switchPane(b.dataset.jump)));
+
+  // Header back-to-home
+  document.getElementById('back-home')?.addEventListener('click', () => switchPane('dashboard'));
+
+  // ── iPhone widget — open / close home grid ──────────────────────
+  const back  = document.getElementById('home-back');
+  const sheet = document.getElementById('home-sheet');
+  function openHome(){
+    back.classList.add('show');
+    sheet.classList.add('show');
+    try { tg?.HapticFeedback?.impactOccurred?.('light'); } catch(e){}
+  }
+  function closeHome(){
+    back.classList.remove('show');
+    sheet.classList.remove('show');
+  }
+  document.getElementById('phone-fab')?.addEventListener('click', openHome);
+  back?.addEventListener('click', closeHome);
+  // Swipe-down on sheet to dismiss (basic touch handling)
+  let _ty0 = 0;
+  sheet?.addEventListener('touchstart', e => { _ty0 = e.touches[0].clientY; }, {passive:true});
+  sheet?.addEventListener('touchmove',  e => {
+    const dy = e.touches[0].clientY - _ty0;
+    if (dy > 80) { closeHome(); _ty0 = 1e9; }
+  }, {passive:true});
+
+  // ── Toast + sendData wrapper ─────────────────────────────────────
+  const toastEl = document.getElementById('toast');
+  let toastT = null;
+  const toast = (msg, kind='') => {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  };
+  function send(payload, msg = '✓ Sent — see chat') {
+    try {
+      tg?.HapticFeedback?.impactOccurred?.('medium');
+      tg?.sendData?.(JSON.stringify(payload));
+      toast(msg, 'ok');
+    } catch(e){ toast('Send failed: ' + e.message, 'err'); }
+  }
+
+  // ── HTTP API plumbing (live mode) ─────────────────────────────────
+  // Resolution order:
+  //   1. `?api=https://host:port`       — explicit override
+  //   2. <meta name="cpm2-api-base">    — present (even empty) = use it
+  //                                       (empty content = same-origin)
+  //   3. Loaded via http(s) from a host that also serves /api/healthz
+  //      (i.e. the bot's embedded server) — auto same-origin
+  //   4. Otherwise → RELAY (legacy sendData) fallback
+  function resolveApiBase(){
+    const qp = new URLSearchParams(location.search).get('api');
+    if (qp != null) return qp.replace(/\/+$/,'');     // '' allowed = same-origin
+    const m = document.querySelector('meta[name="cpm2-api-base"]');
+    if (m) return (m.content || '').replace(/\/+$/,'');
+    // Heuristic: if served from a non-telegram host over http(s),
+    // assume same-origin until /api/healthz disproves it.
+    if (/^https?:$/.test(location.protocol)) return '';
+    return null;
+  }
+  const API_BASE  = resolveApiBase();   // string ('' = same-origin) or null
+  const HAS_INIT  = !!(tg && tg.initData);
+  const LIVE_MODE = (API_BASE !== null) && HAS_INIT;
+
+  // Diagnostic overlay (temporary). Floating banner so it survives
+  // any later DOM rewrites (i18n, switchPane), and big enough to read.
+  try {
+    const dbg = 'v=cf2 base='+(API_BASE===null?'NULL':(API_BASE||'<same>'))
+              + ' init='+(HAS_INIT?'Y':'N')+'('+((tg&&tg.initData)?tg.initData.length:0)+')'
+              + ' live='+(LIVE_MODE?'YES':'NO')
+              + ' state_keys='+Object.keys(state||{}).length;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;'
+      +'background:#fbbf24;color:#000;padding:6px 8px;font:11px/1.3 monospace;'
+      +'word-break:break-all;text-align:left;border-bottom:2px solid #000;';
+    banner.textContent = dbg;
+    document.body.insertBefore(banner, document.body.firstChild);
+  } catch(_){}
+
+  const modePill = document.getElementById('mode-pill');
+  if (modePill) {
+    if (LIVE_MODE) { modePill.classList.remove('relay'); modePill.classList.add('live'); modePill.textContent = 'LIVE'; }
+    else           { modePill.classList.add('relay');    modePill.textContent = 'RELAY'; }
+  }
+
+  async function api(path, {method='GET', body=null} = {}){
+    const opts = {
+      method,
+      headers: {
+        'Authorization': 'tma ' + tg.initData,
+        'Accept':        'application/json',
+      },
+    };
+    if (body != null){
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    const r = await fetch(API_BASE + path, opts);
+    let data = null;
+    try { data = await r.json(); } catch(_) {}
+    if (!r.ok) {
+      const msg = (data && (data.error || data.reason)) || ('HTTP ' + r.status);
+      throw new Error(msg);
+    }
+    return data || {};
+  }
+
+  function fmtDate(ts){
+    if (!ts) return '—';
+    const d = new Date(ts*1000);
+    return d.toISOString().slice(0,10);
+  }
+  function escHtml(s){
+    return String(s).replace(/[&<>"']/g, c =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function showResult(boxId, html){
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    const list = box.querySelector('.api-list');
+    if (list) list.innerHTML = html;
+    box.classList.add('show');
+  }
+  function setSpin(boxId){
+    showResult(boxId, '<div class="api-spinner">loading</div>');
+  }
+  function setError(boxId, msg){
+    showResult(boxId, '<div class="api-err">'+escHtml(msg)+'</div>');
+  }
+
+  // ── Live renderers ───────────────────────────────────────────────
+  async function liveListUsers(tier){
+    setSpin('users-result');
+    try {
+      const qs = tier ? ('?tier=' + encodeURIComponent(tier)) : '';
+      const data = await api('/api/owner/users' + qs);
+      document.getElementById('users-count').textContent =
+        data.total + (data.rows.length < data.total ? (' (showing ' + data.rows.length + ')') : '');
+      if (!data.rows.length) {
+        showResult('users-result', '<div class="api-empty" data-i18n="no_users">'+(t('no_users')||'no users yet')+'</div>');
+        return;
+      }
+      const rows = data.rows.map(r => `
+        <div class="api-row">
+          <div>
+            <div class="uid">${escHtml(r.tg_id)}${r.username ? ' · @'+escHtml(r.username) : ''}</div>
+            <div class="meta">expires ${fmtDate(r.expires)}${r.name ? ' · '+escHtml(r.name) : ''}</div>
+          </div>
+          <span class="badge">${escHtml(r.tier)}</span>
+        </div>`).join('');
+      showResult('users-result', rows);
+    } catch(e) { setError('users-result', e.message); }
+  }
+
+  async function liveListPromos(){
+    setSpin('promos-result');
+    try {
+      const data = await api('/api/owner/promos');
+      const a = data.active || [], rd = data.redeemed || [];
+      document.getElementById('promos-count').textContent =
+        'active=' + a.length + ' · redeemed=' + rd.length;
+      if (!a.length) {
+        showResult('promos-result', '<div class="api-empty">no active promos</div>');
+        return;
+      }
+      const rows = a.slice(0, 80).map(c => `
+        <div class="api-row">
+          <div>
+            <div class="uid">${escHtml(c.code || '?')}</div>
+            <div class="meta">−${escHtml(c.discount || '?')}% · exp ${fmtDate(c.expires_at || 0)}</div>
+          </div>
+          <span class="badge">active</span>
+        </div>`).join('');
+      showResult('promos-result', rows);
+    } catch(e) { setError('promos-result', e.message); }
+  }
+
+  async function liveOwnerState(){
+    try {
+      const data = await api('/api/owner/state');
+      // Reuse the existing snapshot renderer if present
+      try { if (typeof renderSnapshot === 'function') renderSnapshot(data); } catch(_){}
+      document.getElementById('hero-users').textContent = data.users_total ?? '—';
+      const af = data.af || {};
+      document.getElementById('af-count').textContent = af.count ?? '—';
+      document.getElementById('af-state').textContent = af.running ? 'running' : 'idle';
+      if (typeof af.next === 'number' && af.next) {
+        document.getElementById('af-next').textContent = fmtDate(af.next);
+      }
+      document.getElementById('chip-af').textContent    = af.count ?? '—';
+      document.getElementById('chip-state').textContent = af.running ? 'run' : 'idle';
+      document.getElementById('chip-promo').textContent = data.promo_active ?? '—';
+      const tl = document.getElementById('tier-list');
+      if (tl && data.tier_counts){
+        const tc = data.tier_counts;
+        const max = Math.max(1, ...Object.values(tc));
+        tl.innerHTML = Object.entries(tc).map(([k,n]) =>
+          `<div class="tier"><span class="lbl">${escHtml(k)}</span>
+            <div class="bar"><div class="fill" style="width:${(n/max*100).toFixed(1)}%;"></div></div>
+            <span class="n">${n}</span></div>`).join('');
+      }
+      toast('✓ state refreshed', 'ok');
+    } catch(e) { toast('state: ' + e.message, 'err'); }
+  }
+
+  // Auto-refresh state on load when in LIVE mode so the dashboard
+  // reflects current truth instead of whatever the URL blob captured.
+  if (LIVE_MODE) { liveOwnerState(); }
+
+  // ── Action handlers (LIVE → fetch, RELAY → sendData fallback) ────
+  document.getElementById('btn-state')?.addEventListener('click', () => {
+    if (LIVE_MODE) { liveOwnerState(); return; }
+    send({ mode: 'owner_state' }, '⟳ pulling…');
+  });
+
+  document.getElementById('btn-set-tier')?.addEventListener('click', async () => {
+    const tg_id = parseInt(document.getElementById('set-tg').value, 10);
+    const tier  = document.getElementById('set-tier').value;
+    const days  = parseInt(document.getElementById('set-days').value, 10) || 0;
+    if (!tg_id) { toast('Bad tg_id', 'err'); return; }
+    if (!LIVE_MODE) { send({ mode: 'owner_set_tier', tg_id, tier, days }); return; }
+    try {
+      const r = await api('/api/owner/set_tier', {method:'POST', body:{tg_id, tier, days}});
+      toast(`✅ ${r.tier} for ${r.tg_id} (+${r.days}d)`, 'ok');
+      liveOwnerState();
+    } catch(e) { toast('set_tier: ' + e.message, 'err'); }
+  });
+
+  document.getElementById('btn-remove-user')?.addEventListener('click', async () => {
+    const tg_id = parseInt(document.getElementById('set-tg').value, 10);
+    if (!tg_id) { toast('Bad tg_id', 'err'); return; }
+    if (!confirm(`Remove user ${tg_id} from allowlist?`)) return;
+    if (!LIVE_MODE) { send({ mode: 'owner_remove_user', tg_id }); return; }
+    try {
+      const r = await api('/api/owner/remove_user', {method:'POST', body:{tg_id}});
+      toast(r.ok ? `🗑 removed ${tg_id}` : `⛔ ${tg_id} not in allowlist`, r.ok ? 'ok' : 'err');
+      liveOwnerState();
+    } catch(e) { toast('remove: ' + e.message, 'err'); }
+  });
+
+  document.getElementById('btn-list-users')?.addEventListener('click', () => {
+    const tier = document.getElementById('filter-tier').value.trim();
+    if (LIVE_MODE) { liveListUsers(tier); return; }
+    send({ mode: 'owner_users_list', tier });
+  });
+
+  document.getElementById('btn-af-run')?.addEventListener('click', async () => {
+    if (!confirm('Trigger autofarm cycle on entire pool?')) return;
+    if (!LIVE_MODE) { send({ mode: 'owner_af_run_now' }); return; }
+    try {
+      const r = await api('/api/owner/af_run_now', {method:'POST', body:{}});
+      if (r.ok) toast(`🤖 cycle started (pool=${r.pool})`, 'ok');
+      else      toast(`⏳ ${r.reason}`, 'err');
+    } catch(e) { toast('af_run: ' + e.message, 'err'); }
+  });
+
+  document.getElementById('btn-af-remove')?.addEventListener('click', async () => {
+    const email = document.getElementById('af-rm-email').value.trim();
+    if (!email) { toast('Bad email', 'err'); return; }
+    if (!LIVE_MODE) { send({ mode: 'owner_af_remove', email }); return; }
+    try {
+      const r = await api('/api/owner/af_remove', {method:'POST', body:{email}});
+      toast(r.ok ? `🗑 removed (pool=${r.pool})` : '⛔ not in autofarm', r.ok ? 'ok' : 'err');
+    } catch(e) { toast('af_rm: ' + e.message, 'err'); }
+  });
+
+  document.getElementById('btn-promo-gen')?.addEventListener('click', async () => {
+    const count = Math.max(1, Math.min(50, parseInt(document.getElementById('promo-count').value, 10) || 1));
+    if (!LIVE_MODE) { send({ mode: 'owner_promo_gen', count }); return; }
+    try {
+      const r = await api('/api/owner/promo_gen', {method:'POST', body:{count}});
+      if (!r.ok) { toast('promo_gen failed', 'err'); return; }
+      toast(`🎟 generated ${r.codes.length}`, 'ok');
+      liveListPromos();
+    } catch(e) { toast('promo_gen: ' + e.message, 'err'); }
+  });
+
+  document.getElementById('btn-promo-list')?.addEventListener('click', () => {
+    if (LIVE_MODE) { liveListPromos(); return; }
+    send({ mode: 'owner_promo_list' });
+  });
+
+  document.getElementById('btn-broadcast')?.addEventListener('click', async () => {
+    const text = document.getElementById('bc-text').value.trim();
+    const tier = document.getElementById('bc-tier').value;
+    if (!text) { toast('Empty message', 'err'); return; }
+    if (!confirm(`Broadcast to ${tier === 'all' ? 'ALL paid users' : tier + ' tier only'}?\n\n${text.slice(0, 200)}${text.length > 200 ? '…' : ''}`)) return;
+    if (!LIVE_MODE) { send({ mode: 'owner_broadcast', text, tier }, '📢 broadcasting…'); return; }
+    try {
+      const r = await api('/api/owner/broadcast', {method:'POST', body:{text, tier}});
+      toast(`📢 queued ${r.queued} (tier=${r.tier})`, 'ok');
+    } catch(e) { toast('broadcast: ' + e.message, 'err'); }
+  });
+
+  // BackButton
+  try { tg?.BackButton?.show(); tg?.BackButton?.onClick(() => tg?.close()); } catch(e){}
+})();
+</script>
+</body>
+</html>
