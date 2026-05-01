@@ -6,32 +6,44 @@
 <title>CPM2 · Owner Console</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  /* Same console aesthetic as devtool.html — owner console deliberately
-     leans gold-tinted accents to differentiate at a glance. */
+  /* ──────────────────────────────────────────────────────────────────────
+     Owner console — gold-tinted "command bridge" aesthetic. The home
+     screen is always Dashboard; navigation is via a floating iPhone widget
+     (bottom-right) that springs open into a home-screen-style icon grid.
+     Tap an icon → that "app" loads in place. No tab bar, no chrome.
+     ────────────────────────────────────────────────────────────────────── */
   :root{
     --bg:        #05080f;
     --bg-2:      #0a0f1c;
-    --panel:     rgba(251, 191, 36, 0.05);
-    --panel-2:   rgba(251, 191, 36, 0.10);
-    --panel-hi:  rgba(251, 191, 36, 0.16);
-    --line:      rgba(251, 191, 36, 0.22);
+    --bg-3:      #131c30;
+    --panel:     rgba(251, 191, 36, 0.06);
+    --panel-2:   rgba(251, 191, 36, 0.11);
+    --panel-hi:  rgba(251, 191, 36, 0.18);
+    --line:      rgba(251, 191, 36, 0.24);
+    --line-soft: rgba(251, 191, 36, 0.10);
     --text:      #f4ecd8;
     --text-2:    #d4c895;
     --hint:      #8a7d4f;
+    --hint-2:    #5e542f;
     --accent:    #fbbf24;
     --accent-2:  #f59e0b;
+    --accent-3:  #fcd34d;
     --on-accent: #1a1407;
     --green:     #34d399;
-    --danger:    #f87171;
+    --red:       #f87171;
     --cyan:      #4cc9f0;
+    --violet:    #a78bfa;
+    --pink:      #f472b6;
     --mono: ui-monospace,SFMono-Regular,'JetBrains Mono','Fira Code','Menlo','Consolas',monospace;
+    --sans: -apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',Roboto,sans-serif;
     --shadow-glow: 0 0 22px rgba(251, 191, 36, 0.30), 0 0 4px rgba(251, 191, 36, 0.45) inset;
-    --radius: 10px;
+    --shadow-pop: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(251,191,36,0.3);
+    --radius: 12px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
   html,body{height:100%;}
   body{
-    font-family:var(--mono);
+    font-family:var(--sans);
     background:var(--bg);
     color:var(--text);
     font-size:14px;
@@ -41,38 +53,42 @@
     -webkit-tap-highlight-color:transparent;
     position:relative;
   }
+  /* Subtle scanline overlay */
   body::before{
     content:'';
     position:fixed;inset:0;pointer-events:none;z-index:1;
     background:repeating-linear-gradient(
       to bottom,
-      rgba(251, 191, 36, 0.025) 0px,
-      rgba(251, 191, 36, 0.025) 1px,
+      rgba(251, 191, 36, 0.02) 0px,
+      rgba(251, 191, 36, 0.02) 1px,
       transparent 1px,
       transparent 3px
     );
     mix-blend-mode:screen;
   }
+  /* Drifting glow */
   body::after{
     content:'';
     position:fixed;inset:-20%;z-index:-1;pointer-events:none;
     background:
       radial-gradient(50% 40% at 80% 10%, rgba(251, 191, 36, 0.18), transparent 60%),
-      radial-gradient(40% 35% at 15% 90%, rgba(245, 158, 11, 0.14), transparent 60%);
+      radial-gradient(40% 35% at 15% 90%, rgba(245, 158, 11, 0.14), transparent 60%),
+      radial-gradient(35% 30% at 50% 50%, rgba(252, 211, 77, 0.06), transparent 70%);
     animation: drift 24s ease-in-out infinite;
     filter: blur(4px);
   }
   @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(2%,-2%) scale(1.05);}}
 
+  /* ── Top bar ─────────────────────────────────────────────────────── */
   header{
     flex:0 0 auto;
-    padding:12px 16px 10px;
-    border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:10px;
-    background:linear-gradient(180deg, rgba(251,191,36,0.08), transparent);
+    padding:14px 18px 12px;
+    display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(180deg, rgba(251,191,36,0.06), transparent);
   }
   .crown{
-    width:32px;height:32px;border-radius:8px;
+    width:36px;height:36px;border-radius:10px;
     background:linear-gradient(135deg, var(--accent), var(--accent-2));
     display:flex;align-items:center;justify-content:center;
     font-weight:700;color:var(--on-accent);font-size:18px;
@@ -81,12 +97,14 @@
   }
   .title{flex:1;min-width:0;}
   .title h1{
-    font-size:13px;font-weight:600;letter-spacing:0.04em;
+    font-size:14px;font-weight:700;letter-spacing:0.04em;
     color:var(--text);text-transform:uppercase;
+    font-family:var(--mono);
   }
   .title .sub{
-    font-size:11px;color:var(--hint);letter-spacing:0.02em;
-    display:flex;align-items:center;gap:6px;margin-top:1px;
+    font-size:11px;color:var(--hint);
+    display:flex;align-items:center;gap:6px;margin-top:2px;
+    font-family:var(--mono);
   }
   .dot{
     width:6px;height:6px;border-radius:50%;
@@ -94,58 +112,161 @@
     animation:pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .home-btn{
+    background:transparent;border:1px solid var(--line);color:var(--accent);
+    padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;
+    display:none;
+  }
+  .home-btn.show{display:inline-block;}
+  .home-btn:active{transform:scale(0.96);}
 
+  /* ── Main scroll ─────────────────────────────────────────────────── */
   main{
     flex:1 1 auto;
     overflow-y:auto;
     overflow-x:hidden;
-    padding:14px 14px 24px;
+    padding:18px 16px 100px;
     -webkit-overflow-scrolling:touch;
   }
 
-  .tab-pane{display:none;}
-  .tab-pane.active{display:block;animation:fadeIn 0.2s ease-out;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .pane{display:none;animation:fadeUp 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);}
+  .pane.active{display:block;}
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(12px) scale(0.99);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
 
   .section-label{
-    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
     color:var(--hint);
-    padding:0 4px 6px;
+    padding:0 4px 8px;
+    font-family:var(--mono);
   }
   .section-label::before{content:'>';color:var(--accent);margin-right:6px;}
 
   .card{
     background:var(--panel);
-    border:1px solid var(--line);
+    border:1px solid var(--line-soft);
     border-radius:var(--radius);
-    padding:12px 14px;
-    margin-bottom:10px;
+    padding:14px 16px;
+    margin-bottom:12px;
   }
 
-  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-  .stat-card{
-    padding:14px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius);position:relative;overflow:hidden;
+  /* ── Dashboard hero ─────────────────────────────────────────────── */
+  .hero{
+    background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(245,158,11,0.08));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 20px 16px;
+    margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
   }
-  .stat-card .lbl{
-    font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:0.08em;
+  .hero::after{
+    content:'';
+    position:absolute;right:-30%;top:-50%;
+    width:80%;height:160%;
+    background:radial-gradient(circle, rgba(252,211,77,0.18), transparent 60%);
+    pointer-events:none;
+    animation:heroPulse 6s ease-in-out infinite;
   }
-  .stat-card .num{
-    font-size:24px;font-weight:700;color:var(--accent);
-    text-shadow:0 0 12px rgba(251,191,36,0.45);
-    font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px;
+  @keyframes heroPulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+  .hero .lbl{
+    font-size:10px;color:var(--hint);text-transform:uppercase;
+    letter-spacing:0.12em;font-family:var(--mono);
+  }
+  .hero .num{
+    font-size:42px;font-weight:800;color:var(--accent);
+    text-shadow:0 0 22px rgba(251,191,36,0.5);
+    font-variant-numeric:tabular-nums;
+    margin:6px 0 4px;line-height:1;
+    font-family:var(--mono);
+  }
+  .hero .delta{
+    font-size:11px;color:var(--text-2);font-family:var(--mono);
   }
 
+  /* ── Stat chip grid ─────────────────────────────────────────────── */
+  .chip-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;
+  }
+  .chip{
+    padding:12px 10px;
+    background:var(--panel);
+    border:1px solid var(--line-soft);
+    border-radius:10px;
+    text-align:center;
+  }
+  .chip .v{
+    font-size:18px;font-weight:700;color:var(--accent);
+    font-variant-numeric:tabular-nums;font-family:var(--mono);
+  }
+  .chip .l{
+    font-size:9px;color:var(--hint);text-transform:uppercase;
+    letter-spacing:0.08em;margin-top:2px;
+  }
+
+  /* ── Tier bars ──────────────────────────────────────────────────── */
+  .tier-list{padding:0 4px;}
+  .tier-row{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 0;
+    border-bottom:1px dashed var(--line-soft);
+  }
+  .tier-row:last-child{border-bottom:none;}
+  .tier-row .name{
+    font-size:11px;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--text);
+    width:88px;flex-shrink:0;font-family:var(--mono);
+  }
+  .tier-row .bar{
+    flex:1;height:6px;background:rgba(251,191,36,0.06);
+    border-radius:999px;overflow:hidden;
+  }
+  .tier-row .fill{
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-3));
+    box-shadow:0 0 8px rgba(251,191,36,0.4);
+    transition:width 0.6s ease;
+  }
+  .tier-row .n{
+    font-size:11px;color:var(--text);font-weight:600;
+    width:48px;text-align:right;font-family:var(--mono);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ── Quick action row ────────────────────────────────────────────── */
+  .qa-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  }
+  .qa{
+    padding:14px 12px;
+    background:var(--panel);
+    border:1px solid var(--line-soft);
+    border-radius:12px;
+    cursor:pointer;
+    text-align:left;
+    transition:all 0.15s;
+  }
+  .qa:active{transform:scale(0.97);}
+  .qa:hover{border-color:var(--line);background:var(--panel-2);}
+  .qa .ico{font-size:22px;}
+  .qa .ttl{font-size:12px;font-weight:700;color:var(--text);margin-top:4px;
+           text-transform:uppercase;letter-spacing:0.04em;font-family:var(--mono);}
+  .qa .desc{font-size:10px;color:var(--hint);margin-top:1px;}
+
+  /* ── Forms ───────────────────────────────────────────────────────── */
   .field{margin-bottom:10px;}
   .field-label{
     font-size:10px;color:var(--hint);
     text-transform:uppercase;letter-spacing:0.08em;
-    margin-bottom:6px;display:block;
+    margin-bottom:6px;display:block;font-family:var(--mono);
   }
   .input,.select{
-    width:100%;padding:10px 12px;
-    background:var(--panel);border:1px solid var(--line);
-    border-radius:8px;color:var(--text);
+    width:100%;padding:11px 13px;
+    background:var(--panel);border:1px solid var(--line-soft);
+    border-radius:9px;color:var(--text);
     font-family:var(--mono);font-size:13px;
     outline:none;-webkit-user-select:text;user-select:text;
     transition:border-color 0.15s, background 0.15s;
@@ -154,14 +275,14 @@
     border-color:var(--accent);background:var(--panel-2);
     box-shadow:0 0 0 3px rgba(251,191,36,0.15);
   }
-  textarea.input{min-height:120px;resize:vertical;line-height:1.4;}
+  textarea.input{min-height:130px;resize:vertical;line-height:1.5;}
 
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    padding:9px 14px;border-radius:8px;
-    border:1px solid var(--line);background:var(--panel-2);
-    color:var(--text);font-family:var(--mono);font-size:12px;font-weight:600;
-    letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;
+    padding:11px 16px;border-radius:10px;
+    border:1px solid var(--line-soft);background:var(--panel-2);
+    color:var(--text);font-family:var(--mono);font-size:12px;font-weight:700;
+    letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;
     transition:all 0.15s;-webkit-tap-highlight-color:transparent;
   }
   .btn:active{transform:scale(0.97);}
@@ -171,54 +292,127 @@
     color:var(--on-accent);border-color:transparent;box-shadow:var(--shadow-glow);
   }
   .btn.full{width:100%;}
-  .btn.danger{color:var(--danger);border-color:rgba(248,113,113,0.4);}
+  .btn.danger{color:var(--red);border-color:rgba(248,113,113,0.4);}
   .btn-row{display:flex;gap:8px;}
   .btn-row .btn{flex:1;}
 
-  .tier-pill{
-    display:inline-block;padding:2px 8px;border-radius:999px;
-    font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
-    border:1px solid var(--line);color:var(--accent);
-  }
-
-  /* Bottom tabbar */
-  nav{
-    flex:0 0 auto;
-    display:grid;grid-template-columns:repeat(5, 1fr);
-    background:var(--bg-2);border-top:1px solid var(--line);
-    padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
-    position:relative;z-index:5;
-  }
-  nav::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity:0.5;
-  }
-  .tab{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:2px;padding:7px 2px;
-    border:none;background:transparent;cursor:pointer;
-    color:var(--hint);font-family:var(--mono);font-size:9px;letter-spacing:0.04em;
-    text-transform:uppercase;border-radius:8px;
-    transition:color 0.18s, background 0.18s;
-    -webkit-tap-highlight-color:transparent;min-width:0;overflow:hidden;
-  }
-  .tab span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .tab .ico{font-size:17px;line-height:1;transition:transform 0.18s, filter 0.18s;}
-  .tab.active{color:var(--accent);background:var(--panel-2);}
-  .tab.active .ico{filter:drop-shadow(0 0 6px var(--accent));transform:translateY(-1px);}
-  .tab:active{transform:scale(0.95);}
-
+  /* ── Toast ───────────────────────────────────────────────────────── */
   .toast{
-    position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
+    position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
     background:var(--bg-2);border:1px solid var(--accent);
     color:var(--text);padding:10px 16px;border-radius:8px;
     font-size:12px;box-shadow:var(--shadow-glow);
     opacity:0;pointer-events:none;
     transition:opacity 0.2s, transform 0.2s;
-    z-index:100;max-width:80%;text-align:center;
+    z-index:200;max-width:80%;text-align:center;
+    font-family:var(--mono);
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ──────────────────────────────────────────────────────────────────
+     iPhone navigation widget — floating bottom-right. Tap → home screen
+     overlay slides up with the app grid. Each icon swaps the active
+     pane in <main>.
+     ────────────────────────────────────────────────────────────────── */
+  .iphone-fab{
+    position:fixed;
+    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    right:18px;
+    width:64px;height:120px;
+    z-index:90;
+    background:transparent;border:none;cursor:pointer;
+    transition:transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+    -webkit-tap-highlight-color:transparent;
+    filter:drop-shadow(0 8px 22px rgba(251,191,36,0.35));
+  }
+  .iphone-fab:active{transform:scale(0.92);}
+  .iphone-fab svg{width:100%;height:100%;display:block;}
+
+  /* Backdrop + home-screen sheet */
+  .home-back{
+    position:fixed;inset:0;
+    background:rgba(2, 6, 16, 0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    z-index:100;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.25s;
+  }
+  .home-back.show{opacity:1;pointer-events:auto;}
+
+  .home-sheet{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    padding:24px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, rgba(15, 20, 35, 0.94), rgba(5, 8, 15, 0.98));
+    border-top:1px solid var(--line);
+    border-radius:24px 24px 0 0;
+    transform:translateY(100%);
+    transition:transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    z-index:101;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.6);
+  }
+  .home-sheet.show{transform:translateY(0);}
+  .home-sheet .grip{
+    width:38px;height:4px;border-radius:999px;
+    background:rgba(251,191,36,0.4);
+    margin:0 auto 18px;
+  }
+  .home-sheet .head{
+    text-align:center;
+    font-size:11px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.16em;
+    margin-bottom:18px;font-family:var(--mono);
+  }
+
+  .app-grid{
+    display:grid;grid-template-columns:repeat(4, 1fr);
+    gap:14px 4px;
+  }
+  .app{
+    display:flex;flex-direction:column;align-items:center;
+    gap:6px;
+    padding:6px;
+    background:transparent;border:none;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app:active{transform:scale(0.94);}
+  .app .icon{
+    width:62px;height:62px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;
+    background:linear-gradient(135deg, rgba(251,191,36,0.20), rgba(245,158,11,0.30));
+    border:1px solid rgba(251,191,36,0.45);
+    box-shadow:0 6px 18px rgba(0,0,0,0.5),
+               0 0 14px rgba(251,191,36,0.25),
+               0 1px 0 rgba(255,255,255,0.1) inset;
+    position:relative;
+    overflow:hidden;
+  }
+  /* Accent variants per app — gives the home grid a colourful real-iOS
+     feel rather than a wall of gold. */
+  .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#fde68a;}
+  .app[data-tab="users"]     .icon{background:linear-gradient(135deg,#4cc9f0,#3a82d6);border-color:#7dd3fc;}
+  .app[data-tab="autofarm"]  .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
+  .app[data-tab="promo"]     .icon{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:#c4b5fd;}
+  .app[data-tab="broadcast"] .icon{background:linear-gradient(135deg,#f472b6,#ec4899);border-color:#f9a8d4;}
+  .app[data-tab="logs"]      .icon{background:linear-gradient(135deg,#64748b,#475569);border-color:#94a3b8;}
+
+  .app .icon::after{
+    content:'';position:absolute;top:0;left:0;right:0;height:50%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    pointer-events:none;
+  }
+  .app .label{
+    font-size:11px;color:var(--text-2);font-family:var(--sans);
+    font-weight:500;
+  }
+  .app.active .icon{
+    box-shadow:0 0 0 3px var(--accent),
+               0 6px 18px rgba(0,0,0,0.5),
+               0 0 22px rgba(251,191,36,0.5);
+  }
+
 </style>
 </head>
 <body>
@@ -226,32 +420,61 @@
 <header>
   <div class="crown">👑</div>
   <div class="title">
-    <h1>Owner Console</h1>
-    <div class="sub"><span class="dot"></span><span id="status-text">connected</span></div>
+    <h1 id="screen-title">Dashboard</h1>
+    <div class="sub"><span class="dot"></span><span>connected · <span id="status-text">live</span></span></div>
   </div>
+  <button class="home-btn" id="back-home">← home</button>
 </header>
 
 <main>
 
-  <!-- ── Stats ───────────────────────────────────────────────────────── -->
-  <section class="tab-pane active" data-pane="stats">
-    <div class="section-label">Snapshot</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="lbl">Users</div><div class="num" id="stat-users">—</div></div>
-      <div class="stat-card"><div class="lbl">AutoFarm pool</div><div class="num" id="stat-af">—</div></div>
-      <div class="stat-card"><div class="lbl">Promos active</div><div class="num" id="stat-promo">—</div></div>
-      <div class="stat-card"><div class="lbl">AF state</div><div class="num" id="stat-af-state">—</div></div>
+  <!-- ── Dashboard ─────────────────────────────────────────────────── -->
+  <section class="pane active" data-pane="dashboard">
+    <div class="hero">
+      <div class="lbl">Total paid users</div>
+      <div class="num" id="hero-users">—</div>
+      <div class="delta" id="hero-delta">across all tiers</div>
+    </div>
+
+    <div class="chip-grid">
+      <div class="chip"><div class="v" id="chip-af">—</div><div class="l">autofarm pool</div></div>
+      <div class="chip"><div class="v" id="chip-promo">—</div><div class="l">promos active</div></div>
+      <div class="chip"><div class="v" id="chip-state">—</div><div class="l">af state</div></div>
     </div>
 
     <div class="section-label">Tier breakdown</div>
-    <div class="card" id="tier-breakdown">—</div>
+    <div class="card"><div class="tier-list" id="tier-list">—</div></div>
 
-    <div class="section-label">Refresh</div>
+    <div class="section-label">Quick actions</div>
+    <div class="qa-grid">
+      <button class="qa" data-jump="users">
+        <div class="ico">➕</div>
+        <div class="ttl">Grant tier</div>
+        <div class="desc">add / extend a paid user</div>
+      </button>
+      <button class="qa" data-jump="autofarm">
+        <div class="ico">▶</div>
+        <div class="ttl">Run AF cycle</div>
+        <div class="desc">force-trigger autofarm now</div>
+      </button>
+      <button class="qa" data-jump="promo">
+        <div class="ico">🎟</div>
+        <div class="ttl">Issue promos</div>
+        <div class="desc">generate −30% codes</div>
+      </button>
+      <button class="qa" data-jump="broadcast">
+        <div class="ico">📢</div>
+        <div class="ttl">Broadcast</div>
+        <div class="desc">message all users</div>
+      </button>
+    </div>
+
+    <div class="section-label" style="margin-top:14px;">Refresh</div>
     <button class="btn primary full" id="btn-state">⟳ Pull fresh state from bot</button>
   </section>
 
-  <!-- ── Users ────────────────────────────────────────────────────────── -->
-  <section class="tab-pane" data-pane="users">
+  <!-- ── Users ────────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="users">
     <div class="section-label">Grant / extend tier</div>
     <div class="card">
       <div class="field">
@@ -276,30 +499,30 @@
       </div>
       <div class="btn-row">
         <button class="btn primary" id="btn-set-tier">Grant / extend</button>
-        <button class="btn danger" id="btn-remove-user">Remove user</button>
+        <button class="btn danger" id="btn-remove-user">Remove</button>
       </div>
     </div>
 
     <div class="section-label">Inspect</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Filter by tier (optional)</label>
-        <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial / …">
+        <label class="field-label">Filter by tier (blank = all)</label>
+        <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial">
       </div>
       <button class="btn full" id="btn-list-users">📋 List users</button>
     </div>
   </section>
 
-  <!-- ── AutoFarm ─────────────────────────────────────────────────────── -->
-  <section class="tab-pane" data-pane="autofarm">
-    <div class="section-label">Pool</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="lbl">In pool</div><div class="num" id="af-count">—</div></div>
-      <div class="stat-card"><div class="lbl">Status</div><div class="num" id="af-status" style="font-size:14px;">—</div></div>
+  <!-- ── AutoFarm ─────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="autofarm">
+    <div class="chip-grid">
+      <div class="chip"><div class="v" id="af-count">—</div><div class="l">in pool</div></div>
+      <div class="chip"><div class="v" id="af-state">—</div><div class="l">status</div></div>
+      <div class="chip"><div class="v" id="af-next">—</div><div class="l">next run</div></div>
     </div>
 
     <div class="section-label">Actions</div>
-    <button class="btn primary full" id="btn-af-run" style="margin-bottom:8px;">▶ Run cycle now</button>
+    <button class="btn primary full" id="btn-af-run" style="margin-bottom:10px;">▶ Run cycle now</button>
 
     <div class="card">
       <div class="field">
@@ -310,9 +533,9 @@
     </div>
   </section>
 
-  <!-- ── Promo ────────────────────────────────────────────────────────── -->
-  <section class="tab-pane" data-pane="promo">
-    <div class="section-label">Generate</div>
+  <!-- ── Promo ────────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="promo">
+    <div class="section-label">Generate codes</div>
     <div class="card">
       <div class="field">
         <label class="field-label">Number of codes (1-50)</label>
@@ -321,16 +544,16 @@
       <button class="btn primary full" id="btn-promo-gen">🎟 Generate</button>
     </div>
 
-    <div class="section-label">List</div>
+    <div class="section-label">Inspect</div>
     <button class="btn full" id="btn-promo-list">📋 List active promos</button>
   </section>
 
-  <!-- ── Broadcast ────────────────────────────────────────────────────── -->
-  <section class="tab-pane" data-pane="broadcast">
-    <div class="section-label">Broadcast</div>
+  <!-- ── Broadcast ────────────────────────────────────────────────── -->
+  <section class="pane" data-pane="broadcast">
+    <div class="section-label">Mass message</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Tier filter (or "all")</label>
+        <label class="field-label">Tier filter</label>
         <select class="select" id="bc-tier">
           <option value="all" selected>all paid</option>
           <option value="trial">trial only</option>
@@ -346,22 +569,63 @@
         <label class="field-label">Message body (HTML allowed)</label>
         <textarea class="input" id="bc-text" placeholder="📢 Hello everyone …"></textarea>
       </div>
-      <button class="btn primary full danger" id="btn-broadcast">📢 Send broadcast</button>
+      <button class="btn primary danger full" id="btn-broadcast">📢 Send broadcast</button>
       <div style="font-size:10px;color:var(--hint);margin-top:8px;">
-        ⚠ This will mass-send to all matching users. Mini-app closes after send.
+        ⚠ Mass-send to all matching users. Mini-app closes after send.
       </div>
     </div>
   </section>
 
 </main>
 
-<nav>
-  <button class="tab active" data-tab="stats"><span class="ico">📊</span><span>stats</span></button>
-  <button class="tab" data-tab="users"><span class="ico">👥</span><span>users</span></button>
-  <button class="tab" data-tab="autofarm"><span class="ico">🤖</span><span>autofarm</span></button>
-  <button class="tab" data-tab="promo"><span class="ico">🎟</span><span>promo</span></button>
-  <button class="tab" data-tab="broadcast"><span class="ico">📢</span><span>broadcast</span></button>
-</nav>
+<!-- ── Floating iPhone navigation ─────────────────────────────────── -->
+<button class="iphone-fab" id="phone-fab" aria-label="Open apps">
+  <svg viewBox="0 0 64 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <rect x="3" y="3" width="58" height="114" rx="14" ry="14"
+          fill="#0a0f1c" stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="6" y="6" width="52" height="108" rx="11" ry="11"
+          fill="url(#screenGrad)" stroke="rgba(251,191,36,0.2)"/>
+    <!-- Notch -->
+    <rect x="22" y="9" width="20" height="4" rx="2" fill="#000"/>
+    <!-- Screen icons (mini grid) -->
+    <g opacity="0.95">
+      <rect x="11" y="22" width="10" height="10" rx="2.5" fill="#fbbf24"/>
+      <rect x="25" y="22" width="10" height="10" rx="2.5" fill="#4cc9f0"/>
+      <rect x="39" y="22" width="10" height="10" rx="2.5" fill="#34d399"/>
+      <rect x="11" y="36" width="10" height="10" rx="2.5" fill="#a78bfa"/>
+      <rect x="25" y="36" width="10" height="10" rx="2.5" fill="#f472b6"/>
+      <rect x="39" y="36" width="10" height="10" rx="2.5" fill="#64748b"/>
+    </g>
+    <!-- Home indicator -->
+    <rect x="22" y="108" width="20" height="3" rx="1.5" fill="rgba(251,191,36,0.7)"/>
+    <!-- Buttons (volume, side) -->
+    <rect x="1" y="22" width="2" height="10" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <rect x="1" y="36" width="2" height="14" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <rect x="61" y="32" width="2" height="20" rx="1" fill="rgba(251,191,36,0.5)"/>
+    <defs>
+      <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a1407"/>
+        <stop offset="100%" stop-color="#05080f"/>
+      </linearGradient>
+    </defs>
+    <!-- Soft glow ring on hover/active is via filter on parent; subtle shimmer here -->
+  </svg>
+</button>
+
+<!-- Home-screen sheet -->
+<div class="home-back" id="home-back"></div>
+<div class="home-sheet" id="home-sheet">
+  <div class="grip"></div>
+  <div class="head">Owner Apps</div>
+  <div class="app-grid" id="app-grid">
+    <button class="app" data-tab="dashboard"><div class="icon">📊</div><div class="label">Dashboard</div></button>
+    <button class="app" data-tab="users"><div class="icon">👥</div><div class="label">Users</div></button>
+    <button class="app" data-tab="autofarm"><div class="icon">🤖</div><div class="label">AutoFarm</div></button>
+    <button class="app" data-tab="promo"><div class="icon">🎟</div><div class="label">Promo</div></button>
+    <button class="app" data-tab="broadcast"><div class="icon">📢</div><div class="label">Broadcast</div></button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -387,42 +651,100 @@
   const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   })[c]);
+  const fmtTs = t => {
+    if (!t) return 'idle';
+    try { return new Date(t * 1000).toLocaleString('en-GB', { hour12: false }); }
+    catch(e){ return String(t); }
+  };
 
   // ── Render snapshot ──────────────────────────────────────────────
   function renderSnapshot(s){
-    document.getElementById('stat-users').textContent = fmtNum(s.users_total);
-    document.getElementById('stat-af').textContent = fmtNum(s.af?.count);
-    document.getElementById('stat-promo').textContent = fmtNum(s.promo_active);
-    document.getElementById('stat-af-state').textContent =
-      s.af?.running ? 'running' : 'idle';
-    document.getElementById('af-count').textContent = fmtNum(s.af?.count);
-    document.getElementById('af-status').textContent =
-      s.af?.running ? 'running' : 'idle';
-
-    // Tier breakdown
-    const wrap = document.getElementById('tier-breakdown');
+    document.getElementById('hero-users').textContent = fmtNum(s.users_total);
     const counts = s.tier_counts || {};
-    const total = Object.values(counts).reduce((a,b) => a + b, 0) || 1;
-    wrap.innerHTML = Object.entries(counts).sort((a,b) => b[1] - a[1])
-      .map(([t, n]) => {
-        const pct = (n / total * 100).toFixed(1);
-        return `<div style="display:flex;justify-content:space-between;padding:4px 0;">
-          <span class="tier-pill">${escHtml(t)}</span>
-          <span style="color:var(--text);font-weight:600;">${fmtNum(n)} <span style="color:var(--hint);font-size:10px;">(${pct}%)</span></span>
-        </div>`;
-      }).join('') || '<span style="color:var(--hint);">no data</span>';
+    const total  = Object.values(counts).reduce((a,b) => a + b, 0) || 1;
+    const top    = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    document.getElementById('hero-delta').textContent =
+      top.length ? top.map(([t,n]) => `${t} ${n}`).join(' · ') : 'no users yet';
+
+    document.getElementById('chip-af').textContent = fmtNum(s.af?.count);
+    document.getElementById('chip-promo').textContent = fmtNum(s.promo_active);
+    document.getElementById('chip-state').textContent = s.af?.running ? 'live' : 'idle';
+
+    document.getElementById('af-count').textContent = fmtNum(s.af?.count);
+    document.getElementById('af-state').textContent = s.af?.running ? 'running' : 'idle';
+    document.getElementById('af-next').style.fontSize = '11px';
+    document.getElementById('af-next').textContent = s.af?.next ? fmtTs(s.af.next) : 'idle';
+
+    // Tier bars
+    const wrap = document.getElementById('tier-list');
+    if (!Object.keys(counts).length) {
+      wrap.innerHTML = '<div style="color:var(--hint);text-align:center;padding:8px 0;">no users yet</div>';
+    } else {
+      const max = Math.max(...Object.values(counts));
+      wrap.innerHTML = Object.entries(counts).sort((a,b) => b[1] - a[1]).map(([t, n]) => `
+        <div class="tier-row">
+          <span class="name">${escHtml(t)}</span>
+          <div class="bar"><div class="fill" style="width:${(n/max*100).toFixed(1)}%;"></div></div>
+          <span class="n">${fmtNum(n)}</span>
+        </div>`).join('');
+    }
   }
   if (state.owner) renderSnapshot(state);
 
-  // ── Tab switching ────────────────────────────────────────────────
-  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
-    document.querySelectorAll('.tab-pane').forEach(p =>
-      p.classList.toggle('active', p.dataset.pane === t.dataset.tab));
+  // ── Pane / tab switching ─────────────────────────────────────────
+  const TITLES = {
+    dashboard: 'Dashboard', users: 'Users', autofarm: 'AutoFarm',
+    promo: 'Promo', broadcast: 'Broadcast'
+  };
+  function switchPane(name){
+    document.querySelectorAll('.pane').forEach(p =>
+      p.classList.toggle('active', p.dataset.pane === name));
+    document.querySelectorAll('.app').forEach(a =>
+      a.classList.toggle('active', a.dataset.tab === name));
+    document.getElementById('screen-title').textContent = TITLES[name] || 'Owner';
+    document.getElementById('back-home').classList.toggle('show', name !== 'dashboard');
+    // Scroll to top of <main> so the new pane starts at the top.
+    document.querySelector('main').scrollTop = 0;
+  }
+
+  // App icons
+  document.querySelectorAll('.app').forEach(a => a.addEventListener('click', () => {
+    const name = a.dataset.tab;
+    switchPane(name);
+    closeHome();
     try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
   }));
 
-  // ── Toast ────────────────────────────────────────────────────────
+  // Quick-action shortcuts on Dashboard
+  document.querySelectorAll('[data-jump]').forEach(b =>
+    b.addEventListener('click', () => switchPane(b.dataset.jump)));
+
+  // Header back-to-home
+  document.getElementById('back-home')?.addEventListener('click', () => switchPane('dashboard'));
+
+  // ── iPhone widget — open / close home grid ──────────────────────
+  const back  = document.getElementById('home-back');
+  const sheet = document.getElementById('home-sheet');
+  function openHome(){
+    back.classList.add('show');
+    sheet.classList.add('show');
+    try { tg?.HapticFeedback?.impactOccurred?.('light'); } catch(e){}
+  }
+  function closeHome(){
+    back.classList.remove('show');
+    sheet.classList.remove('show');
+  }
+  document.getElementById('phone-fab')?.addEventListener('click', openHome);
+  back?.addEventListener('click', closeHome);
+  // Swipe-down on sheet to dismiss (basic touch handling)
+  let _ty0 = 0;
+  sheet?.addEventListener('touchstart', e => { _ty0 = e.touches[0].clientY; }, {passive:true});
+  sheet?.addEventListener('touchmove',  e => {
+    const dy = e.touches[0].clientY - _ty0;
+    if (dy > 80) { closeHome(); _ty0 = 1e9; }
+  }, {passive:true});
+
+  // ── Toast + sendData wrapper ─────────────────────────────────────
   const toastEl = document.getElementById('toast');
   let toastT = null;
   const toast = (msg, kind='') => {
@@ -431,23 +753,18 @@
     clearTimeout(toastT);
     toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
   };
-
-  // ── Send-data wrapper ────────────────────────────────────────────
-  function send(payload, closeMsg = '✓ Sent — see chat') {
+  function send(payload, msg = '✓ Sent — see chat') {
     try {
       tg?.HapticFeedback?.impactOccurred?.('medium');
       tg?.sendData?.(JSON.stringify(payload));
-      toast(closeMsg, 'ok');
-    } catch(e) {
-      toast('Send failed: ' + e.message, 'err');
-    }
+      toast(msg, 'ok');
+    } catch(e){ toast('Send failed: ' + e.message, 'err'); }
   }
 
-  // ── Stats refresh ────────────────────────────────────────────────
+  // ── Action handlers ──────────────────────────────────────────────
   document.getElementById('btn-state')?.addEventListener('click', () =>
     send({ mode: 'owner_state' }, '⟳ pulling…'));
 
-  // ── Users ────────────────────────────────────────────────────────
   document.getElementById('btn-set-tier')?.addEventListener('click', () => {
     const tg_id = parseInt(document.getElementById('set-tg').value, 10);
     const tier  = document.getElementById('set-tier').value;
@@ -466,7 +783,6 @@
     send({ mode: 'owner_users_list', tier });
   });
 
-  // ── AutoFarm ─────────────────────────────────────────────────────
   document.getElementById('btn-af-run')?.addEventListener('click', () => {
     if (!confirm('Trigger autofarm cycle on entire pool?')) return;
     send({ mode: 'owner_af_run_now' });
@@ -477,7 +793,6 @@
     send({ mode: 'owner_af_remove', email });
   });
 
-  // ── Promo ────────────────────────────────────────────────────────
   document.getElementById('btn-promo-gen')?.addEventListener('click', () => {
     const count = Math.max(1, Math.min(50, parseInt(document.getElementById('promo-count').value, 10) || 1));
     send({ mode: 'owner_promo_gen', count });
@@ -485,7 +800,6 @@
   document.getElementById('btn-promo-list')?.addEventListener('click', () =>
     send({ mode: 'owner_promo_list' }));
 
-  // ── Broadcast ────────────────────────────────────────────────────
   document.getElementById('btn-broadcast')?.addEventListener('click', () => {
     const text = document.getElementById('bc-text').value.trim();
     const tier = document.getElementById('bc-tier').value;
