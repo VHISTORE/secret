@@ -605,6 +605,109 @@
     100% { opacity:0; transform:translate(-50%, -80px) scale(2.4); filter:blur(8px); }
   }
 
+  /* ── Cars tab ────────────────────────────────────────────────────── */
+  .cars-section{margin-bottom:14px;}
+  .cars-section .head{
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--hint);
+    padding:0 4px 6px;
+  }
+  .cars-section .head::before{content:'>';color:var(--accent);margin-right:6px;}
+  .main-acc-card{
+    background:var(--panel);
+    border:1px solid var(--accent);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    box-shadow:0 0 14px rgba(76,201,240,0.15) inset;
+  }
+  .main-acc-card .field{margin-bottom:8px;}
+  .main-acc-card .field:last-child{margin-bottom:0;}
+  .main-acc-card .gstatus{
+    display:flex;justify-content:space-between;
+    margin-top:8px;padding-top:8px;
+    border-top:1px dashed var(--line);
+    font-size:11px;color:var(--hint);font-family:var(--mono);
+  }
+  .main-acc-card .gstatus b{color:var(--accent);}
+
+  /* Wishlist (cars to buy) */
+  .car-wishlist{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:10px 12px;
+  }
+  .car-wishlist .empty{
+    color:var(--hint);font-size:11px;text-align:center;padding:14px 0;
+  }
+  .car-wishlist .row{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 4px;
+    border-bottom:1px dashed var(--line);
+    font-family:var(--mono);font-size:12px;
+  }
+  .car-wishlist .row:last-child{border-bottom:none;}
+  .car-wishlist .row .id{
+    color:var(--accent);font-weight:700;min-width:42px;
+  }
+  .car-wishlist .row .meta{flex:1;color:var(--text-2);font-size:10.5px;}
+  .car-wishlist .row .qty{
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:6px;padding:2px 6px;
+    color:var(--accent);font-weight:600;font-size:11px;
+    min-width:28px;text-align:center;
+  }
+  .car-wishlist .row .x{
+    color:var(--danger);cursor:pointer;font-weight:700;padding:0 6px;
+  }
+  .car-wishlist .row .x:hover{filter:brightness(1.4);}
+
+  /* Picker (catalog browser) */
+  .car-picker-toolbar{
+    display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;
+  }
+  .car-picker-toolbar input,
+  .car-picker-toolbar select{
+    flex:1;min-width:80px;
+    padding:6px 8px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    color:var(--text);
+    font-family:var(--mono);font-size:11px;
+    outline:none;
+    -webkit-user-select:text;user-select:text;
+  }
+  .car-picker-list{
+    background:#000;
+    border:1px solid var(--line);
+    border-radius:8px;
+    max-height:34vh;
+    overflow-y:auto;
+    font-family:var(--mono);
+  }
+  .car-picker-list .pcard{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 10px;
+    border-bottom:1px solid rgba(76,201,240,0.06);
+    cursor:pointer;
+    font-size:11px;
+  }
+  .car-picker-list .pcard:hover{background:rgba(76,201,240,0.08);}
+  .car-picker-list .pcard:last-child{border-bottom:none;}
+  .car-picker-list .pcard .id{color:var(--accent);font-weight:700;min-width:42px;}
+  .car-picker-list .pcard .price{
+    min-width:74px;text-align:right;
+    color:var(--text);font-weight:600;
+  }
+  .car-picker-list .pcard .price.coin{color:var(--amber);}
+  .car-picker-list .pcard .price.cash{color:var(--green);}
+  .car-picker-list .pcard .meta{flex:1;color:var(--hint);font-size:10px;}
+  .car-picker-list .pcard.in-list{background:rgba(76,201,240,0.12);}
+  .car-picker-list .pcard.in-list::after{
+    content:'✓';color:var(--accent);margin-left:auto;font-weight:700;
+  }
+
   /* ── Stat cards (Dashboard tab) ──────────────────────────────────── */
   .stat-grid{
     display:grid;
@@ -1193,6 +1296,82 @@
     </div>
   </section>
 
+  <!-- ── Cars (fleet builder) ─────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="cars">
+
+    <div class="cars-section">
+      <div class="head">Main account (target garage)</div>
+      <div class="main-acc-card">
+        <div class="field">
+          <label class="field-label">Email</label>
+          <input class="input" type="email" id="cars-main-email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="main@gmail.com">
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <input class="input" type="password" id="cars-main-pw" autocomplete="off" placeholder="••••••">
+        </div>
+        <div class="gstatus" id="cars-main-status">
+          <span>garage: <b id="cars-main-garage">—</b></span>
+          <span>cash: <b id="cars-main-cash">—</b></span>
+          <span>coins: <b id="cars-main-coins">—</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cars-section">
+      <div class="head">Donor accounts (one email:password per line, or upload .txt)</div>
+      <textarea class="input" id="cars-donors" placeholder="donor1@gmail.com:pass1&#10;donor2@gmail.com:pass2&#10;…" style="min-height:90px;"></textarea>
+      <div class="seg" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr;">
+        <button type="button" id="cars-donors-from-pool">Use my pool</button>
+        <button type="button" id="cars-donors-file">Upload .txt</button>
+        <button type="button" id="cars-donors-clear">Clear</button>
+      </div>
+      <input type="file" id="cars-donors-file-input" accept=".txt,text/plain" style="display:none;">
+      <div class="hint" style="font-size:10px;color:var(--hint);margin-top:6px;letter-spacing:0.04em;">
+        Each donor signs in, optionally tops up coins via daily drag race, then
+        buys the cars assigned to them. Transfer to main acc is a separate step.
+      </div>
+    </div>
+
+    <div class="cars-section">
+      <div class="head">Wishlist · cars to buy on each donor</div>
+      <div class="car-wishlist" id="car-wishlist">
+        <div class="empty">Nothing selected — pick from the catalogue below</div>
+      </div>
+    </div>
+
+    <div class="cars-section">
+      <div class="head">Catalogue · tap to add / remove</div>
+      <div class="car-picker-toolbar">
+        <input type="search" id="car-search" placeholder="search id / class / hp" autocomplete="off">
+        <select id="car-currency">
+          <option value="">any cur</option>
+          <option value="cash">cash</option>
+          <option value="coin">coin</option>
+        </select>
+        <select id="car-class">
+          <option value="">any class</option>
+          <option value="0">class 0</option>
+          <option value="1">class 1</option>
+          <option value="2">class 2</option>
+          <option value="3">class 3</option>
+          <option value="4">class 4</option>
+          <option value="5">class 5</option>
+          <option value="6">class 6</option>
+        </select>
+      </div>
+      <div class="car-picker-list" id="car-picker-list"></div>
+    </div>
+
+    <div class="launch-dock">
+      <div class="launch-meta"><span id="cars-summary">Configure main + donors + wishlist</span></div>
+      <button class="launch-btn" id="cars-launch" disabled>
+        <span class="ico">🚗</span><span class="label">Buy fleet</span>
+      </button>
+    </div>
+
+  </section>
+
   <!-- ── Dashboard ─────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="dashboard">
     <div class="section-label">Lifetime stats</div>
@@ -1255,6 +1434,9 @@
   </button>
   <button class="tab" data-tab="functions">
     <span class="ico">⚙️</span><span>functions</span>
+  </button>
+  <button class="tab" data-tab="cars">
+    <span class="ico">🚗</span><span>cars</span>
   </button>
   <button class="tab" data-tab="dashboard">
     <span class="ico">📊</span><span>dashboard</span>
@@ -1793,6 +1975,188 @@
     });
   }
   renderGenPool(state.gen);
+
+  // ── Cars tab ─────────────────────────────────────────────────────
+  // Compact car catalogue embedded so the picker is instant — no need
+  // for a server round-trip and no URL-blob bloat.
+  // {id, p:price, cur:'cash'|'coin', cl:class, hp, y:year}
+  // 199 buyable visible cars; hidden donate IDs filtered out — those
+  // return R=0 from BuyCar22_1 (IAP-gated).
+  const CAR_CATALOG = [{"id":0,"p":1000,"cur":"coin","cl":2,"hp":371,"y":1994},{"id":1,"p":1000,"cur":"coin","cl":2,"hp":344,"y":2012},{"id":2,"p":18000,"cur":"cash","cl":2,"hp":403,"y":2008},{"id":3,"p":2500,"cur":"coin","cl":2,"hp":437,"y":2011},{"id":4,"p":5000,"cur":"coin","cl":2,"hp":344,"y":2018},{"id":5,"p":1500,"cur":"coin","cl":2,"hp":358,"y":2010},{"id":6,"p":1000,"cur":"coin","cl":0,"hp":247,"y":2020},{"id":7,"p":10000,"cur":"coin","cl":3,"hp":452,"y":2010},{"id":8,"p":1000,"cur":"coin","cl":1,"hp":284,"y":2007},{"id":9,"p":500,"cur":"coin","cl":1,"hp":314,"y":2010},{"id":10,"p":10000,"cur":"coin","cl":4,"hp":574,"y":2013},{"id":11,"p":1500,"cur":"coin","cl":1,"hp":304,"y":1999},{"id":12,"p":1000,"cur":"coin","cl":1,"hp":303,"y":2007},{"id":13,"p":12000,"cur":"cash","cl":0,"hp":247,"y":1997},{"id":14,"p":2000,"cur":"coin","cl":3,"hp":461,"y":2007},{"id":15,"p":2000,"cur":"coin","cl":2,"hp":418,"y":2012},{"id":17,"p":1500,"cur":"coin","cl":2,"hp":396,"y":2012},{"id":19,"p":1500,"cur":"coin","cl":3,"hp":483,"y":2015},{"id":20,"p":1500,"cur":"coin","cl":2,"hp":405,"y":2019},{"id":21,"p":500,"cur":"coin","cl":0,"hp":217,"y":2007},{"id":22,"p":2000,"cur":"coin","cl":2,"hp":433,"y":2012},{"id":23,"p":200000,"cur":"cash","cl":2,"hp":381,"y":2012},{"id":24,"p":2000,"cur":"coin","cl":2,"hp":418,"y":2009},{"id":27,"p":10000,"cur":"coin","cl":5,"hp":717,"y":2005},{"id":28,"p":1500,"cur":"coin","cl":2,"hp":389,"y":2012},{"id":29,"p":80000,"cur":"cash","cl":0,"hp":224,"y":2007},{"id":30,"p":1000,"cur":"coin","cl":2,"hp":342,"y":1998},{"id":31,"p":2000,"cur":"coin","cl":2,"hp":380,"y":2005},{"id":32,"p":10000,"cur":"coin","cl":5,"hp":952,"y":2011},{"id":35,"p":1500,"cur":"coin","cl":2,"hp":381,"y":2015},{"id":39,"p":500,"cur":"coin","cl":4,"hp":569,"y":1969},{"id":40,"p":2000,"cur":"coin","cl":5,"hp":636,"y":2014},{"id":41,"p":10000,"cur":"coin","cl":5,"hp":747,"y":2013},{"id":43,"p":1000,"cur":"coin","cl":1,"hp":268,"y":2009},{"id":45,"p":70000,"cur":"cash","cl":1,"hp":303,"y":1991},{"id":47,"p":1500,"cur":"coin","cl":1,"hp":262,"y":1999},{"id":48,"p":500000,"cur":"cash","cl":1,"hp":252,"y":2003},{"id":49,"p":1500,"cur":"coin","cl":1,"hp":337,"y":1993},{"id":51,"p":1500,"cur":"coin","cl":2,"hp":346,"y":1959},{"id":53,"p":250000,"cur":"cash","cl":0,"hp":224,"y":1969},{"id":54,"p":500,"cur":"coin","cl":1,"hp":300,"y":1985},{"id":55,"p":60000,"cur":"cash","cl":0,"hp":192,"y":-1},{"id":56,"p":1500,"cur":"coin","cl":2,"hp":373,"y":2008},{"id":57,"p":50000,"cur":"cash","cl":2,"hp":424,"y":2014},{"id":58,"p":10000,"cur":"coin","cl":3,"hp":447,"y":2009},{"id":59,"p":1000,"cur":"coin","cl":0,"hp":199,"y":2007},{"id":60,"p":500,"cur":"coin","cl":1,"hp":283,"y":2011},{"id":61,"p":1500,"cur":"coin","cl":2,"hp":416,"y":2005},{"id":62,"p":500,"cur":"coin","cl":3,"hp":473,"y":2020},{"id":66,"p":220000,"cur":"cash","cl":2,"hp":370,"y":2005},{"id":74,"p":18000,"cur":"cash","cl":0,"hp":212,"y":2014},{"id":76,"p":1500,"cur":"coin","cl":2,"hp":344,"y":2009},{"id":77,"p":20000,"cur":"cash","cl":2,"hp":386,"y":2009},{"id":81,"p":1000,"cur":"coin","cl":1,"hp":325,"y":2001},{"id":82,"p":1500,"cur":"coin","cl":1,"hp":314,"y":2005},{"id":85,"p":1000,"cur":"coin","cl":1,"hp":309,"y":2012},{"id":86,"p":1500,"cur":"coin","cl":2,"hp":361,"y":2009},{"id":87,"p":2000,"cur":"coin","cl":3,"hp":476,"y":2006},{"id":88,"p":1500,"cur":"coin","cl":1,"hp":316,"y":2001},{"id":89,"p":90000,"cur":"cash","cl":2,"hp":358,"y":1951},{"id":99,"p":12000,"cur":"cash","cl":0,"hp":178,"y":2007},{"id":100,"p":60000,"cur":"cash","cl":0,"hp":177,"y":1971},{"id":102,"p":30000,"cur":"cash","cl":0,"hp":136,"y":1997},{"id":103,"p":2500,"cur":"coin","cl":2,"hp":402,"y":2014},{"id":104,"p":5000,"cur":"coin","cl":3,"hp":477,"y":2018},{"id":105,"p":2000,"cur":"coin","cl":3,"hp":505,"y":2018},{"id":106,"p":150000,"cur":"cash","cl":0,"hp":216,"y":1984},{"id":107,"p":2500,"cur":"coin","cl":2,"hp":352,"y":2006},{"id":108,"p":1500,"cur":"coin","cl":2,"hp":416,"y":1984},{"id":109,"p":2500,"cur":"coin","cl":3,"hp":440,"y":2014},{"id":110,"p":1500,"cur":"coin","cl":1,"hp":337,"y":2013},{"id":111,"p":2000,"cur":"coin","cl":2,"hp":437,"y":2016},{"id":112,"p":1000,"cur":"coin","cl":1,"hp":339,"y":1991},{"id":113,"p":1000,"cur":"coin","cl":1,"hp":319,"y":2013},{"id":114,"p":2500,"cur":"coin","cl":3,"hp":485,"y":2016},{"id":115,"p":5000,"cur":"coin","cl":3,"hp":448,"y":2015},{"id":116,"p":1500,"cur":"coin","cl":2,"hp":369,"y":2022},{"id":117,"p":2500,"cur":"coin","cl":2,"hp":409,"y":2017},{"id":118,"p":2000,"cur":"coin","cl":2,"hp":380,"y":2015},{"id":120,"p":300000,"cur":"cash","cl":1,"hp":309,"y":2018},{"id":121,"p":500,"cur":"coin","cl":0,"hp":203,"y":2014},{"id":123,"p":2000,"cur":"coin","cl":2,"hp":400,"y":2015},{"id":124,"p":2500,"cur":"coin","cl":2,"hp":393,"y":2015},{"id":126,"p":500,"cur":"coin","cl":1,"hp":288,"y":2019},{"id":127,"p":1500,"cur":"coin","cl":2,"hp":390,"y":2016},{"id":128,"p":1500,"cur":"coin","cl":1,"hp":291,"y":1999},{"id":129,"p":20000,"cur":"coin","cl":1,"hp":322,"y":1991},{"id":130,"p":5000,"cur":"coin","cl":3,"hp":515,"y":2006},{"id":131,"p":280000,"cur":"cash","cl":1,"hp":271,"y":1989},{"id":132,"p":10000,"cur":"cash","cl":0,"hp":151,"y":1982},{"id":133,"p":50000,"cur":"cash","cl":0,"hp":192,"y":2011},{"id":134,"p":1500,"cur":"coin","cl":1,"hp":302,"y":1992},{"id":135,"p":5000,"cur":"coin","cl":2,"hp":434,"y":2020},{"id":136,"p":2000,"cur":"coin","cl":2,"hp":392,"y":2014},{"id":137,"p":18000,"cur":"cash","cl":1,"hp":258,"y":2006},{"id":139,"p":40000,"cur":"cash","cl":1,"hp":259,"y":1998},{"id":140,"p":35000,"cur":"cash","cl":0,"hp":219,"y":1983},{"id":141,"p":2500,"cur":"coin","cl":4,"hp":553,"y":2008},{"id":142,"p":5000,"cur":"coin","cl":3,"hp":465,"y":2019},{"id":143,"p":5000,"cur":"coin","cl":2,"hp":372,"y":2023},{"id":144,"p":2500,"cur":"coin","cl":3,"hp":463,"y":2019},{"id":145,"p":1500,"cur":"coin","cl":1,"hp":311,"y":2002},{"id":146,"p":35000,"cur":"cash","cl":0,"hp":151,"y":2006},{"id":147,"p":500,"cur":"coin","cl":1,"hp":334,"y":2015},{"id":148,"p":500,"cur":"coin","cl":1,"hp":293,"y":1965},{"id":149,"p":25000,"cur":"cash","cl":0,"hp":223,"y":1956},{"id":150,"p":1000,"cur":"coin","cl":2,"hp":369,"y":2019},{"id":151,"p":500,"cur":"coin","cl":0,"hp":231,"y":2014},{"id":152,"p":12000,"cur":"cash","cl":0,"hp":165,"y":1971},{"id":153,"p":2500,"cur":"coin","cl":2,"hp":436,"y":2021},{"id":154,"p":500,"cur":"coin","cl":0,"hp":211,"y":2020},{"id":155,"p":15000,"cur":"coin","cl":6,"hp":1546,"y":1991},{"id":156,"p":1500,"cur":"coin","cl":1,"hp":307,"y":1989},{"id":157,"p":260000,"cur":"cash","cl":0,"hp":225,"y":1984},{"id":158,"p":170000,"cur":"cash","cl":1,"hp":256,"y":2019},{"id":160,"p":1000,"cur":"coin","cl":2,"hp":355,"y":1970},{"id":161,"p":500,"cur":"coin","cl":1,"hp":321,"y":2014},{"id":162,"p":10000,"cur":"coin","cl":5,"hp":623,"y":2017},{"id":163,"p":320000,"cur":"cash","cl":0,"hp":205,"y":1964},{"id":165,"p":20000,"cur":"coin","cl":6,"hp":1209,"y":2018},{"id":166,"p":2500,"cur":"coin","cl":3,"hp":442,"y":2020},{"id":167,"p":1500,"cur":"coin","cl":1,"hp":277,"y":2011},{"id":168,"p":500,"cur":"coin","cl":1,"hp":298,"y":2015},{"id":169,"p":2500,"cur":"coin","cl":2,"hp":391,"y":2003},{"id":172,"p":5000,"cur":"coin","cl":2,"hp":358,"y":2018},{"id":173,"p":1500,"cur":"coin","cl":3,"hp":444,"y":2012},{"id":175,"p":1000,"cur":"coin","cl":1,"hp":296,"y":1995},{"id":176,"p":25000,"cur":"cash","cl":2,"hp":346,"y":1984},{"id":177,"p":500,"cur":"coin","cl":1,"hp":305,"y":1991},{"id":178,"p":10000,"cur":"coin","cl":5,"hp":901,"y":2016},{"id":179,"p":120000,"cur":"cash","cl":0,"hp":211,"y":1977},{"id":180,"p":500,"cur":"coin","cl":2,"hp":341,"y":1984},{"id":181,"p":1000,"cur":"coin","cl":1,"hp":330,"y":1964},{"id":182,"p":1000,"cur":"coin","cl":5,"hp":801,"y":2007},{"id":183,"p":1000,"cur":"coin","cl":5,"hp":754,"y":1965},{"id":184,"p":190000,"cur":"cash","cl":1,"hp":271,"y":1997},{"id":185,"p":500,"cur":"coin","cl":2,"hp":345,"y":1965},{"id":186,"p":60000,"cur":"cash","cl":0,"hp":207,"y":1985},{"id":187,"p":370000,"cur":"cash","cl":0,"hp":216,"y":1989},{"id":188,"p":5000,"cur":"coin","cl":3,"hp":468,"y":2021},{"id":189,"p":1500,"cur":"coin","cl":1,"hp":298,"y":2023},{"id":190,"p":45000,"cur":"cash","cl":0,"hp":227,"y":1995},{"id":192,"p":1500,"cur":"coin","cl":2,"hp":349,"y":2021},{"id":193,"p":2500,"cur":"coin","cl":2,"hp":407,"y":2022},{"id":194,"p":5000,"cur":"coin","cl":3,"hp":493,"y":2003},{"id":196,"p":500,"cur":"coin","cl":1,"hp":324,"y":1973},{"id":197,"p":80000,"cur":"cash","cl":0,"hp":118,"y":1950},{"id":198,"p":10000,"cur":"coin","cl":5,"hp":1254,"y":2019},{"id":199,"p":1500,"cur":"coin","cl":3,"hp":494,"y":2005},{"id":200,"p":500,"cur":"coin","cl":2,"hp":397,"y":2018},{"id":201,"p":1500,"cur":"coin","cl":4,"hp":595,"y":1997},{"id":202,"p":10000,"cur":"coin","cl":5,"hp":743,"y":1999},{"id":203,"p":10000,"cur":"coin","cl":5,"hp":1299,"y":1994},{"id":205,"p":1500,"cur":"coin","cl":2,"hp":402,"y":1994},{"id":206,"p":500,"cur":"coin","cl":3,"hp":495,"y":2016},{"id":208,"p":350000,"cur":"cash","cl":1,"hp":331,"y":2024},{"id":209,"p":500,"cur":"coin","cl":2,"hp":361,"y":2008},{"id":210,"p":1000,"cur":"coin","cl":1,"hp":264,"y":1968},{"id":211,"p":2500,"cur":"coin","cl":3,"hp":451,"y":2023},{"id":212,"p":5000,"cur":"coin","cl":0,"hp":224,"y":2013},{"id":213,"p":1500,"cur":"coin","cl":1,"hp":284,"y":1993},{"id":214,"p":2500,"cur":"coin","cl":1,"hp":306,"y":1996},{"id":215,"p":2000,"cur":"coin","cl":1,"hp":265,"y":2015},{"id":216,"p":10000,"cur":"coin","cl":5,"hp":768,"y":2018},{"id":217,"p":5000,"cur":"coin","cl":1,"hp":321,"y":2019},{"id":219,"p":1500,"cur":"coin","cl":1,"hp":320,"y":2023},{"id":220,"p":1000,"cur":"coin","cl":1,"hp":252,"y":1969},{"id":221,"p":5000,"cur":"coin","cl":1,"hp":302,"y":1991},{"id":223,"p":1500,"cur":"coin","cl":0,"hp":196,"y":1981},{"id":224,"p":1500,"cur":"coin","cl":1,"hp":302,"y":2022},{"id":225,"p":500,"cur":"coin","cl":0,"hp":215,"y":1996},{"id":226,"p":150000,"cur":"cash","cl":0,"hp":178,"y":2017},{"id":228,"p":1000,"cur":"coin","cl":1,"hp":319,"y":1992},{"id":229,"p":5000,"cur":"coin","cl":5,"hp":786,"y":1987},{"id":230,"p":2000,"cur":"coin","cl":1,"hp":276,"y":2023},{"id":231,"p":500000,"cur":"cash","cl":0,"hp":185,"y":1989},{"id":232,"p":500,"cur":"coin","cl":1,"hp":318,"y":2017},{"id":233,"p":2500,"cur":"coin","cl":2,"hp":341,"y":2022},{"id":234,"p":10000,"cur":"coin","cl":3,"hp":510,"y":2018},{"id":235,"p":2500,"cur":"coin","cl":2,"hp":392,"y":2025},{"id":238,"p":5000,"cur":"coin","cl":3,"hp":450,"y":2024},{"id":239,"p":2500,"cur":"coin","cl":2,"hp":359,"y":2024},{"id":240,"p":1000,"cur":"coin","cl":2,"hp":363,"y":2016},{"id":241,"p":10000,"cur":"coin","cl":5,"hp":734,"y":2013},{"id":242,"p":1500,"cur":"coin","cl":2,"hp":418,"y":2017},{"id":243,"p":1500,"cur":"coin","cl":0,"hp":206,"y":2019},{"id":244,"p":5000,"cur":"coin","cl":2,"hp":360,"y":2022},{"id":245,"p":20000,"cur":"coin","cl":2,"hp":357,"y":2024},{"id":248,"p":1000,"cur":"coin","cl":2,"hp":360,"y":2013},{"id":249,"p":5000,"cur":"coin","cl":2,"hp":416,"y":2025},{"id":250,"p":10000,"cur":"coin","cl":4,"hp":532,"y":2004},{"id":251,"p":1500,"cur":"coin","cl":0,"hp":246,"y":1998},{"id":252,"p":150000,"cur":"cash","cl":1,"hp":300,"y":1992},{"id":254,"p":15000,"cur":"cash","cl":0,"hp":193,"y":2004},{"id":255,"p":10000,"cur":"coin","cl":1,"hp":332,"y":2005},{"id":256,"p":2000,"cur":"coin","cl":2,"hp":417,"y":1967},{"id":257,"p":20000,"cur":"coin","cl":2,"hp":423,"y":2025},{"id":258,"p":20000,"cur":"coin","cl":1,"hp":317,"y":1994},{"id":259,"p":20000,"cur":"coin","cl":0,"hp":224,"y":2024}];
+
+  // Wishlist state — array of {id, qty}
+  const wishlist = [];
+
+  function findCar(id){ return CAR_CATALOG.find(c => c.id === id); }
+
+  function renderWishlist(){
+    const wrap = document.getElementById('car-wishlist');
+    if (!wrap) return;
+    if (!wishlist.length) {
+      wrap.innerHTML = '<div class="empty">Nothing selected — pick from the catalogue below</div>';
+    } else {
+      wrap.innerHTML = wishlist.map(w => {
+        const c = findCar(w.id);
+        const meta = c ? `${c.cur} ${c.p} · cl${c.cl} · ${c.hp}hp · ${c.y}` : '?';
+        return `
+          <div class="row" data-id="${w.id}">
+            <span class="id">#${w.id}</span>
+            <span class="meta">${escHtml(meta)}</span>
+            <span class="qty" title="qty per donor"
+                  data-id="${w.id}" data-q="-">−</span>
+            <span class="qty" data-q="cur">${w.qty}</span>
+            <span class="qty" data-id="${w.id}" data-q="+">+</span>
+            <span class="x" data-id="${w.id}">×</span>
+          </div>`;
+      }).join('');
+      wrap.querySelectorAll('[data-q]').forEach(el => {
+        const sym = el.getAttribute('data-q');
+        if (sym === 'cur') return;
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', e => {
+          const id = parseInt(el.getAttribute('data-id'), 10);
+          const w = wishlist.find(w => w.id === id);
+          if (!w) return;
+          if (sym === '+') w.qty = Math.min(50, w.qty + 1);
+          if (sym === '-') w.qty = Math.max(1, w.qty - 1);
+          renderWishlist(); updateCarsLaunch();
+          try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+        });
+      });
+      wrap.querySelectorAll('.x').forEach(el => el.addEventListener('click', () => {
+        const id = parseInt(el.dataset.id, 10);
+        const i = wishlist.findIndex(w => w.id === id);
+        if (i >= 0) wishlist.splice(i, 1);
+        renderWishlist(); renderCarPicker(); updateCarsLaunch();
+      }));
+    }
+  }
+
+  function renderCarPicker(){
+    const list = document.getElementById('car-picker-list');
+    if (!list) return;
+    const q   = (document.getElementById('car-search')?.value || '').trim().toLowerCase();
+    const cur = document.getElementById('car-currency')?.value || '';
+    const cls = document.getElementById('car-class')?.value || '';
+    const wishIds = new Set(wishlist.map(w => w.id));
+    const filtered = CAR_CATALOG.filter(c => {
+      if (cur && c.cur !== cur) return false;
+      if (cls !== '' && String(c.cl) !== cls) return false;
+      if (q) {
+        const blob = `${c.id} ${c.cur} ${c.cl} ${c.hp} ${c.y} ${c.p}`.toLowerCase();
+        if (!blob.includes(q)) return false;
+      }
+      return true;
+    }).sort((a, b) => a.p - b.p || a.id - b.id);
+    list.innerHTML = filtered.slice(0, 200).map(c => `
+      <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
+        <span class="id">#${c.id}</span>
+        <span class="price ${c.cur}">${c.cur} ${c.p.toLocaleString('en-US').replace(/,/g,' ')}</span>
+        <span class="meta">cl${c.cl} · ${c.hp}hp · ${c.y}</span>
+      </div>`).join('') + (filtered.length > 200 ? `<div class="empty" style="padding:6px 0;color:var(--hint);">… +${filtered.length - 200} more (refine filter)</div>` : '');
+    list.querySelectorAll('.pcard').forEach(card => card.addEventListener('click', () => {
+      const id = parseInt(card.dataset.id, 10);
+      const i = wishlist.findIndex(w => w.id === id);
+      if (i >= 0) wishlist.splice(i, 1);
+      else        wishlist.push({ id, qty: 1 });
+      renderWishlist(); renderCarPicker(); updateCarsLaunch();
+      try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+    }));
+  }
+
+  function updateCarsLaunch(){
+    const btn   = document.getElementById('cars-launch');
+    const meta  = document.getElementById('cars-summary');
+    if (!btn || !meta) return;
+    const mainEmail = document.getElementById('cars-main-email')?.value.trim();
+    const mainPw    = document.getElementById('cars-main-pw')?.value;
+    const donorsRaw = document.getElementById('cars-donors')?.value || '';
+    const donors    = donorsRaw.split(/\r?\n/).map(l => l.trim()).filter(l => l.includes(':'));
+    const totalCars = wishlist.reduce((s, w) => s + w.qty, 0);
+    const ready = mainEmail && mainPw && donors.length && totalCars;
+    btn.disabled = !ready;
+    if (!ready) {
+      const missing = [];
+      if (!mainEmail || !mainPw) missing.push('main acc');
+      if (!donors.length)         missing.push('donors');
+      if (!totalCars)             missing.push('cars');
+      meta.textContent = `Need: ${missing.join(', ')}`;
+    } else {
+      meta.innerHTML = `<b>${donors.length}</b> donors · <b>${totalCars}</b> cars/donor · <b>${donors.length * totalCars}</b> total`;
+    }
+  }
+
+  ['cars-main-email','cars-main-pw','cars-donors'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateCarsLaunch);
+  });
+  ['car-search','car-currency','car-class'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderCarPicker);
+  });
+
+  // Donor textarea helpers
+  document.getElementById('cars-donors-clear')?.addEventListener('click', () => {
+    document.getElementById('cars-donors').value = '';
+    updateCarsLaunch();
+  });
+  document.getElementById('cars-donors-from-pool')?.addEventListener('click', () => {
+    const recent = state.gen?.recent || [];
+    if (!recent.length) {
+      toast('Pool empty — generate accounts first', 'err');
+      return;
+    }
+    const lines = recent.map(a => `${a.email}:${a.password}`);
+    const ta = document.getElementById('cars-donors');
+    ta.value = (ta.value ? ta.value.replace(/\s+$/,'') + '\n' : '') + lines.join('\n');
+    toast(`📥 ${lines.length} from pool`, 'ok');
+    updateCarsLaunch();
+  });
+  document.getElementById('cars-donors-file')?.addEventListener('click',
+    () => document.getElementById('cars-donors-file-input')?.click());
+  document.getElementById('cars-donors-file-input')?.addEventListener('change', e => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 1024 * 1024) { toast('File too large (>1MB)', 'err'); return; }
+    const r = new FileReader();
+    r.onload = () => {
+      const ta = document.getElementById('cars-donors');
+      const txt = String(r.result || '');
+      ta.value = (ta.value ? ta.value.replace(/\s+$/,'') + '\n' : '') + txt;
+      toast(`📥 file loaded`, 'ok');
+      updateCarsLaunch();
+    };
+    r.readAsText(f);
+  });
+
+  document.getElementById('cars-launch')?.addEventListener('click', () => {
+    const btn = document.getElementById('cars-launch');
+    if (btn.disabled || btn.classList.contains('starting')) return;
+    const main = {
+      email: document.getElementById('cars-main-email').value.trim(),
+      password: document.getElementById('cars-main-pw').value,
+    };
+    const donorsRaw = document.getElementById('cars-donors').value || '';
+    const donors = donorsRaw.split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.includes(':'))
+      .map(l => {
+        const [e, ...rest] = l.split(':');
+        return { email: e.trim(), password: rest.join(':').trim() };
+      });
+    const cars = wishlist.map(w => ({ id: w.id, qty: w.qty }));
+    const payload = { mode: 'devtool_fleet_buy', main, donors, cars };
+    logLine(`fleet buy: main=${main.email} donors=${donors.length} cars=${cars.length}`, 'info');
+    btn.classList.add('starting');
+    setTimeout(() => btn.classList.remove('starting'), 2000);
+    try {
+      tg?.sendData?.(JSON.stringify(payload));
+      toast(`🚗 ${donors.length}×${cars.reduce((s,c)=>s+c.qty,0)} cars queued`, 'ok');
+    } catch(err) { toast('sendData failed: ' + err.message, 'err'); }
+  });
+
+  // Initial render of the cars tab
+  renderWishlist();
+  renderCarPicker();
+  updateCarsLaunch();
 
   // ── Modal helpers ────────────────────────────────────────────────
   function openModal(name){
