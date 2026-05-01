@@ -122,6 +122,40 @@
     background:rgba(251, 191, 36, 0.08);
   }
 
+  /* ── Language switcher ──────────────────────────────────────────────── */
+  .lang-wrap{position:relative;flex-shrink:0;}
+  .lang-btn{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:4px 8px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);
+    color:var(--text-2);font-size:11px;font-weight:600;
+    cursor:pointer;letter-spacing:0.04em;
+    -webkit-tap-highlight-color:transparent;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .lang-btn:hover,.lang-btn.open{
+    border-color:rgba(76,201,240,0.5);color:var(--accent);
+  }
+  .lang-btn .chev{font-size:8px;opacity:0.7;}
+  .lang-menu{
+    position:absolute;top:calc(100% + 6px);right:0;
+    min-width:130px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:4px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    display:none;flex-direction:column;z-index:50;
+  }
+  .lang-menu.open{display:flex;}
+  .lang-opt{
+    padding:7px 10px;border-radius:6px;
+    font-size:12px;color:var(--text);
+    cursor:pointer;display:flex;align-items:center;gap:8px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lang-opt:hover{background:var(--panel-2);color:var(--accent);}
+  .lang-opt.active{color:var(--accent);background:rgba(76,201,240,0.08);}
+  .lang-opt .flag{font-size:14px;}
+
   /* ── Main scroll area ───────────────────────────────────────────────── */
   main{
     flex:1 1 auto;
@@ -1154,8 +1188,16 @@
 <header>
   <div class="logo">⚡</div>
   <div class="title">
-    <h1>CPM2 · Dev Tool</h1>
-    <div class="sub"><span class="dot"></span><span id="status-text">connected</span></div>
+    <h1>CPM2 · <span data-i18n="app_devtool">Dev Tool</span></h1>
+    <div class="sub"><span class="dot"></span><span id="status-text" data-i18n="connected">connected</span></div>
+  </div>
+  <div class="lang-wrap">
+    <button class="lang-btn" id="lang-btn" type="button">
+      <span class="flag" id="lang-flag">🇬🇧</span>
+      <span id="lang-code">EN</span>
+      <span class="chev">▼</span>
+    </button>
+    <div class="lang-menu" id="lang-menu"></div>
   </div>
   <div class="badge" id="tier-badge">—</div>
 </header>
@@ -1438,19 +1480,19 @@
 
 <nav>
   <button class="tab active" data-tab="accounts">
-    <span class="ico">👥</span><span>accounts</span>
+    <span class="ico">👥</span><span data-i18n="tab_accounts">accounts</span>
   </button>
   <button class="tab" data-tab="functions">
-    <span class="ico">⚙️</span><span>functions</span>
+    <span class="ico">⚙️</span><span data-i18n="tab_functions">functions</span>
   </button>
   <button class="tab" data-tab="cars">
-    <span class="ico">🚗</span><span>cars</span>
+    <span class="ico">🚗</span><span data-i18n="tab_cars">cars</span>
   </button>
   <button class="tab" data-tab="dashboard">
-    <span class="ico">📊</span><span>dashboard</span>
+    <span class="ico">📊</span><span data-i18n="tab_dashboard">dashboard</span>
   </button>
   <button class="tab" data-tab="logs">
-    <span class="ico">📜</span><span>logs</span>
+    <span class="ico">📜</span><span data-i18n="tab_logs">logs</span>
   </button>
 </nav>
 
@@ -1553,6 +1595,85 @@
       const json = atob(b64 + '==='.slice((b64.length + 3) % 4));
       return JSON.parse(decodeURIComponent(escape(json)));
     } catch(e){ return {}; }
+  })();
+
+  // ── i18n ─────────────────────────────────────────────────────────
+  const LANGS = [
+    {code:'en', label:'EN', flag:'🇬🇧', name:'English'},
+    {code:'ru', label:'RU', flag:'🇷🇺', name:'Русский'},
+    {code:'es', label:'ES', flag:'🇪🇸', name:'Español'},
+    {code:'pt', label:'PT', flag:'🇵🇹', name:'Português'},
+    {code:'de', label:'DE', flag:'🇩🇪', name:'Deutsch'},
+    {code:'fr', label:'FR', flag:'🇫🇷', name:'Français'},
+    {code:'it', label:'IT', flag:'🇮🇹', name:'Italiano'},
+    {code:'tr', label:'TR', flag:'🇹🇷', name:'Türkçe'},
+  ];
+  const I18N = {
+    en:{app_devtool:'Dev Tool',connected:'connected',tab_accounts:'accounts',tab_functions:'functions',tab_cars:'cars',tab_dashboard:'dashboard',tab_logs:'logs'},
+    ru:{app_devtool:'Dev Tool',connected:'подключено',tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_logs:'логи'},
+    es:{app_devtool:'Dev Tool',connected:'conectado',tab_accounts:'cuentas',tab_functions:'funciones',tab_cars:'coches',tab_dashboard:'panel',tab_logs:'registros'},
+    pt:{app_devtool:'Dev Tool',connected:'conectado',tab_accounts:'contas',tab_functions:'funções',tab_cars:'carros',tab_dashboard:'painel',tab_logs:'registos'},
+    de:{app_devtool:'Dev Tool',connected:'verbunden',tab_accounts:'konten',tab_functions:'funktionen',tab_cars:'autos',tab_dashboard:'übersicht',tab_logs:'logs'},
+    fr:{app_devtool:'Dev Tool',connected:'connecté',tab_accounts:'comptes',tab_functions:'fonctions',tab_cars:'voitures',tab_dashboard:'tableau',tab_logs:'journaux'},
+    it:{app_devtool:'Dev Tool',connected:'connesso',tab_accounts:'account',tab_functions:'funzioni',tab_cars:'auto',tab_dashboard:'pannello',tab_logs:'log'},
+    tr:{app_devtool:'Dev Tool',connected:'bağlı',tab_accounts:'hesaplar',tab_functions:'işlevler',tab_cars:'arabalar',tab_dashboard:'panel',tab_logs:'günlükler'},
+  };
+  const detectLang = () => {
+    try {
+      const saved = localStorage.getItem('cpm2_lang');
+      if (saved && I18N[saved]) return saved;
+    } catch(e){}
+    const tgLc = (tg?.initDataUnsafe?.user?.language_code || '').toLowerCase().slice(0,2);
+    return I18N[tgLc] ? tgLc : 'en';
+  };
+  let curLang = detectLang();
+  const t = k => (I18N[curLang]||I18N.en)[k] || I18N.en[k] || k;
+  const applyI18n = () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      const v = t(k); if (v) el.textContent = v;
+    });
+    const cur = LANGS.find(l => l.code === curLang) || LANGS[0];
+    const fl = document.getElementById('lang-flag');
+    const lc = document.getElementById('lang-code');
+    if (fl) fl.textContent = cur.flag;
+    if (lc) lc.textContent = cur.label;
+  };
+  const setLang = code => {
+    if (!I18N[code]) return;
+    curLang = code;
+    try { localStorage.setItem('cpm2_lang', code); } catch(e){}
+    applyI18n();
+    document.querySelectorAll('.lang-opt').forEach(o => {
+      o.classList.toggle('active', o.dataset.lang === code);
+    });
+  };
+  (() => {
+    const menu = document.getElementById('lang-menu');
+    const btn = document.getElementById('lang-btn');
+    if (!menu || !btn) return;
+    LANGS.forEach(l => {
+      const opt = document.createElement('div');
+      opt.className = 'lang-opt' + (l.code === curLang ? ' active' : '');
+      opt.dataset.lang = l.code;
+      opt.innerHTML = `<span class="flag">${l.flag}</span><span>${l.name}</span>`;
+      opt.addEventListener('click', () => {
+        setLang(l.code);
+        menu.classList.remove('open');
+        btn.classList.remove('open');
+      });
+      menu.appendChild(opt);
+    });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      menu.classList.toggle('open');
+      btn.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      menu.classList.remove('open');
+      btn.classList.remove('open');
+    });
+    applyI18n();
   })();
 
   const tierBadge = document.getElementById('tier-badge');
