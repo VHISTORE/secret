@@ -1062,6 +1062,16 @@
     document.getElementById('back-home').classList.toggle('show', name !== 'dashboard');
     // Scroll to top of <main> so the new pane starts at the top.
     document.querySelector('main').scrollTop = 0;
+    // In LIVE mode, prefetch list panes so the data is there on arrival
+    // instead of behind an extra "📋 List users" tap.
+    if (typeof LIVE_MODE !== 'undefined' && LIVE_MODE) {
+      if (name === 'users') {
+        const tier = (document.getElementById('filter-tier')?.value || '').trim();
+        liveListUsers(tier);
+      } else if (name === 'promo') {
+        liveListPromos();
+      }
+    }
   }
 
   // App icons
