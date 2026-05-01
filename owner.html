@@ -1140,6 +1140,16 @@
   const HAS_INIT  = !!(tg && tg.initData);
   const LIVE_MODE = (API_BASE !== null) && HAS_INIT;
 
+  // Diagnostic overlay (temporary) — shows in title bar so we can see
+  // exactly what the page detected without round-tripping through chat.
+  try {
+    const dbg = 'v=cf1 base='+(API_BASE===null?'null':(API_BASE||'<same>'))
+              + ' init='+(HAS_INIT?'Y':'N')
+              + ' live='+(LIVE_MODE?'Y':'N');
+    const el = document.getElementById('screen-title');
+    if (el) el.textContent = (el.textContent || 'Owner') + ' · ' + dbg;
+  } catch(_){}
+
   const modePill = document.getElementById('mode-pill');
   if (modePill) {
     if (LIVE_MODE) { modePill.classList.remove('relay'); modePill.classList.add('live'); modePill.textContent = 'LIVE'; }
