@@ -1207,24 +1207,24 @@
   <!-- ── Functions ──────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="functions">
 
-    <div class="section-label">Resources</div>
+    <div class="section-label" data-i18n="sec_resources">Resources</div>
 
     <!-- Full Coins -->
     <div class="card" data-fn="coins">
       <div class="card-head">
         <div class="card-icon">🪙</div>
         <div class="card-title">
-          <div class="name">Full Coins</div>
-          <div class="desc">Coins from every source · max by default</div>
+          <div class="name" data-i18n="fn_coins_n">Full Coins</div>
+          <div class="desc" data-i18n="fn_coins_d">Coins from every source · max by default</div>
         </div>
         <div class="sel-mark"></div>
       </div>
       <div class="toggle-row">
-        <span class="lbl">Pick amount</span>
+        <span class="lbl" data-i18n="pick_amount">Pick amount</span>
         <div class="toggle" data-toggle="coins"></div>
       </div>
       <div class="reveal" data-reveal="coins">
-        <div class="reveal-label">Amount</div>
+        <div class="reveal-label" data-i18n="amount">Amount</div>
         <div class="pills" data-pills="coins">
           <div class="pill" data-coins="1000">+1 000</div>
           <div class="pill" data-coins="2500">+2 500</div>
@@ -1240,52 +1240,52 @@
       <div class="card-head">
         <div class="card-icon">⚡</div>
         <div class="card-title">
-          <div class="name">Full Boost</div>
-          <div class="desc">Apply all boosts · or pick which</div>
+          <div class="name" data-i18n="fn_boost_n">Full Boost</div>
+          <div class="desc" data-i18n="fn_boost_d">Apply all boosts · or pick which</div>
         </div>
         <div class="sel-mark"></div>
       </div>
       <div class="toggle-row">
-        <span class="lbl">Pick boosts</span>
+        <span class="lbl" data-i18n="pick_boosts">Pick boosts</span>
         <div class="toggle" data-toggle="boost"></div>
       </div>
       <div class="reveal" data-reveal="boost">
         <div class="checklist-head">
-          <div class="reveal-label">Select boosts</div>
-          <button class="link-btn" id="boost-all">All</button>
+          <div class="reveal-label" data-i18n="select_boosts">Select boosts</div>
+          <button class="link-btn" id="boost-all" data-i18n="all">All</button>
         </div>
         <div class="check-list" id="boost-checklist">
           <div class="check-row" data-b="wheels">
-            <div class="info"><div class="ttl">All wheels</div><div class="desc">Every wheel design</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_wheels_n">All wheels</div><div class="desc" data-i18n="b_wheels_d">Every wheel design</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="brakes">
-            <div class="info"><div class="ttl">All brakes</div><div class="desc">Every brake variant</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_brakes_n">All brakes</div><div class="desc" data-i18n="b_brakes_d">Every brake variant</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="calipers">
-            <div class="info"><div class="ttl">All calipers</div><div class="desc">Every caliper color</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_caliper_n">All calipers</div><div class="desc" data-i18n="b_caliper_d">Every caliper color</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="flags">
-            <div class="info"><div class="ttl">Achievements</div><div class="desc">Every achievement flag</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_ach_n">Achievements</div><div class="desc" data-i18n="b_ach_d">Every achievement flag</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="equipment">
-            <div class="info"><div class="ttl">Character clothing</div><div class="desc">All outfits and accessories</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_cloth_n">Character clothing</div><div class="desc" data-i18n="b_cloth_d">All outfits and accessories</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="cosmetics">
-            <div class="info"><div class="ttl">Paint &amp; animations</div><div class="desc">All paint colors and animations</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_paint_n">Paint &amp; animations</div><div class="desc" data-i18n="b_paint_d">All paint colors and animations</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="check-row" data-b="garage">
-            <div class="info"><div class="ttl">Garage slots</div><div class="desc">100 coins per slot · stock cap 17</div></div>
+            <div class="info"><div class="ttl" data-i18n="b_slots_n">Garage slots</div><div class="desc" data-i18n="b_slots_d">100 coins per slot · stock cap 17</div></div>
             <div class="checkbox"></div>
           </div>
           <div class="garage-slot-picker" id="garage-slot-picker" style="display:none;padding:8px 4px 4px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-              <span style="font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:0.08em;">Slot count</span>
+              <span style="font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:0.08em;" data-i18n="slot_count">Slot count</span>
               <span style="font-size:13px;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;" id="garage-slot-val">17</span>
             </div>
             <input type="range" id="garage-slot-range" min="1" max="17" step="1" value="17" style="width:100%;">
@@ -1299,8 +1299,8 @@
       <div class="card-head">
         <div class="card-icon">💵</div>
         <div class="card-title">
-          <div class="name">Full Cash</div>
-          <div class="desc">Always max — no custom amount</div>
+          <div class="name" data-i18n="fn_cash_n">Full Cash</div>
+          <div class="desc" data-i18n="fn_cash_d">Always max — no custom amount</div>
         </div>
         <div class="sel-mark"></div>
       </div>
@@ -1308,10 +1308,10 @@
 
     <!-- Launch dock — sticky CTA, drives everything that's selected. -->
     <div class="launch-dock">
-      <div class="launch-meta"><span id="queue-summary">Tap a card to add to queue</span></div>
+      <div class="launch-meta"><span id="queue-summary" data-i18n="queue_empty">Tap a card to add to queue</span></div>
       <button class="launch-btn" id="launch-btn" disabled>
         <span class="ico" id="launch-ico">🚀</span>
-        <span class="label" id="launch-label">Launch</span>
+        <span class="label" id="launch-label" data-i18n="launch">Launch</span>
       </button>
     </div>
 
@@ -1319,30 +1319,30 @@
 
   <!-- ── Accounts ──────────────────────────────────────────────────── -->
   <section class="tab-pane active" data-pane="accounts">
-    <div class="section-label">Manage accounts</div>
+    <div class="section-label" data-i18n="sec_manage">Manage accounts</div>
     <div class="action-grid">
       <div class="action-tile" id="act-generate">
         <span class="ico">✨</span>
-        <div class="ttl">Generate New</div>
-        <div class="sub">Create N fresh accounts</div>
+        <div class="ttl" data-i18n="gen_new_t">Generate New</div>
+        <div class="sub" data-i18n="gen_new_d">Create N fresh accounts</div>
       </div>
       <div class="action-tile" id="act-add-existing">
         <span class="ico">➕</span>
-        <div class="ttl">Add Existing</div>
-        <div class="sub">Login + password / file</div>
+        <div class="ttl" data-i18n="add_exist_t">Add Existing</div>
+        <div class="sub" data-i18n="add_exist_d">Login + password / file</div>
       </div>
     </div>
     <!-- Generated pool (rendered when state.gen.total > 0) -->
     <div id="gen-pool-block" style="display:none;">
-      <div class="section-label">Latest batch</div>
+      <div class="section-label" data-i18n="latest_batch">Latest batch</div>
       <div class="gen-pool" id="gen-pool"></div>
     </div>
 
-    <div class="section-label">Sessions</div>
+    <div class="section-label" data-i18n="sec_sessions">Sessions</div>
     <div class="empty">
       <div class="icon">👥</div>
-      <div class="msg">No accounts yet</div>
-      <div class="sub">// generate or add to populate</div>
+      <div class="msg" data-i18n="no_accs">No accounts yet</div>
+      <div class="sub" data-i18n="no_accs_sub">// generate or add to populate</div>
     </div>
   </section>
 
@@ -1350,57 +1350,57 @@
   <section class="tab-pane" data-pane="cars">
 
     <div class="cars-section">
-      <div class="head">Main account (target garage)</div>
+      <div class="head" data-i18n="cars_main_h">Main account (target garage)</div>
       <div class="main-acc-card">
         <div class="field">
-          <label class="field-label">Email</label>
+          <label class="field-label" data-i18n="email">Email</label>
           <input class="input" type="email" id="cars-main-email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="main@gmail.com">
         </div>
         <div class="field">
-          <label class="field-label">Password</label>
+          <label class="field-label" data-i18n="password">Password</label>
           <input class="input" type="password" id="cars-main-pw" autocomplete="off" placeholder="••••••">
         </div>
         <div class="gstatus" id="cars-main-status">
-          <span>garage: <b id="cars-main-garage">—</b></span>
-          <span>cash: <b id="cars-main-cash">—</b></span>
-          <span>coins: <b id="cars-main-coins">—</b></span>
+          <span><span data-i18n="garage_lbl">garage</span>: <b id="cars-main-garage">—</b></span>
+          <span><span data-i18n="cash_lbl">cash</span>: <b id="cars-main-cash">—</b></span>
+          <span><span data-i18n="coins_lbl">coins</span>: <b id="cars-main-coins">—</b></span>
         </div>
       </div>
     </div>
 
     <div class="cars-section">
-      <div class="head">Donor accounts (one email:password per line, or upload .txt)</div>
+      <div class="head" data-i18n="cars_donors_h">Donor accounts (one email:password per line, or upload .txt)</div>
       <textarea class="input" id="cars-donors" placeholder="donor1@gmail.com:pass1&#10;donor2@gmail.com:pass2&#10;…" style="min-height:90px;"></textarea>
       <div class="seg" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr;">
-        <button type="button" id="cars-donors-from-pool">Use my pool</button>
-        <button type="button" id="cars-donors-file">Upload .txt</button>
-        <button type="button" id="cars-donors-clear">Clear</button>
+        <button type="button" id="cars-donors-from-pool" data-i18n="use_pool">Use my pool</button>
+        <button type="button" id="cars-donors-file" data-i18n="upload_txt">Upload .txt</button>
+        <button type="button" id="cars-donors-clear" data-i18n="clear">Clear</button>
       </div>
       <input type="file" id="cars-donors-file-input" accept=".txt,text/plain" style="display:none;">
-      <div class="hint" style="font-size:10px;color:var(--hint);margin-top:6px;letter-spacing:0.04em;">
+      <div class="hint" style="font-size:10px;color:var(--hint);margin-top:6px;letter-spacing:0.04em;" data-i18n="cars_donors_hint">
         Each donor signs in, optionally tops up coins via daily drag race, then
         buys the cars assigned to them. Transfer to main acc is a separate step.
       </div>
     </div>
 
     <div class="cars-section">
-      <div class="head">Wishlist · cars to buy on each donor</div>
+      <div class="head" data-i18n="cars_wishlist_h">Wishlist · cars to buy on each donor</div>
       <div class="car-wishlist" id="car-wishlist">
-        <div class="empty">Nothing selected — pick from the catalogue below</div>
+        <div class="empty" data-i18n="wish_empty">Nothing selected — pick from the catalogue below</div>
       </div>
     </div>
 
     <div class="cars-section">
-      <div class="head">Catalogue · tap to add / remove</div>
+      <div class="head" data-i18n="cars_cat_h">Catalogue · tap to add / remove</div>
       <div class="car-picker-toolbar">
         <input type="search" id="car-search" placeholder="search id / class / hp" autocomplete="off">
         <select id="car-currency">
-          <option value="">any cur</option>
-          <option value="cash">cash</option>
-          <option value="coin">coin</option>
+          <option value="" data-i18n="any_cur">any cur</option>
+          <option value="cash" data-i18n="cash_lbl">cash</option>
+          <option value="coin" data-i18n="coin_lbl">coin</option>
         </select>
         <select id="car-class">
-          <option value="">any class</option>
+          <option value="" data-i18n="any_class">any class</option>
           <option value="0">class 0</option>
           <option value="1">class 1</option>
           <option value="2">class 2</option>
@@ -1414,9 +1414,9 @@
     </div>
 
     <div class="launch-dock">
-      <div class="launch-meta"><span id="cars-summary">Configure main + donors + wishlist</span></div>
+      <div class="launch-meta"><span id="cars-summary" data-i18n="cars_cfg_hint">Configure main + donors + wishlist</span></div>
       <button class="launch-btn" id="cars-launch" disabled>
-        <span class="ico">🚗</span><span class="label">Buy fleet</span>
+        <span class="ico">🚗</span><span class="label" data-i18n="buy_fleet">Buy fleet</span>
       </button>
     </div>
 
@@ -1424,23 +1424,23 @@
 
   <!-- ── Dashboard ─────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="dashboard">
-    <div class="section-label">Lifetime stats</div>
+    <div class="section-label" data-i18n="lifetime_stats">Lifetime stats</div>
     <div class="stat-grid">
       <div class="stat-card">
         <div class="ico">⚡</div>
-        <div class="lbl">Boosted accounts</div>
+        <div class="lbl" data-i18n="boosted_accs">Boosted accounts</div>
         <div class="num" id="stat-boosted">—</div>
-        <div class="delta">all time · this seller</div>
+        <div class="delta" data-i18n="alltime_seller">all time · this seller</div>
       </div>
       <div class="stat-card">
         <div class="ico">✨</div>
-        <div class="lbl">Generated accounts</div>
+        <div class="lbl" data-i18n="generated_accs">Generated accounts</div>
         <div class="num" id="stat-generated">—</div>
-        <div class="delta">all time · this seller</div>
+        <div class="delta" data-i18n="alltime_seller">all time · this seller</div>
       </div>
     </div>
     <div class="stat-meta">
-      Tracked since <b id="stat-since">launch</b> · counters update on each successful run
+      <span data-i18n="tracked_since">Tracked since</span> <b id="stat-since" data-i18n="launch_lc">launch</b> <span data-i18n="counters_update">· counters update on each successful run</span>
     </div>
   </section>
 
@@ -1449,28 +1449,28 @@
 
     <div class="log-section">
       <div class="head">
-        <span>Live</span>
-        <span class="live-dot" id="live-dot" style="display:none;">RUNNING</span>
+        <span data-i18n="logs_live">Live</span>
+        <span class="live-dot" id="live-dot" style="display:none;" data-i18n="running">RUNNING</span>
       </div>
       <div class="live-pane" id="live-pane">
         <div style="color:var(--hint);text-align:center;padding:30px 0;font-size:11px;">
-          No active log<br>
-          <span style="font-size:10px;opacity:0.7;">Launch a boost to start a new session</span>
+          <span data-i18n="no_active_log">No active log</span><br>
+          <span style="font-size:10px;opacity:0.7;" data-i18n="launch_to_start">Launch a boost to start a new session</span>
         </div>
       </div>
     </div>
 
     <div class="log-section">
-      <div class="head"><span>Passive · downloadable</span></div>
+      <div class="head"><span data-i18n="passive_dl">Passive · downloadable</span></div>
       <div class="passive-list" id="passive-list">
-        <div style="color:var(--hint);text-align:center;padding:14px 0;font-size:11px;">
+        <div style="color:var(--hint);text-align:center;padding:14px 0;font-size:11px;" data-i18n="no_archived">
           No archived sessions yet
         </div>
       </div>
     </div>
 
     <div class="log-section">
-      <div class="head"><span>Console</span></div>
+      <div class="head"><span data-i18n="console">Console</span></div>
       <div class="log-view" id="log-view"><span class="ts">[boot]</span> <span class="info">dev tool ready</span></div>
     </div>
 
@@ -1501,27 +1501,27 @@
 <div class="modal" data-modal="generate">
   <div class="modal-head">
     <span class="mh-icon">✨</span>
-    <span class="mh-title">Generate accounts</span>
+    <span class="mh-title" data-i18n="m_gen_title">Generate accounts</span>
     <button class="mh-close" data-close="generate">×</button>
   </div>
   <div class="modal-body">
     <div class="field">
-      <label class="field-label">Number of accounts</label>
+      <label class="field-label" data-i18n="m_gen_count">Number of accounts</label>
       <div class="stepper">
         <button type="button" data-step="-1">−</button>
         <input class="input" type="number" id="gen-count" min="1" max="200" value="10" inputmode="numeric">
         <button type="button" data-step="+1">+</button>
       </div>
     </div>
-    <div class="field" style="font-size:11px;color:var(--hint);line-height:1.5;">
+    <div class="field" style="font-size:11px;color:var(--hint);line-height:1.5;" data-i18n="m_gen_hint">
       Fresh accounts will be registered on Firebase with random credentials.
-      Max <b>200</b> per request. The bot writes them to your seller pool
+      Max 200 per request. The bot writes them to your seller pool
       and replies with a copy-friendly message + .txt file in chat.
     </div>
   </div>
   <div class="modal-foot">
-    <button class="btn ghost" data-close="generate">Cancel</button>
-    <button class="btn primary" id="gen-create">Create</button>
+    <button class="btn ghost" data-close="generate" data-i18n="cancel">Cancel</button>
+    <button class="btn primary" id="gen-create" data-i18n="create">Create</button>
   </div>
 </div>
 
@@ -1530,27 +1530,27 @@
 <div class="modal" data-modal="add">
   <div class="modal-head">
     <span class="mh-icon">➕</span>
-    <span class="mh-title">Add existing account</span>
+    <span class="mh-title" data-i18n="m_add_title">Add existing account</span>
     <button class="mh-close" data-close="add">×</button>
   </div>
   <div class="modal-body">
     <div class="seg" id="add-seg">
-      <button type="button" class="active" data-method="manual">Manual</button>
-      <button type="button" data-method="file">File</button>
+      <button type="button" class="active" data-method="manual" data-i18n="m_add_manual">Manual</button>
+      <button type="button" data-method="file" data-i18n="m_add_file">File</button>
     </div>
 
     <!-- Manual entry -->
     <div data-method-pane="manual">
       <div class="field">
-        <label class="field-label">Email</label>
+        <label class="field-label" data-i18n="email">Email</label>
         <input class="input" type="email" id="add-email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="account@gmail.com">
       </div>
       <div class="field">
-        <label class="field-label">Password</label>
+        <label class="field-label" data-i18n="password">Password</label>
         <input class="input" type="password" id="add-pw" autocomplete="off" placeholder="••••••">
       </div>
-      <div class="field" style="font-size:11px;color:var(--hint);">
-        Or paste multiple lines as <code>email:password</code> below.
+      <div class="field" style="font-size:11px;color:var(--hint);" data-i18n="m_add_paste">
+        Or paste multiple lines as email:password below.
       </div>
       <div class="field">
         <textarea class="input" id="add-bulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
@@ -1561,16 +1561,16 @@
     <div data-method-pane="file" style="display:none;">
       <label class="file-drop" id="add-drop">
         <span class="ico">📁</span>
-        <div class="lbl">Choose .txt file</div>
-        <div class="sub">One per line: <code>email:password</code></div>
+        <div class="lbl" data-i18n="m_add_choose">Choose .txt file</div>
+        <div class="sub" data-i18n="m_add_oneperline">One per line: email:password</div>
         <input type="file" id="add-file" accept=".txt,text/plain">
       </label>
       <div class="file-info" id="add-file-info"></div>
     </div>
   </div>
   <div class="modal-foot">
-    <button class="btn ghost" data-close="add">Cancel</button>
-    <button class="btn primary" id="add-submit">Add</button>
+    <button class="btn ghost" data-close="add" data-i18n="cancel">Cancel</button>
+    <button class="btn primary" id="add-submit" data-i18n="add">Add</button>
   </div>
 </div>
 
@@ -1609,14 +1609,366 @@
     {code:'tr', label:'TR', flag:'🇹🇷', name:'Türkçe'},
   ];
   const I18N = {
-    en:{app_devtool:'Dev Tool',connected:'connected',tab_accounts:'accounts',tab_functions:'functions',tab_cars:'cars',tab_dashboard:'dashboard',tab_logs:'logs'},
-    ru:{app_devtool:'Dev Tool',connected:'подключено',tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_logs:'логи'},
-    es:{app_devtool:'Dev Tool',connected:'conectado',tab_accounts:'cuentas',tab_functions:'funciones',tab_cars:'coches',tab_dashboard:'panel',tab_logs:'registros'},
-    pt:{app_devtool:'Dev Tool',connected:'conectado',tab_accounts:'contas',tab_functions:'funções',tab_cars:'carros',tab_dashboard:'painel',tab_logs:'registos'},
-    de:{app_devtool:'Dev Tool',connected:'verbunden',tab_accounts:'konten',tab_functions:'funktionen',tab_cars:'autos',tab_dashboard:'übersicht',tab_logs:'logs'},
-    fr:{app_devtool:'Dev Tool',connected:'connecté',tab_accounts:'comptes',tab_functions:'fonctions',tab_cars:'voitures',tab_dashboard:'tableau',tab_logs:'journaux'},
-    it:{app_devtool:'Dev Tool',connected:'connesso',tab_accounts:'account',tab_functions:'funzioni',tab_cars:'auto',tab_dashboard:'pannello',tab_logs:'log'},
-    tr:{app_devtool:'Dev Tool',connected:'bağlı',tab_accounts:'hesaplar',tab_functions:'işlevler',tab_cars:'arabalar',tab_dashboard:'panel',tab_logs:'günlükler'},
+    en:{
+      app_devtool:'Dev Tool',connected:'connected',
+      tab_accounts:'accounts',tab_functions:'functions',tab_cars:'cars',tab_dashboard:'dashboard',tab_logs:'logs',
+      sec_resources:'Resources',sec_manage:'Manage accounts',sec_sessions:'Sessions',
+      fn_coins_n:'Full Coins',fn_coins_d:'Coins from every source · max by default',
+      fn_boost_n:'Full Boost',fn_boost_d:'Apply all boosts · or pick which',
+      fn_cash_n:'Full Cash',fn_cash_d:'Always max — no custom amount',
+      pick_amount:'Pick amount',pick_boosts:'Pick boosts',amount:'Amount',select_boosts:'Select boosts',all:'All',slot_count:'Slot count',
+      b_wheels_n:'All wheels',b_wheels_d:'Every wheel design',
+      b_brakes_n:'All brakes',b_brakes_d:'Every brake variant',
+      b_caliper_n:'All calipers',b_caliper_d:'Every caliper color',
+      b_ach_n:'Achievements',b_ach_d:'Every achievement flag',
+      b_cloth_n:'Character clothing',b_cloth_d:'All outfits and accessories',
+      b_paint_n:'Paint & animations',b_paint_d:'All paint colors and animations',
+      b_slots_n:'Garage slots',b_slots_d:'100 coins per slot · stock cap 17',
+      queue_empty:'Tap a card to add to queue',launch:'Launch',
+      gen_new_t:'Generate New',gen_new_d:'Create N fresh accounts',
+      add_exist_t:'Add Existing',add_exist_d:'Login + password / file',
+      latest_batch:'Latest batch',no_accs:'No accounts yet',no_accs_sub:'// generate or add to populate',
+      cars_main_h:'Main account (target garage)',
+      cars_donors_h:'Donor accounts (one email:password per line, or upload .txt)',
+      cars_wishlist_h:'Wishlist · cars to buy on each donor',
+      cars_cat_h:'Catalogue · tap to add / remove',
+      cars_cfg_hint:'Configure main + donors + wishlist',
+      cars_donors_hint:'Each donor signs in, optionally tops up coins via daily drag race, then buys the cars assigned to them. Transfer to main acc is a separate step.',
+      email:'Email',password:'Password',
+      garage_lbl:'garage',cash_lbl:'cash',coins_lbl:'coins',coin_lbl:'coin',
+      use_pool:'Use my pool',upload_txt:'Upload .txt',clear:'Clear',
+      wish_empty:'Nothing selected — pick from the catalogue below',
+      any_cur:'any cur',any_class:'any class',buy_fleet:'Buy fleet',
+      lifetime_stats:'Lifetime stats',boosted_accs:'Boosted accounts',generated_accs:'Generated accounts',
+      alltime_seller:'all time · this seller',tracked_since:'Tracked since',launch_lc:'launch',
+      counters_update:'· counters update on each successful run',
+      logs_live:'Live',running:'RUNNING',no_active_log:'No active log',
+      launch_to_start:'Launch a boost to start a new session',
+      passive_dl:'Passive · downloadable',no_archived:'No archived sessions yet',console:'Console',
+      m_gen_title:'Generate accounts',m_gen_count:'Number of accounts',
+      m_gen_hint:'Fresh accounts will be registered on Firebase with random credentials. Max 200 per request. The bot writes them to your seller pool and replies with a copy-friendly message + .txt file in chat.',
+      cancel:'Cancel',create:'Create',add:'Add',
+      m_add_title:'Add existing account',m_add_manual:'Manual',m_add_file:'File',
+      m_add_paste:'Or paste multiple lines as email:password below.',
+      m_add_choose:'Choose .txt file',m_add_oneperline:'One per line: email:password',
+      pending_label:'Pending add (will run on Launch)',pending_sub:'queued for verify + add',
+      accs_in_batch:'accounts in latest batch',copy:'Copy',copy_visible:'Copy visible',dl_txt:'Download .txt',pool_server:'pool stored on server — tap Download to fetch',more_in_dl:'more in copy/download',more:'more',download:'Download',
+    },
+    ru:{
+      app_devtool:'Dev Tool',connected:'подключено',
+      tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_logs:'логи',
+      sec_resources:'Ресурсы',sec_manage:'Управление аккаунтами',sec_sessions:'Сессии',
+      fn_coins_n:'Полные коины',fn_coins_d:'Коины из всех источников · по умолчанию максимум',
+      fn_boost_n:'Полный буст',fn_boost_d:'Применить все бусты · или выбрать',
+      fn_cash_n:'Полный кэш',fn_cash_d:'Всегда максимум — без кастомной суммы',
+      pick_amount:'Выбрать сумму',pick_boosts:'Выбрать бусты',amount:'Сумма',select_boosts:'Выбор бустов',all:'Все',slot_count:'Кол-во слотов',
+      b_wheels_n:'Все диски',b_wheels_d:'Все варианты дисков',
+      b_brakes_n:'Все тормоза',b_brakes_d:'Все варианты тормозов',
+      b_caliper_n:'Все суппорты',b_caliper_d:'Все цвета суппортов',
+      b_ach_n:'Достижения',b_ach_d:'Все ачивки',
+      b_cloth_n:'Одежда',b_cloth_d:'Все шмотки и аксессуары',
+      b_paint_n:'Краска и анимации',b_paint_d:'Все краски и анимации',
+      b_slots_n:'Слоты гаража',b_slots_d:'100 коинов за слот · максимум 17',
+      queue_empty:'Тапни карточку, чтобы добавить в очередь',launch:'Запуск',
+      gen_new_t:'Создать новые',gen_new_d:'Создать N свежих аков',
+      add_exist_t:'Добавить свои',add_exist_d:'Логин + пароль / файл',
+      latest_batch:'Последний батч',no_accs:'Аков пока нет',no_accs_sub:'// создай или добавь свои',
+      cars_main_h:'Основной аккаунт (целевой гараж)',
+      cars_donors_h:'Доноры (по одному email:password на строку, или .txt)',
+      cars_wishlist_h:'Список · какие тачки купить на каждом доноре',
+      cars_cat_h:'Каталог · тап чтобы добавить / убрать',
+      cars_cfg_hint:'Настрой основной + доноров + список',
+      cars_donors_hint:'Каждый донор логинится, опционально добивает коины через дрэг-рейс, потом покупает назначенные тачки. Перенос в основной — отдельный шаг.',
+      email:'Email',password:'Пароль',
+      garage_lbl:'гараж',cash_lbl:'кэш',coins_lbl:'коины',coin_lbl:'коин',
+      use_pool:'Из пула',upload_txt:'Загрузить .txt',clear:'Очистить',
+      wish_empty:'Ничего не выбрано — выбирай из каталога ниже',
+      any_cur:'любая валюта',any_class:'любой класс',buy_fleet:'Купить парк',
+      lifetime_stats:'Общая статистика',boosted_accs:'Бустнутых аков',generated_accs:'Создано аков',
+      alltime_seller:'за всё время · этот продавец',tracked_since:'С момента',launch_lc:'запуска',
+      counters_update:'· счётчики обновляются после каждого успеха',
+      logs_live:'Онлайн',running:'РАБОТАЕТ',no_active_log:'Активного лога нет',
+      launch_to_start:'Запусти буст, чтобы начать сессию',
+      passive_dl:'Пассивные · скачиваемые',no_archived:'Архивных сессий пока нет',console:'Консоль',
+      m_gen_title:'Создать аккаунты',m_gen_count:'Количество аккаунтов',
+      m_gen_hint:'Свежие аки будут зарегистрированы в Firebase со случайными данными. Максимум 200 за раз. Бот добавит их в твой пул и пришлёт сообщение + .txt в чат.',
+      cancel:'Отмена',create:'Создать',add:'Добавить',
+      m_add_title:'Добавить существующий аккаунт',m_add_manual:'Вручную',m_add_file:'Файл',
+      m_add_paste:'Или вставь несколько строк в формате email:password ниже.',
+      m_add_choose:'Выбрать .txt файл',m_add_oneperline:'По одному на строку: email:password',
+      pending_label:'Ждут добавления (запустятся по кнопке)',pending_sub:'в очереди на проверку + добавление',
+      accs_in_batch:'аков в последнем батче',copy:'Копировать',copy_visible:'Копировать видимые',dl_txt:'Скачать .txt',pool_server:'пул на сервере — нажми Скачать',more_in_dl:'ещё в копии/скачивании',more:'ещё',download:'Скачать',
+    },
+    es:{
+      app_devtool:'Dev Tool',connected:'conectado',
+      tab_accounts:'cuentas',tab_functions:'funciones',tab_cars:'coches',tab_dashboard:'panel',tab_logs:'registros',
+      sec_resources:'Recursos',sec_manage:'Gestionar cuentas',sec_sessions:'Sesiones',
+      fn_coins_n:'Monedas máx',fn_coins_d:'Monedas de toda fuente · máx por defecto',
+      fn_boost_n:'Boost completo',fn_boost_d:'Aplicar todo · o elegir',
+      fn_cash_n:'Dinero máx',fn_cash_d:'Siempre máximo — sin cantidad personal',
+      pick_amount:'Elegir cantidad',pick_boosts:'Elegir boosts',amount:'Cantidad',select_boosts:'Selecciona boosts',all:'Todo',slot_count:'Nº de slots',
+      b_wheels_n:'Todas las llantas',b_wheels_d:'Cada diseño',
+      b_brakes_n:'Todos los frenos',b_brakes_d:'Cada variante',
+      b_caliper_n:'Todas las pinzas',b_caliper_d:'Cada color',
+      b_ach_n:'Logros',b_ach_d:'Todos los logros',
+      b_cloth_n:'Ropa',b_cloth_d:'Todos los atuendos',
+      b_paint_n:'Pintura y animaciones',b_paint_d:'Todos los colores y animaciones',
+      b_slots_n:'Slots del garaje',b_slots_d:'100 monedas por slot · tope 17',
+      queue_empty:'Toca una tarjeta para añadir a la cola',launch:'Lanzar',
+      gen_new_t:'Generar nuevas',gen_new_d:'Crear N cuentas nuevas',
+      add_exist_t:'Añadir existentes',add_exist_d:'Login + contraseña / archivo',
+      latest_batch:'Último lote',no_accs:'Sin cuentas todavía',no_accs_sub:'// genera o añade para llenar',
+      cars_main_h:'Cuenta principal (garaje destino)',
+      cars_donors_h:'Cuentas donantes (una email:pass por línea o .txt)',
+      cars_wishlist_h:'Lista · coches a comprar en cada donante',
+      cars_cat_h:'Catálogo · toca para añadir / quitar',
+      cars_cfg_hint:'Configura principal + donantes + lista',
+      cars_donors_hint:'Cada donante inicia sesión, sube monedas en la carrera diaria y compra los coches asignados. Transferir al principal es un paso aparte.',
+      email:'Email',password:'Contraseña',
+      garage_lbl:'garaje',cash_lbl:'dinero',coins_lbl:'monedas',coin_lbl:'moneda',
+      use_pool:'Usar mi pool',upload_txt:'Subir .txt',clear:'Limpiar',
+      wish_empty:'Nada elegido — escoge del catálogo abajo',
+      any_cur:'cualquier mon.',any_class:'cualquier clase',buy_fleet:'Comprar flota',
+      lifetime_stats:'Estadísticas',boosted_accs:'Cuentas boosteadas',generated_accs:'Cuentas creadas',
+      alltime_seller:'en total · este vendedor',tracked_since:'Desde',launch_lc:'el inicio',
+      counters_update:'· los contadores se actualizan tras cada éxito',
+      logs_live:'En vivo',running:'EJECUTANDO',no_active_log:'Sin log activo',
+      launch_to_start:'Lanza un boost para iniciar una sesión',
+      passive_dl:'Pasivos · descargables',no_archived:'Sin sesiones archivadas',console:'Consola',
+      m_gen_title:'Generar cuentas',m_gen_count:'Número de cuentas',
+      m_gen_hint:'Cuentas nuevas se registran en Firebase con credenciales aleatorias. Máx 200 por petición. El bot las añade a tu pool y envía un mensaje + .txt en el chat.',
+      cancel:'Cancelar',create:'Crear',add:'Añadir',
+      m_add_title:'Añadir cuenta existente',m_add_manual:'Manual',m_add_file:'Archivo',
+      m_add_paste:'O pega varias líneas como email:password abajo.',
+      m_add_choose:'Elegir archivo .txt',m_add_oneperline:'Una por línea: email:password',
+      pending_label:'Pendientes (se añaden al lanzar)',pending_sub:'en cola para verificar + añadir',
+      accs_in_batch:'cuentas en el último lote',copy:'Copiar',copy_visible:'Copiar visibles',dl_txt:'Descargar .txt',pool_server:'pool en el servidor — toca Descargar',more_in_dl:'más en copia/descarga',more:'más',download:'Descargar',
+    },
+    pt:{
+      app_devtool:'Dev Tool',connected:'conectado',
+      tab_accounts:'contas',tab_functions:'funções',tab_cars:'carros',tab_dashboard:'painel',tab_logs:'registos',
+      sec_resources:'Recursos',sec_manage:'Gerir contas',sec_sessions:'Sessões',
+      fn_coins_n:'Moedas máx',fn_coins_d:'Moedas de toda fonte · máx por padrão',
+      fn_boost_n:'Boost completo',fn_boost_d:'Aplicar tudo · ou escolher',
+      fn_cash_n:'Dinheiro máx',fn_cash_d:'Sempre máximo — sem valor próprio',
+      pick_amount:'Escolher valor',pick_boosts:'Escolher boosts',amount:'Valor',select_boosts:'Selecionar boosts',all:'Tudo',slot_count:'Nº de slots',
+      b_wheels_n:'Todas as rodas',b_wheels_d:'Todos os designs',
+      b_brakes_n:'Todos os travões',b_brakes_d:'Todas as variantes',
+      b_caliper_n:'Todas as pinças',b_caliper_d:'Todas as cores',
+      b_ach_n:'Conquistas',b_ach_d:'Todas as flags',
+      b_cloth_n:'Roupas',b_cloth_d:'Todos os trajes',
+      b_paint_n:'Pintura e animações',b_paint_d:'Todas as cores e animações',
+      b_slots_n:'Slots da garagem',b_slots_d:'100 moedas por slot · máx 17',
+      queue_empty:'Toca num cartão para adicionar à fila',launch:'Lançar',
+      gen_new_t:'Gerar novas',gen_new_d:'Criar N contas novas',
+      add_exist_t:'Adicionar existentes',add_exist_d:'Login + senha / arquivo',
+      latest_batch:'Último lote',no_accs:'Sem contas ainda',no_accs_sub:'// gera ou adiciona',
+      cars_main_h:'Conta principal (garagem destino)',
+      cars_donors_h:'Contas doadoras (uma email:senha por linha ou .txt)',
+      cars_wishlist_h:'Lista · carros para comprar em cada doadora',
+      cars_cat_h:'Catálogo · toca para adicionar / remover',
+      cars_cfg_hint:'Configura principal + doadoras + lista',
+      cars_donors_hint:'Cada doadora faz login, opcionalmente sobe moedas no drag race diário e compra os carros atribuídos. Transferir para a principal é um passo separado.',
+      email:'Email',password:'Senha',
+      garage_lbl:'garagem',cash_lbl:'dinheiro',coins_lbl:'moedas',coin_lbl:'moeda',
+      use_pool:'Usar meu pool',upload_txt:'Enviar .txt',clear:'Limpar',
+      wish_empty:'Nada selecionado — escolhe do catálogo abaixo',
+      any_cur:'qualquer moeda',any_class:'qualquer classe',buy_fleet:'Comprar frota',
+      lifetime_stats:'Estatísticas',boosted_accs:'Contas boostadas',generated_accs:'Contas criadas',
+      alltime_seller:'sempre · este vendedor',tracked_since:'Desde',launch_lc:'o início',
+      counters_update:'· contadores atualizam a cada sucesso',
+      logs_live:'Ao vivo',running:'A CORRER',no_active_log:'Sem log ativo',
+      launch_to_start:'Lança um boost para iniciar uma sessão',
+      passive_dl:'Passivos · transferíveis',no_archived:'Sem sessões arquivadas',console:'Consola',
+      m_gen_title:'Gerar contas',m_gen_count:'Número de contas',
+      m_gen_hint:'Contas novas são registadas no Firebase com dados aleatórios. Máx 200 por pedido. O bot adiciona-as ao teu pool e envia mensagem + .txt no chat.',
+      cancel:'Cancelar',create:'Criar',add:'Adicionar',
+      m_add_title:'Adicionar conta existente',m_add_manual:'Manual',m_add_file:'Arquivo',
+      m_add_paste:'Ou cola várias linhas como email:senha abaixo.',
+      m_add_choose:'Escolher arquivo .txt',m_add_oneperline:'Uma por linha: email:senha',
+      pending_label:'Pendentes (correm ao lançar)',pending_sub:'na fila para verificar + adicionar',
+      accs_in_batch:'contas no último lote',copy:'Copiar',copy_visible:'Copiar visíveis',dl_txt:'Baixar .txt',pool_server:'pool no servidor — toca Baixar',more_in_dl:'mais na cópia/download',more:'mais',download:'Baixar',
+    },
+    de:{
+      app_devtool:'Dev Tool',connected:'verbunden',
+      tab_accounts:'konten',tab_functions:'funktionen',tab_cars:'autos',tab_dashboard:'übersicht',tab_logs:'logs',
+      sec_resources:'Ressourcen',sec_manage:'Konten verwalten',sec_sessions:'Sitzungen',
+      fn_coins_n:'Volle Coins',fn_coins_d:'Coins aus allen Quellen · max standardmäßig',
+      fn_boost_n:'Voller Boost',fn_boost_d:'Alle Boosts · oder auswählen',
+      fn_cash_n:'Volles Cash',fn_cash_d:'Immer max — kein eigener Betrag',
+      pick_amount:'Betrag wählen',pick_boosts:'Boosts wählen',amount:'Betrag',select_boosts:'Boosts auswählen',all:'Alle',slot_count:'Slot-Anzahl',
+      b_wheels_n:'Alle Felgen',b_wheels_d:'Jedes Design',
+      b_brakes_n:'Alle Bremsen',b_brakes_d:'Jede Variante',
+      b_caliper_n:'Alle Sättel',b_caliper_d:'Jede Farbe',
+      b_ach_n:'Erfolge',b_ach_d:'Alle Achievements',
+      b_cloth_n:'Kleidung',b_cloth_d:'Alle Outfits & Accessoires',
+      b_paint_n:'Lack & Animationen',b_paint_d:'Alle Farben und Animationen',
+      b_slots_n:'Garagen-Slots',b_slots_d:'100 Coins pro Slot · max 17',
+      queue_empty:'Tippe eine Karte zum Hinzufügen',launch:'Starten',
+      gen_new_t:'Neu generieren',gen_new_d:'N neue Konten erstellen',
+      add_exist_t:'Vorhandene hinzufügen',add_exist_d:'Login + Passwort / Datei',
+      latest_batch:'Letzter Batch',no_accs:'Noch keine Konten',no_accs_sub:'// generieren oder hinzufügen',
+      cars_main_h:'Hauptkonto (Ziel-Garage)',
+      cars_donors_h:'Spender-Konten (email:passwort pro Zeile oder .txt)',
+      cars_wishlist_h:'Wunschliste · Autos pro Spender',
+      cars_cat_h:'Katalog · tippen zum Hinzufügen / Entfernen',
+      cars_cfg_hint:'Haupt + Spender + Wunschliste konfigurieren',
+      cars_donors_hint:'Jeder Spender meldet sich an, füllt optional Coins via Drag Race auf und kauft die zugewiesenen Autos. Transfer zum Hauptkonto ist separat.',
+      email:'E-Mail',password:'Passwort',
+      garage_lbl:'garage',cash_lbl:'cash',coins_lbl:'coins',coin_lbl:'coin',
+      use_pool:'Pool nutzen',upload_txt:'.txt hochladen',clear:'Leeren',
+      wish_empty:'Nichts gewählt — wähle aus dem Katalog unten',
+      any_cur:'beliebig',any_class:'beliebige Klasse',buy_fleet:'Flotte kaufen',
+      lifetime_stats:'Gesamtstatistik',boosted_accs:'Geboostete Konten',generated_accs:'Erstellte Konten',
+      alltime_seller:'gesamt · dieser Verkäufer',tracked_since:'Seit',launch_lc:'Start',
+      counters_update:'· Zähler aktualisieren nach jedem Erfolg',
+      logs_live:'Live',running:'LÄUFT',no_active_log:'Kein aktives Log',
+      launch_to_start:'Starte einen Boost, um eine Sitzung zu beginnen',
+      passive_dl:'Passiv · herunterladbar',no_archived:'Keine archivierten Sitzungen',console:'Konsole',
+      m_gen_title:'Konten generieren',m_gen_count:'Anzahl Konten',
+      m_gen_hint:'Neue Konten werden in Firebase mit Zufallsdaten registriert. Max 200 pro Anfrage. Der Bot fügt sie in deinen Pool ein und schickt Nachricht + .txt im Chat.',
+      cancel:'Abbrechen',create:'Erstellen',add:'Hinzufügen',
+      m_add_title:'Vorhandenes Konto hinzufügen',m_add_manual:'Manuell',m_add_file:'Datei',
+      m_add_paste:'Oder mehrere Zeilen als email:passwort einfügen.',
+      m_add_choose:'.txt-Datei wählen',m_add_oneperline:'Eine pro Zeile: email:passwort',
+      pending_label:'Ausstehend (laufen beim Start)',pending_sub:'in Warteschlange',
+      accs_in_batch:'Konten im letzten Batch',copy:'Kopieren',copy_visible:'Sichtbare kopieren',dl_txt:'.txt herunterladen',pool_server:'Pool auf Server — Download tippen',more_in_dl:'mehr in Kopie/Download',more:'mehr',download:'Download',
+    },
+    fr:{
+      app_devtool:'Dev Tool',connected:'connecté',
+      tab_accounts:'comptes',tab_functions:'fonctions',tab_cars:'voitures',tab_dashboard:'tableau',tab_logs:'journaux',
+      sec_resources:'Ressources',sec_manage:'Gérer les comptes',sec_sessions:'Sessions',
+      fn_coins_n:'Coins max',fn_coins_d:'Coins de toutes sources · max par défaut',
+      fn_boost_n:'Boost complet',fn_boost_d:'Tout appliquer · ou choisir',
+      fn_cash_n:'Cash max',fn_cash_d:'Toujours max — pas de montant perso',
+      pick_amount:'Choisir montant',pick_boosts:'Choisir boosts',amount:'Montant',select_boosts:'Sélection',all:'Tout',slot_count:'Nb de slots',
+      b_wheels_n:'Toutes les jantes',b_wheels_d:'Chaque design',
+      b_brakes_n:'Tous les freins',b_brakes_d:'Chaque variante',
+      b_caliper_n:'Tous les étriers',b_caliper_d:'Chaque couleur',
+      b_ach_n:'Succès',b_ach_d:'Tous les flags',
+      b_cloth_n:'Vêtements',b_cloth_d:'Toutes les tenues',
+      b_paint_n:'Peinture et animations',b_paint_d:'Toutes les couleurs et animations',
+      b_slots_n:'Slots de garage',b_slots_d:'100 coins par slot · max 17',
+      queue_empty:'Tape une carte pour l’ajouter',launch:'Lancer',
+      gen_new_t:'Générer nouveaux',gen_new_d:'Créer N nouveaux comptes',
+      add_exist_t:'Ajouter existant',add_exist_d:'Login + mdp / fichier',
+      latest_batch:'Dernier lot',no_accs:'Aucun compte',no_accs_sub:'// générer ou ajouter',
+      cars_main_h:'Compte principal (garage cible)',
+      cars_donors_h:'Donneurs (un email:mdp par ligne ou .txt)',
+      cars_wishlist_h:'Liste · voitures à acheter par donneur',
+      cars_cat_h:'Catalogue · tap pour ajouter / retirer',
+      cars_cfg_hint:'Configure principal + donneurs + liste',
+      cars_donors_hint:'Chaque donneur se connecte, recharge éventuellement les coins via la drag race, puis achète les voitures attribuées. Le transfert vers le principal est séparé.',
+      email:'Email',password:'Mot de passe',
+      garage_lbl:'garage',cash_lbl:'cash',coins_lbl:'coins',coin_lbl:'coin',
+      use_pool:'Utiliser pool',upload_txt:'Envoyer .txt',clear:'Vider',
+      wish_empty:'Rien choisi — pioche dans le catalogue',
+      any_cur:'toute mon.',any_class:'toute classe',buy_fleet:'Acheter flotte',
+      lifetime_stats:'Stats globales',boosted_accs:'Comptes boostés',generated_accs:'Comptes créés',
+      alltime_seller:'total · ce vendeur',tracked_since:'Depuis',launch_lc:'le démarrage',
+      counters_update:'· compteurs mis à jour après chaque succès',
+      logs_live:'En direct',running:'EN COURS',no_active_log:'Aucun log actif',
+      launch_to_start:'Lance un boost pour démarrer',
+      passive_dl:'Passifs · téléchargeables',no_archived:'Aucune session archivée',console:'Console',
+      m_gen_title:'Générer des comptes',m_gen_count:'Nombre de comptes',
+      m_gen_hint:'Comptes neufs enregistrés sur Firebase avec identifiants aléatoires. Max 200 par requête. Le bot les ajoute au pool et envoie message + .txt au chat.',
+      cancel:'Annuler',create:'Créer',add:'Ajouter',
+      m_add_title:'Ajouter un compte',m_add_manual:'Manuel',m_add_file:'Fichier',
+      m_add_paste:'Ou colle plusieurs lignes email:mdp ci-dessous.',
+      m_add_choose:'Choisir un .txt',m_add_oneperline:'Un par ligne : email:mdp',
+      pending_label:'En attente (au lancement)',pending_sub:'en file pour vérif + ajout',
+      accs_in_batch:'comptes dans le dernier lot',copy:'Copier',copy_visible:'Copier visibles',dl_txt:'Télécharger .txt',pool_server:'pool sur serveur — Télécharger',more_in_dl:'plus en copie/téléchargement',more:'+',download:'Télécharger',
+    },
+    it:{
+      app_devtool:'Dev Tool',connected:'connesso',
+      tab_accounts:'account',tab_functions:'funzioni',tab_cars:'auto',tab_dashboard:'pannello',tab_logs:'log',
+      sec_resources:'Risorse',sec_manage:'Gestisci account',sec_sessions:'Sessioni',
+      fn_coins_n:'Monete max',fn_coins_d:'Monete da ogni fonte · max default',
+      fn_boost_n:'Boost completo',fn_boost_d:'Applica tutto · o scegli',
+      fn_cash_n:'Soldi max',fn_cash_d:'Sempre max — nessun importo custom',
+      pick_amount:'Scegli importo',pick_boosts:'Scegli boost',amount:'Importo',select_boosts:'Seleziona boost',all:'Tutto',slot_count:'N. slot',
+      b_wheels_n:'Tutti i cerchi',b_wheels_d:'Ogni design',
+      b_brakes_n:'Tutti i freni',b_brakes_d:'Ogni variante',
+      b_caliper_n:'Tutte le pinze',b_caliper_d:'Ogni colore',
+      b_ach_n:'Obiettivi',b_ach_d:'Tutti i flag',
+      b_cloth_n:'Vestiti',b_cloth_d:'Tutti gli outfit',
+      b_paint_n:'Vernice e animazioni',b_paint_d:'Tutti i colori e le animazioni',
+      b_slots_n:'Slot del garage',b_slots_d:'100 monete per slot · max 17',
+      queue_empty:'Tocca una scheda per aggiungere',launch:'Avvia',
+      gen_new_t:'Genera nuovi',gen_new_d:'Crea N account nuovi',
+      add_exist_t:'Aggiungi esistenti',add_exist_d:'Login + password / file',
+      latest_batch:'Ultimo lotto',no_accs:'Nessun account',no_accs_sub:'// genera o aggiungi',
+      cars_main_h:'Account principale (garage target)',
+      cars_donors_h:'Donatori (un email:password per riga o .txt)',
+      cars_wishlist_h:'Lista · auto da comprare per ogni donatore',
+      cars_cat_h:'Catalogo · tocca per aggiungere / rimuovere',
+      cars_cfg_hint:'Configura principale + donatori + lista',
+      cars_donors_hint:'Ogni donatore fa login, opzionalmente fa monete con la drag race quotidiana, poi compra le auto assegnate. Il trasferimento al principale è un passo separato.',
+      email:'Email',password:'Password',
+      garage_lbl:'garage',cash_lbl:'soldi',coins_lbl:'monete',coin_lbl:'moneta',
+      use_pool:'Usa pool',upload_txt:'Carica .txt',clear:'Pulisci',
+      wish_empty:'Niente scelto — pesca dal catalogo qui sotto',
+      any_cur:'qualsiasi val.',any_class:'qualsiasi classe',buy_fleet:'Compra flotta',
+      lifetime_stats:'Statistiche',boosted_accs:'Account boostati',generated_accs:'Account creati',
+      alltime_seller:'totale · questo venditore',tracked_since:'Da',launch_lc:'avvio',
+      counters_update:'· contatori aggiornati ad ogni successo',
+      logs_live:'Live',running:'IN ESECUZIONE',no_active_log:'Nessun log attivo',
+      launch_to_start:'Lancia un boost per iniziare',
+      passive_dl:'Passivi · scaricabili',no_archived:'Nessuna sessione archiviata',console:'Console',
+      m_gen_title:'Genera account',m_gen_count:'Numero di account',
+      m_gen_hint:'Account nuovi registrati su Firebase con credenziali random. Max 200 per richiesta. Il bot li aggiunge al pool e invia messaggio + .txt in chat.',
+      cancel:'Annulla',create:'Crea',add:'Aggiungi',
+      m_add_title:'Aggiungi account esistente',m_add_manual:'Manuale',m_add_file:'File',
+      m_add_paste:'Oppure incolla più righe email:password qui sotto.',
+      m_add_choose:'Scegli .txt',m_add_oneperline:'Uno per riga: email:password',
+      pending_label:'In attesa (al lancio)',pending_sub:'in coda per verifica + aggiunta',
+      accs_in_batch:'account nell\'ultimo lotto',copy:'Copia',copy_visible:'Copia visibili',dl_txt:'Scarica .txt',pool_server:'pool sul server — tocca Scarica',more_in_dl:'altri in copia/download',more:'altro',download:'Scarica',
+    },
+    tr:{
+      app_devtool:'Dev Tool',connected:'bağlı',
+      tab_accounts:'hesaplar',tab_functions:'işlevler',tab_cars:'arabalar',tab_dashboard:'panel',tab_logs:'günlükler',
+      sec_resources:'Kaynaklar',sec_manage:'Hesapları yönet',sec_sessions:'Oturumlar',
+      fn_coins_n:'Tam Coin',fn_coins_d:'Her kaynaktan coin · varsayılan maks',
+      fn_boost_n:'Tam Boost',fn_boost_d:'Hepsini uygula · veya seç',
+      fn_cash_n:'Tam Para',fn_cash_d:'Her zaman maks — özel miktar yok',
+      pick_amount:'Miktar seç',pick_boosts:'Boost seç',amount:'Miktar',select_boosts:'Boost seç',all:'Hepsi',slot_count:'Slot sayısı',
+      b_wheels_n:'Tüm jantlar',b_wheels_d:'Her tasarım',
+      b_brakes_n:'Tüm frenler',b_brakes_d:'Her varyant',
+      b_caliper_n:'Tüm kaliperler',b_caliper_d:'Her renk',
+      b_ach_n:'Başarımlar',b_ach_d:'Tüm flagler',
+      b_cloth_n:'Karakter kıyafeti',b_cloth_d:'Tüm kıyafetler',
+      b_paint_n:'Boya ve animasyonlar',b_paint_d:'Tüm renkler ve animasyonlar',
+      b_slots_n:'Garaj slotları',b_slots_d:'Slot başı 100 coin · maks 17',
+      queue_empty:'Sıraya eklemek için karta dokun',launch:'Başlat',
+      gen_new_t:'Yeni oluştur',gen_new_d:'N adet yeni hesap',
+      add_exist_t:'Mevcut ekle',add_exist_d:'Giriş + şifre / dosya',
+      latest_batch:'Son grup',no_accs:'Henüz hesap yok',no_accs_sub:'// oluştur veya ekle',
+      cars_main_h:'Ana hesap (hedef garaj)',
+      cars_donors_h:'Donör hesaplar (her satıra email:şifre veya .txt)',
+      cars_wishlist_h:'Liste · her donörde alınacak arabalar',
+      cars_cat_h:'Katalog · eklemek/çıkarmak için dokun',
+      cars_cfg_hint:'Ana + donörler + listeyi ayarla',
+      cars_donors_hint:'Her donör giriş yapar, dilerse drag race ile coin doldurur ve kendisine atanan arabaları alır. Ana hesaba transfer ayrı bir adımdır.',
+      email:'E-posta',password:'Şifre',
+      garage_lbl:'garaj',cash_lbl:'para',coins_lbl:'coin',coin_lbl:'coin',
+      use_pool:'Havuzu kullan',upload_txt:'.txt yükle',clear:'Temizle',
+      wish_empty:'Seçim yok — aşağıdaki katalogdan seç',
+      any_cur:'her birim',any_class:'her sınıf',buy_fleet:'Filo al',
+      lifetime_stats:'Genel istatistik',boosted_accs:'Boost\'lu hesap',generated_accs:'Oluşturulan hesap',
+      alltime_seller:'toplam · bu satıcı',tracked_since:'Şuradan',launch_lc:'başlangıç',
+      counters_update:'· sayaçlar her başarıda güncellenir',
+      logs_live:'Canlı',running:'ÇALIŞIYOR',no_active_log:'Aktif log yok',
+      launch_to_start:'Oturum başlatmak için boost başlat',
+      passive_dl:'Pasif · indirilebilir',no_archived:'Arşivlenmiş oturum yok',console:'Konsol',
+      m_gen_title:'Hesap oluştur',m_gen_count:'Hesap sayısı',
+      m_gen_hint:'Yeni hesaplar Firebase\'e rastgele bilgilerle kaydedilir. İstek başına maks 200. Bot havuza ekler ve sohbete mesaj + .txt yollar.',
+      cancel:'İptal',create:'Oluştur',add:'Ekle',
+      m_add_title:'Mevcut hesabı ekle',m_add_manual:'Elle',m_add_file:'Dosya',
+      m_add_paste:'Ya da aşağıya email:şifre satırlarını yapıştır.',
+      m_add_choose:'.txt dosyası seç',m_add_oneperline:'Satır başına bir: email:şifre',
+      pending_label:'Bekleyen (başlatınca çalışır)',pending_sub:'doğrula + ekle kuyruğunda',
+      accs_in_batch:'son gruptaki hesaplar',copy:'Kopyala',copy_visible:'Görüneni kopyala',dl_txt:'.txt indir',pool_server:'havuz sunucuda — İndir\'e dokun',more_in_dl:'kopya/indirmede daha',more:'daha',download:'İndir',
+    },
   };
   const detectLang = () => {
     try {
@@ -2020,7 +2372,7 @@
             <div class="sub">${escHtml(s.count||0)} entr${(s.count===1?'y':'ies')} ${escHtml(dur)}</div>
           </div>
           <span class="status-pill ${stCls}">${escHtml(s.status||'?')}</span>
-          <button class="dl-btn" data-dl="${escHtml(s.id)}">Download</button>
+          <button class="dl-btn" data-dl="${escHtml(s.id)}">${t('download')}</button>
         </div>`;
     }).join('');
     wrap.querySelectorAll('[data-dl]').forEach(b => {
@@ -2056,19 +2408,19 @@
     let preview = recent.slice(0, 6).map(a =>
       `<div><span class="em">${escHtml(a.email)}</span>:<span class="pw">${escHtml(a.password)}</span></div>`
     ).join('');
-    if (recent.length > 6) preview += `<div class="more">… +${recent.length - 6} more in copy/download</div>`;
-    if (!recent.length) preview = `<div class="more">pool stored on server — tap Download to fetch</div>`;
+    if (recent.length > 6) preview += `<div class="more">… +${recent.length - 6} ${t('more_in_dl')}</div>`;
+    if (!recent.length) preview = `<div class="more">${t('pool_server')}</div>`;
     wrap.innerHTML = `
       <div class="pool-head">
         <div class="ico">✨</div>
         <div class="info">
           <div class="num">${escHtml(gen.total)}</div>
-          <div class="lbl">accounts in latest batch</div>
+          <div class="lbl">${t('accs_in_batch')}</div>
         </div>
       </div>
       <div class="actions">
-        <button class="btn primary" id="gen-copy">📋 Copy${recent.length < gen.total ? ' visible' : ''}</button>
-        <button class="btn" id="gen-download">📥 Download .txt</button>
+        <button class="btn primary" id="gen-copy">📋 ${recent.length < gen.total ? t('copy_visible') : t('copy')}</button>
+        <button class="btn" id="gen-download">📥 ${t('dl_txt')}</button>
       </div>
       <div class="preview">${preview}</div>
     `;
@@ -2414,17 +2766,17 @@
     const preview = pendingAdds.slice(0, 4).map(a =>
       `<div><span style="color:var(--accent-3)">${escHtml(a.email)}</span></div>`
     ).join('');
-    const more = pendingAdds.length > 4 ? `<div style="color:var(--hint);text-align:center;padding-top:4px;">… +${pendingAdds.length - 4} more</div>` : '';
+    const more = pendingAdds.length > 4 ? `<div style="color:var(--hint);text-align:center;padding-top:4px;">… +${pendingAdds.length - 4} ${t('more')}</div>` : '';
     pendingBlock.innerHTML = `
-      <div class="section-label">Pending add (will run on Launch)</div>
+      <div class="section-label">${t('pending_label')}</div>
       <div class="gen-pool" style="border-color:var(--amber);">
         <div class="pool-head">
           <div class="ico" style="border-color:var(--amber);color:var(--amber);">⏳</div>
           <div class="info">
             <div class="num" style="color:var(--amber);text-shadow:0 0 8px rgba(251,191,36,0.4);">${pendingAdds.length}</div>
-            <div class="lbl">queued for verify + add</div>
+            <div class="lbl">${t('pending_sub')}</div>
           </div>
-          <button class="btn ghost" id="pending-clear" style="padding:6px 10px;font-size:10px;">Clear</button>
+          <button class="btn ghost" id="pending-clear" style="padding:6px 10px;font-size:10px;">${t('clear')}</button>
         </div>
         <div class="preview" style="font-family:var(--mono);font-size:10.5px;">${preview}${more}</div>
       </div>`;

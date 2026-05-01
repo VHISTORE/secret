@@ -472,58 +472,58 @@
   <!-- ── Dashboard ─────────────────────────────────────────────────── -->
   <section class="pane active" data-pane="dashboard">
     <div class="hero">
-      <div class="lbl">Total paid users</div>
+      <div class="lbl" data-i18n="hero_lbl">Total paid users</div>
       <div class="num" id="hero-users">—</div>
-      <div class="delta" id="hero-delta">across all tiers</div>
+      <div class="delta" id="hero-delta" data-i18n="across_tiers">across all tiers</div>
     </div>
 
     <div class="chip-grid">
-      <div class="chip"><div class="v" id="chip-af">—</div><div class="l">autofarm pool</div></div>
-      <div class="chip"><div class="v" id="chip-promo">—</div><div class="l">promos active</div></div>
-      <div class="chip"><div class="v" id="chip-state">—</div><div class="l">af state</div></div>
+      <div class="chip"><div class="v" id="chip-af">—</div><div class="l" data-i18n="af_pool">autofarm pool</div></div>
+      <div class="chip"><div class="v" id="chip-promo">—</div><div class="l" data-i18n="promos_active">promos active</div></div>
+      <div class="chip"><div class="v" id="chip-state">—</div><div class="l" data-i18n="af_state_l">af state</div></div>
     </div>
 
-    <div class="section-label">Tier breakdown</div>
+    <div class="section-label" data-i18n="tier_breakdown">Tier breakdown</div>
     <div class="card"><div class="tier-list" id="tier-list">—</div></div>
 
-    <div class="section-label">Quick actions</div>
+    <div class="section-label" data-i18n="quick_actions">Quick actions</div>
     <div class="qa-grid">
       <button class="qa" data-jump="users">
         <div class="ico">➕</div>
-        <div class="ttl">Grant tier</div>
-        <div class="desc">add / extend a paid user</div>
+        <div class="ttl" data-i18n="qa_grant_t">Grant tier</div>
+        <div class="desc" data-i18n="qa_grant_d">add / extend a paid user</div>
       </button>
       <button class="qa" data-jump="autofarm">
         <div class="ico">▶</div>
-        <div class="ttl">Run AF cycle</div>
-        <div class="desc">force-trigger autofarm now</div>
+        <div class="ttl" data-i18n="qa_af_t">Run AF cycle</div>
+        <div class="desc" data-i18n="qa_af_d">force-trigger autofarm now</div>
       </button>
       <button class="qa" data-jump="promo">
         <div class="ico">🎟</div>
-        <div class="ttl">Issue promos</div>
-        <div class="desc">generate −30% codes</div>
+        <div class="ttl" data-i18n="qa_promo_t">Issue promos</div>
+        <div class="desc" data-i18n="qa_promo_d">generate −30% codes</div>
       </button>
       <button class="qa" data-jump="broadcast">
         <div class="ico">📢</div>
-        <div class="ttl">Broadcast</div>
-        <div class="desc">message all users</div>
+        <div class="ttl" data-i18n="qa_bc_t">Broadcast</div>
+        <div class="desc" data-i18n="qa_bc_d">message all users</div>
       </button>
     </div>
 
-    <div class="section-label" style="margin-top:14px;">Refresh</div>
-    <button class="btn primary full" id="btn-state">⟳ Pull fresh state from bot</button>
+    <div class="section-label" style="margin-top:14px;" data-i18n="refresh">Refresh</div>
+    <button class="btn primary full" id="btn-state" data-i18n="pull_state">⟳ Pull fresh state from bot</button>
   </section>
 
   <!-- ── Users ────────────────────────────────────────────────────── -->
   <section class="pane" data-pane="users">
-    <div class="section-label">Grant / extend tier</div>
+    <div class="section-label" data-i18n="grant_extend">Grant / extend tier</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Telegram user id</label>
+        <label class="field-label" data-i18n="tg_uid">Telegram user id</label>
         <input class="input" type="text" id="set-tg" inputmode="numeric" placeholder="123456789">
       </div>
       <div class="field">
-        <label class="field-label">Tier</label>
+        <label class="field-label" data-i18n="tier_lbl">Tier</label>
         <select class="select" id="set-tier">
           <option value="trial">trial</option>
           <option value="week">week</option>
@@ -535,66 +535,66 @@
         </select>
       </div>
       <div class="field">
-        <label class="field-label">Days (0 = tier default)</label>
+        <label class="field-label" data-i18n="days_default">Days (0 = tier default)</label>
         <input class="input" type="number" id="set-days" min="0" placeholder="0">
       </div>
       <div class="btn-row">
-        <button class="btn primary" id="btn-set-tier">Grant / extend</button>
-        <button class="btn danger" id="btn-remove-user">Remove</button>
+        <button class="btn primary" id="btn-set-tier" data-i18n="btn_grant">Grant / extend</button>
+        <button class="btn danger" id="btn-remove-user" data-i18n="remove">Remove</button>
       </div>
     </div>
 
-    <div class="section-label">Inspect</div>
+    <div class="section-label" data-i18n="inspect">Inspect</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Filter by tier (blank = all)</label>
+        <label class="field-label" data-i18n="filter_tier">Filter by tier (blank = all)</label>
         <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial">
       </div>
-      <button class="btn full" id="btn-list-users">📋 List users</button>
+      <button class="btn full" id="btn-list-users" data-i18n="list_users">📋 List users</button>
     </div>
   </section>
 
   <!-- ── AutoFarm ─────────────────────────────────────────────────── -->
   <section class="pane" data-pane="autofarm">
     <div class="chip-grid">
-      <div class="chip"><div class="v" id="af-count">—</div><div class="l">in pool</div></div>
-      <div class="chip"><div class="v" id="af-state">—</div><div class="l">status</div></div>
-      <div class="chip"><div class="v" id="af-next">—</div><div class="l">next run</div></div>
+      <div class="chip"><div class="v" id="af-count">—</div><div class="l" data-i18n="in_pool">in pool</div></div>
+      <div class="chip"><div class="v" id="af-state">—</div><div class="l" data-i18n="status_l">status</div></div>
+      <div class="chip"><div class="v" id="af-next">—</div><div class="l" data-i18n="next_run">next run</div></div>
     </div>
 
-    <div class="section-label">Actions</div>
-    <button class="btn primary full" id="btn-af-run" style="margin-bottom:10px;">▶ Run cycle now</button>
+    <div class="section-label" data-i18n="actions">Actions</div>
+    <button class="btn primary full" id="btn-af-run" style="margin-bottom:10px;" data-i18n="run_cycle">▶ Run cycle now</button>
 
     <div class="card">
       <div class="field">
-        <label class="field-label">Remove account from pool</label>
+        <label class="field-label" data-i18n="rm_acc_pool">Remove account from pool</label>
         <input class="input" type="email" id="af-rm-email" placeholder="cpm2_xxx@gmail.com">
       </div>
-      <button class="btn danger full" id="btn-af-remove">🗑 Remove from autofarm</button>
+      <button class="btn danger full" id="btn-af-remove" data-i18n="rm_from_af">🗑 Remove from autofarm</button>
     </div>
   </section>
 
   <!-- ── Promo ────────────────────────────────────────────────────── -->
   <section class="pane" data-pane="promo">
-    <div class="section-label">Generate codes</div>
+    <div class="section-label" data-i18n="gen_codes">Generate codes</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Number of codes (1-50)</label>
+        <label class="field-label" data-i18n="num_codes">Number of codes (1-50)</label>
         <input class="input" type="number" id="promo-count" min="1" max="50" value="5">
       </div>
-      <button class="btn primary full" id="btn-promo-gen">🎟 Generate</button>
+      <button class="btn primary full" id="btn-promo-gen" data-i18n="generate">🎟 Generate</button>
     </div>
 
-    <div class="section-label">Inspect</div>
-    <button class="btn full" id="btn-promo-list">📋 List active promos</button>
+    <div class="section-label" data-i18n="inspect">Inspect</div>
+    <button class="btn full" id="btn-promo-list" data-i18n="list_promos">📋 List active promos</button>
   </section>
 
   <!-- ── Broadcast ────────────────────────────────────────────────── -->
   <section class="pane" data-pane="broadcast">
-    <div class="section-label">Mass message</div>
+    <div class="section-label" data-i18n="mass_msg">Mass message</div>
     <div class="card">
       <div class="field">
-        <label class="field-label">Tier filter</label>
+        <label class="field-label" data-i18n="tier_filter">Tier filter</label>
         <select class="select" id="bc-tier">
           <option value="all" selected>all paid</option>
           <option value="trial">trial only</option>
@@ -607,11 +607,11 @@
         </select>
       </div>
       <div class="field">
-        <label class="field-label">Message body (HTML allowed)</label>
+        <label class="field-label" data-i18n="msg_body">Message body (HTML allowed)</label>
         <textarea class="input" id="bc-text" placeholder="📢 Hello everyone …"></textarea>
       </div>
-      <button class="btn primary danger full" id="btn-broadcast">📢 Send broadcast</button>
-      <div style="font-size:10px;color:var(--hint);margin-top:8px;">
+      <button class="btn primary danger full" id="btn-broadcast" data-i18n="send_bc">📢 Send broadcast</button>
+      <div style="font-size:10px;color:var(--hint);margin-top:8px;" data-i18n="bc_warn">
         ⚠ Mass-send to all matching users. Mini-app closes after send.
       </div>
     </div>
@@ -700,14 +700,182 @@
     {code:'tr', label:'TR', flag:'🇹🇷', name:'Türkçe'},
   ];
   const I18N = {
-    en:{screen_dashboard:'Dashboard',connected:'connected',live:'live',home_btn:'← home',owner_apps:'Owner Apps',app_dashboard:'Dashboard',app_users:'Users',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Broadcast'},
-    ru:{screen_dashboard:'Панель',connected:'подключено',live:'онлайн',home_btn:'← домой',owner_apps:'Приложения',app_dashboard:'Панель',app_users:'Юзеры',app_autofarm:'Автофарм',app_promo:'Промо',app_broadcast:'Рассылка'},
-    es:{screen_dashboard:'Panel',connected:'conectado',live:'en vivo',home_btn:'← inicio',owner_apps:'Apps del Dueño',app_dashboard:'Panel',app_users:'Usuarios',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Difusión'},
-    pt:{screen_dashboard:'Painel',connected:'conectado',live:'ao vivo',home_btn:'← início',owner_apps:'Apps do Dono',app_dashboard:'Painel',app_users:'Usuários',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Transmissão'},
-    de:{screen_dashboard:'Übersicht',connected:'verbunden',live:'live',home_btn:'← start',owner_apps:'Owner Apps',app_dashboard:'Übersicht',app_users:'Nutzer',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Rundsenden'},
-    fr:{screen_dashboard:'Tableau',connected:'connecté',live:'en direct',home_btn:'← accueil',owner_apps:'Apps Propriétaire',app_dashboard:'Tableau',app_users:'Utilisateurs',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Diffusion'},
-    it:{screen_dashboard:'Pannello',connected:'connesso',live:'live',home_btn:'← home',owner_apps:'App Owner',app_dashboard:'Pannello',app_users:'Utenti',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Trasmissione'},
-    tr:{screen_dashboard:'Panel',connected:'bağlı',live:'canlı',home_btn:'← ana',owner_apps:'Owner Apps',app_dashboard:'Panel',app_users:'Kullanıcılar',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Yayın'},
+    en:{
+      connected:'connected',live:'live',home_btn:'← home',
+      owner_apps:'Owner Apps',app_dashboard:'Dashboard',app_users:'Users',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Broadcast',
+      hero_lbl:'Total paid users',across_tiers:'across all tiers',
+      af_pool:'autofarm pool',promos_active:'promos active',af_state_l:'af state',
+      tier_breakdown:'Tier breakdown',quick_actions:'Quick actions',
+      qa_grant_t:'Grant tier',qa_grant_d:'add / extend a paid user',
+      qa_af_t:'Run AF cycle',qa_af_d:'force-trigger autofarm now',
+      qa_promo_t:'Issue promos',qa_promo_d:'generate −30% codes',
+      qa_bc_t:'Broadcast',qa_bc_d:'message all users',
+      refresh:'Refresh',pull_state:'⟳ Pull fresh state from bot',
+      grant_extend:'Grant / extend tier',tg_uid:'Telegram user id',tier_lbl:'Tier',
+      days_default:'Days (0 = tier default)',btn_grant:'Grant / extend',remove:'Remove',
+      inspect:'Inspect',filter_tier:'Filter by tier (blank = all)',list_users:'📋 List users',
+      in_pool:'in pool',status_l:'status',next_run:'next run',
+      actions:'Actions',run_cycle:'▶ Run cycle now',
+      rm_acc_pool:'Remove account from pool',rm_from_af:'🗑 Remove from autofarm',
+      gen_codes:'Generate codes',num_codes:'Number of codes (1-50)',generate:'🎟 Generate',list_promos:'📋 List active promos',
+      mass_msg:'Mass message',tier_filter:'Tier filter',msg_body:'Message body (HTML allowed)',send_bc:'📢 Send broadcast',
+      bc_warn:'⚠ Mass-send to all matching users. Mini-app closes after send.',
+      no_users:'no users yet',
+    },
+    ru:{
+      connected:'подключено',live:'онлайн',home_btn:'← домой',
+      owner_apps:'Приложения',app_dashboard:'Панель',app_users:'Юзеры',app_autofarm:'Автофарм',app_promo:'Промо',app_broadcast:'Рассылка',
+      hero_lbl:'Всего платных юзеров',across_tiers:'по всем тирам',
+      af_pool:'пул автофарма',promos_active:'активные промо',af_state_l:'статус АФ',
+      tier_breakdown:'Разбивка по тирам',quick_actions:'Быстрые действия',
+      qa_grant_t:'Выдать тир',qa_grant_d:'добавить / продлить юзера',
+      qa_af_t:'Запустить АФ',qa_af_d:'форс-старт автофарма',
+      qa_promo_t:'Выпустить промо',qa_promo_d:'сгенерить коды −30%',
+      qa_bc_t:'Рассылка',qa_bc_d:'сообщение всем юзерам',
+      refresh:'Обновить',pull_state:'⟳ Подтянуть свежий стейт',
+      grant_extend:'Выдать / продлить тир',tg_uid:'Telegram user id',tier_lbl:'Тир',
+      days_default:'Дней (0 = по умолчанию)',btn_grant:'Выдать / продлить',remove:'Удалить',
+      inspect:'Просмотр',filter_tier:'Фильтр по тиру (пусто = все)',list_users:'📋 Список юзеров',
+      in_pool:'в пуле',status_l:'статус',next_run:'следующий запуск',
+      actions:'Действия',run_cycle:'▶ Запустить цикл',
+      rm_acc_pool:'Удалить аккаунт из пула',rm_from_af:'🗑 Удалить из автофарма',
+      gen_codes:'Сгенерить коды',num_codes:'Количество кодов (1-50)',generate:'🎟 Сгенерить',list_promos:'📋 Активные промо',
+      mass_msg:'Массовое сообщение',tier_filter:'Фильтр по тиру',msg_body:'Текст (HTML разрешён)',send_bc:'📢 Отправить рассылку',
+      bc_warn:'⚠ Отправка всем подходящим. Миниапп закроется после отправки.',
+      no_users:'юзеров пока нет',
+    },
+    es:{
+      connected:'conectado',live:'en vivo',home_btn:'← inicio',
+      owner_apps:'Apps del Dueño',app_dashboard:'Panel',app_users:'Usuarios',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Difusión',
+      hero_lbl:'Usuarios pagos totales',across_tiers:'en todos los niveles',
+      af_pool:'pool autofarm',promos_active:'promos activos',af_state_l:'estado AF',
+      tier_breakdown:'Por niveles',quick_actions:'Acciones rápidas',
+      qa_grant_t:'Dar nivel',qa_grant_d:'añadir / extender pago',
+      qa_af_t:'Ciclo AF',qa_af_d:'lanzar autofarm ya',
+      qa_promo_t:'Emitir promos',qa_promo_d:'generar códigos −30%',
+      qa_bc_t:'Difusión',qa_bc_d:'mensaje a todos',
+      refresh:'Refrescar',pull_state:'⟳ Traer estado del bot',
+      grant_extend:'Dar / extender nivel',tg_uid:'ID Telegram',tier_lbl:'Nivel',
+      days_default:'Días (0 = por defecto)',btn_grant:'Dar / extender',remove:'Quitar',
+      inspect:'Inspeccionar',filter_tier:'Filtrar por nivel (vacío = todos)',list_users:'📋 Listar usuarios',
+      in_pool:'en pool',status_l:'estado',next_run:'próxima ejec.',
+      actions:'Acciones',run_cycle:'▶ Lanzar ciclo',
+      rm_acc_pool:'Quitar cuenta del pool',rm_from_af:'🗑 Quitar de autofarm',
+      gen_codes:'Generar códigos',num_codes:'Número de códigos (1-50)',generate:'🎟 Generar',list_promos:'📋 Promos activos',
+      mass_msg:'Mensaje masivo',tier_filter:'Filtro de nivel',msg_body:'Texto (HTML permitido)',send_bc:'📢 Enviar difusión',
+      bc_warn:'⚠ Envío masivo a todos los usuarios. La mini-app se cierra al enviar.',
+      no_users:'sin usuarios todavía',
+    },
+    pt:{
+      connected:'conectado',live:'ao vivo',home_btn:'← início',
+      owner_apps:'Apps do Dono',app_dashboard:'Painel',app_users:'Usuários',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Transmissão',
+      hero_lbl:'Total de usuários pagos',across_tiers:'em todos os níveis',
+      af_pool:'pool autofarm',promos_active:'promos ativos',af_state_l:'estado AF',
+      tier_breakdown:'Por nível',quick_actions:'Ações rápidas',
+      qa_grant_t:'Conceder nível',qa_grant_d:'adicionar / estender pago',
+      qa_af_t:'Ciclo AF',qa_af_d:'forçar autofarm agora',
+      qa_promo_t:'Emitir promos',qa_promo_d:'gerar códigos −30%',
+      qa_bc_t:'Transmissão',qa_bc_d:'mensagem para todos',
+      refresh:'Atualizar',pull_state:'⟳ Puxar estado do bot',
+      grant_extend:'Conceder / estender nível',tg_uid:'ID Telegram',tier_lbl:'Nível',
+      days_default:'Dias (0 = padrão)',btn_grant:'Conceder / estender',remove:'Remover',
+      inspect:'Inspecionar',filter_tier:'Filtrar por nível (vazio = todos)',list_users:'📋 Listar usuários',
+      in_pool:'no pool',status_l:'estado',next_run:'próxima exec.',
+      actions:'Ações',run_cycle:'▶ Iniciar ciclo',
+      rm_acc_pool:'Remover conta do pool',rm_from_af:'🗑 Remover do autofarm',
+      gen_codes:'Gerar códigos',num_codes:'Número de códigos (1-50)',generate:'🎟 Gerar',list_promos:'📋 Promos ativos',
+      mass_msg:'Mensagem em massa',tier_filter:'Filtro de nível',msg_body:'Texto (HTML permitido)',send_bc:'📢 Enviar transmissão',
+      bc_warn:'⚠ Envio em massa. Mini-app fecha após enviar.',
+      no_users:'sem usuários ainda',
+    },
+    de:{
+      connected:'verbunden',live:'live',home_btn:'← start',
+      owner_apps:'Owner Apps',app_dashboard:'Übersicht',app_users:'Nutzer',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Rundsenden',
+      hero_lbl:'Bezahlte Nutzer gesamt',across_tiers:'über alle Tiers',
+      af_pool:'AutoFarm-Pool',promos_active:'aktive Promos',af_state_l:'AF-Status',
+      tier_breakdown:'Tier-Aufschlüsselung',quick_actions:'Schnellaktionen',
+      qa_grant_t:'Tier vergeben',qa_grant_d:'Zahler hinzufügen / verlängern',
+      qa_af_t:'AF-Zyklus',qa_af_d:'AutoFarm jetzt starten',
+      qa_promo_t:'Promos ausgeben',qa_promo_d:'−30%-Codes erzeugen',
+      qa_bc_t:'Rundsenden',qa_bc_d:'Nachricht an alle',
+      refresh:'Aktualisieren',pull_state:'⟳ Aktuellen Stand vom Bot holen',
+      grant_extend:'Tier vergeben / verlängern',tg_uid:'Telegram-ID',tier_lbl:'Tier',
+      days_default:'Tage (0 = Standard)',btn_grant:'Vergeben / verlängern',remove:'Entfernen',
+      inspect:'Inspizieren',filter_tier:'Nach Tier filtern (leer = alle)',list_users:'📋 Nutzer auflisten',
+      in_pool:'im Pool',status_l:'Status',next_run:'nächster Lauf',
+      actions:'Aktionen',run_cycle:'▶ Zyklus jetzt starten',
+      rm_acc_pool:'Konto aus Pool entfernen',rm_from_af:'🗑 Aus AutoFarm entfernen',
+      gen_codes:'Codes generieren',num_codes:'Anzahl Codes (1-50)',generate:'🎟 Erzeugen',list_promos:'📋 Aktive Promos',
+      mass_msg:'Massennachricht',tier_filter:'Tier-Filter',msg_body:'Nachricht (HTML erlaubt)',send_bc:'📢 Senden',
+      bc_warn:'⚠ Massensendung. Mini-App schließt nach dem Senden.',
+      no_users:'noch keine Nutzer',
+    },
+    fr:{
+      connected:'connecté',live:'en direct',home_btn:'← accueil',
+      owner_apps:'Apps Propriétaire',app_dashboard:'Tableau',app_users:'Utilisateurs',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Diffusion',
+      hero_lbl:'Utilisateurs payants',across_tiers:'tous niveaux',
+      af_pool:'pool autofarm',promos_active:'promos actives',af_state_l:'état AF',
+      tier_breakdown:'Par niveau',quick_actions:'Actions rapides',
+      qa_grant_t:'Donner niveau',qa_grant_d:'ajouter / prolonger',
+      qa_af_t:'Cycle AF',qa_af_d:'lancer autofarm',
+      qa_promo_t:'Émettre promos',qa_promo_d:'générer codes −30%',
+      qa_bc_t:'Diffusion',qa_bc_d:'message à tous',
+      refresh:'Rafraîchir',pull_state:'⟳ Récupérer état du bot',
+      grant_extend:'Donner / prolonger niveau',tg_uid:'ID Telegram',tier_lbl:'Niveau',
+      days_default:'Jours (0 = défaut)',btn_grant:'Donner / prolonger',remove:'Retirer',
+      inspect:'Inspecter',filter_tier:'Filtrer par niveau (vide = tous)',list_users:'📋 Lister utilisateurs',
+      in_pool:'en pool',status_l:'statut',next_run:'prochain',
+      actions:'Actions',run_cycle:'▶ Lancer cycle',
+      rm_acc_pool:'Retirer du pool',rm_from_af:'🗑 Retirer d’autofarm',
+      gen_codes:'Générer codes',num_codes:'Nombre de codes (1-50)',generate:'🎟 Générer',list_promos:'📋 Promos actives',
+      mass_msg:'Message de masse',tier_filter:'Filtre niveau',msg_body:'Message (HTML autorisé)',send_bc:'📢 Envoyer',
+      bc_warn:'⚠ Envoi de masse. Mini-app se ferme après envoi.',
+      no_users:'aucun utilisateur',
+    },
+    it:{
+      connected:'connesso',live:'live',home_btn:'← home',
+      owner_apps:'App Owner',app_dashboard:'Pannello',app_users:'Utenti',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Trasmissione',
+      hero_lbl:'Utenti paganti totali',across_tiers:'su tutti i livelli',
+      af_pool:'pool autofarm',promos_active:'promo attivi',af_state_l:'stato AF',
+      tier_breakdown:'Per livello',quick_actions:'Azioni rapide',
+      qa_grant_t:'Dai livello',qa_grant_d:'aggiungi / estendi pagante',
+      qa_af_t:'Ciclo AF',qa_af_d:'forza autofarm ora',
+      qa_promo_t:'Emetti promo',qa_promo_d:'genera codici −30%',
+      qa_bc_t:'Trasmissione',qa_bc_d:'messaggio a tutti',
+      refresh:'Aggiorna',pull_state:'⟳ Prendi stato dal bot',
+      grant_extend:'Dai / estendi livello',tg_uid:'ID Telegram',tier_lbl:'Livello',
+      days_default:'Giorni (0 = default)',btn_grant:'Dai / estendi',remove:'Rimuovi',
+      inspect:'Ispeziona',filter_tier:'Filtra per livello (vuoto = tutti)',list_users:'📋 Elenca utenti',
+      in_pool:'nel pool',status_l:'stato',next_run:'prossima esec.',
+      actions:'Azioni',run_cycle:'▶ Avvia ciclo',
+      rm_acc_pool:'Rimuovi account dal pool',rm_from_af:'🗑 Rimuovi da autofarm',
+      gen_codes:'Genera codici',num_codes:'Numero di codici (1-50)',generate:'🎟 Genera',list_promos:'📋 Promo attivi',
+      mass_msg:'Messaggio di massa',tier_filter:'Filtro livello',msg_body:'Testo (HTML consentito)',send_bc:'📢 Invia trasmissione',
+      bc_warn:'⚠ Invio di massa. La mini-app si chiude dopo l\'invio.',
+      no_users:'nessun utente',
+    },
+    tr:{
+      connected:'bağlı',live:'canlı',home_btn:'← ana',
+      owner_apps:'Owner Apps',app_dashboard:'Panel',app_users:'Kullanıcılar',app_autofarm:'AutoFarm',app_promo:'Promo',app_broadcast:'Yayın',
+      hero_lbl:'Toplam ödeyen kullanıcı',across_tiers:'tüm kademelerde',
+      af_pool:'autofarm havuzu',promos_active:'aktif promo',af_state_l:'AF durumu',
+      tier_breakdown:'Kademelere göre',quick_actions:'Hızlı işlemler',
+      qa_grant_t:'Kademe ver',qa_grant_d:'kullanıcı ekle/uzat',
+      qa_af_t:'AF döngüsü',qa_af_d:'autofarm başlat',
+      qa_promo_t:'Promo ver',qa_promo_d:'−30% kod üret',
+      qa_bc_t:'Yayın',qa_bc_d:'tüm kullanıcılara mesaj',
+      refresh:'Yenile',pull_state:'⟳ Bot durumunu çek',
+      grant_extend:'Kademe ver / uzat',tg_uid:'Telegram ID',tier_lbl:'Kademe',
+      days_default:'Gün (0 = varsayılan)',btn_grant:'Ver / uzat',remove:'Kaldır',
+      inspect:'İncele',filter_tier:'Kademe filtresi (boş = hepsi)',list_users:'📋 Kullanıcıları listele',
+      in_pool:'havuzda',status_l:'durum',next_run:'sıradaki',
+      actions:'İşlemler',run_cycle:'▶ Döngüyü çalıştır',
+      rm_acc_pool:'Havuzdan hesap çıkar',rm_from_af:'🗑 AutoFarm\'dan çıkar',
+      gen_codes:'Kod üret',num_codes:'Kod sayısı (1-50)',generate:'🎟 Üret',list_promos:'📋 Aktif promolar',
+      mass_msg:'Toplu mesaj',tier_filter:'Kademe filtresi',msg_body:'Mesaj (HTML)',send_bc:'📢 Yayını gönder',
+      bc_warn:'⚠ Toplu gönderim. Mini-app gönderimden sonra kapanır.',
+      no_users:'henüz kullanıcı yok',
+    },
   };
   const detectLang = () => {
     try {
@@ -738,6 +906,11 @@
     document.querySelectorAll('.lang-opt').forEach(o => {
       o.classList.toggle('active', o.dataset.lang === code);
     });
+    // Re-translate the dynamic screen-title (set by switchPane).
+    try {
+      const st = document.getElementById('screen-title');
+      if (st && typeof _curPane !== 'undefined') st.textContent = t('app_' + _curPane);
+    } catch(e){}
   };
   (() => {
     const menu = document.getElementById('lang-menu');
@@ -784,7 +957,7 @@
     const total  = Object.values(counts).reduce((a,b) => a + b, 0) || 1;
     const top    = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 3);
     document.getElementById('hero-delta').textContent =
-      top.length ? top.map(([t,n]) => `${t} ${n}`).join(' · ') : 'no users yet';
+      top.length ? top.map(([k,n]) => `${k} ${n}`).join(' · ') : t('no_users');
 
     document.getElementById('chip-af').textContent = fmtNum(s.af?.count);
     document.getElementById('chip-promo').textContent = fmtNum(s.promo_active);
@@ -812,16 +985,15 @@
   if (state.owner) renderSnapshot(state);
 
   // ── Pane / tab switching ─────────────────────────────────────────
-  const TITLES = {
-    dashboard: 'Dashboard', users: 'Users', autofarm: 'AutoFarm',
-    promo: 'Promo', broadcast: 'Broadcast'
-  };
+  const titleKey = name => 'app_' + name;
+  let _curPane = 'dashboard';
   function switchPane(name){
+    _curPane = name;
     document.querySelectorAll('.pane').forEach(p =>
       p.classList.toggle('active', p.dataset.pane === name));
     document.querySelectorAll('.app').forEach(a =>
       a.classList.toggle('active', a.dataset.tab === name));
-    document.getElementById('screen-title').textContent = TITLES[name] || 'Owner';
+    document.getElementById('screen-title').textContent = t(titleKey(name)) || 'Owner';
     document.getElementById('back-home').classList.toggle('show', name !== 'dashboard');
     // Scroll to top of <main> so the new pane starts at the top.
     document.querySelector('main').scrollTop = 0;
