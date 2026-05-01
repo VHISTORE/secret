@@ -1428,6 +1428,13 @@
   // ── Run handlers (stubbed — wire to bot via sendData when backend
   //    endpoints are ready). For now we just log the intent so the UX
   //    can be tested end-to-end on-device.
+  // Pending-add stash declared here so it's reachable from
+  // updateLaunchState (defined right below). Telegram closes the mini-app
+  // on every sendData call, so we cannot Add Accounts mid-flow without
+  // losing the seller's session — entries pile up locally and ship out
+  // bundled in the single Launch sendData call.
+  const pendingAdds = [];
+
   // ── Card selection (cart-style) ──────────────────────────────────
   // Tapping the card head toggles whether the function joins the launch
   // queue. The inner "Pick amount/boosts" toggles still operate
@@ -1441,7 +1448,7 @@
   function updateLaunchState(){
     const selected = document.querySelectorAll('.card.selected');
     const n = selected.length;
-    const pendN = (typeof pendingAdds !== 'undefined') ? pendingAdds.length : 0;
+    const pendN = pendingAdds.length;
     // Launch is enabled when there's anything to do — selected functions
     // OR pending accounts. Add-only run is allowed (just verifies+adds).
     launchBtn.disabled = (n === 0 && pendN === 0);
@@ -1804,11 +1811,10 @@
     reader.readAsText(f);
   });
 
-  // Pending-add stash. Telegram's sendData() ALWAYS closes the mini-app,
-  // so submitting accounts mid-flow would prevent the seller from then
-  // configuring Functions and tapping Launch. Instead we stash entries
-  // locally and ship them as part of the single Launch sendData call.
-  const pendingAdds = [];
+  // Pending-add stash was hoisted to the top of this IIFE so
+  // updateLaunchState (defined earlier) can read pendingAdds.length
+  // without a TDZ ReferenceError. The visible "queued for verify+add"
+  // block lives below and is rendered on demand.
   const pendingBlock = document.createElement('div');
   pendingBlock.id = 'pending-block';
   pendingBlock.style.display = 'none';
