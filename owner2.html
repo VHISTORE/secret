@@ -26,9 +26,9 @@
     --text-2:    #d4c895;
     --hint:      #8a7d4f;
     --hint-2:    #5e542f;
-    --accent:    #a855f7;
-    --accent-2:  #7c3aed;
-    --accent-3:  #c084fc;
+    --accent:    #fbbf24;
+    --accent-2:  #f59e0b;
+    --accent-3:  #fcd34d;
     --on-accent: #1a1407;
     --green:     #34d399;
     --red:       #f87171;
@@ -738,6 +738,31 @@
 <script>
 (() => {
   'use strict';
+  // Earliest-possible diagnostic — runs before any other code so we can
+  // catch JS errors that prevent later init steps from rendering.
+  (function showEarlyBanner(){
+    try {
+      const b = document.createElement('div');
+      b.id = '__cpm2_dbg__';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;'
+        +'background:#22c55e;color:#000;padding:8px;font:12px/1.4 monospace;'
+        +'word-break:break-all;border-bottom:3px solid #000;';
+      b.textContent = 'v=cf3 booted ' + new Date().toISOString().slice(11,19)
+        + ' tg=' + (!!window.Telegram?.WebApp ? 'Y' : 'N')
+        + ' init_len=' + (window.Telegram?.WebApp?.initData?.length || 0)
+        + ' search_len=' + location.search.length;
+      const place = () => document.body.insertBefore(b, document.body.firstChild);
+      if (document.body) place(); else document.addEventListener('DOMContentLoaded', place);
+    } catch(_){}
+  })();
+  // Surface any later runtime errors right onto the banner.
+  window.addEventListener('error', e => {
+    try {
+      const b = document.getElementById('__cpm2_dbg__');
+      if (b) { b.style.background='#ef4444'; b.style.color='#fff';
+               b.textContent = 'JS-ERR: '+e.message+' @'+e.filename+':'+e.lineno; }
+    } catch(_){}
+  });
   const tg = window.Telegram?.WebApp;
   try { tg?.ready(); tg?.expand(); } catch(e){}
   try { tg?.setHeaderColor?.('#05080f'); tg?.setBackgroundColor?.('#05080f'); } catch(e){}
