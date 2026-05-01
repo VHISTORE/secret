@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>CPM2 · Owner Console</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  /* Same console aesthetic as devtool.html — owner console deliberately
+     leans gold-tinted accents to differentiate at a glance. */
+  :root{
+    --bg:        #05080f;
+    --bg-2:      #0a0f1c;
+    --panel:     rgba(251, 191, 36, 0.05);
+    --panel-2:   rgba(251, 191, 36, 0.10);
+    --panel-hi:  rgba(251, 191, 36, 0.16);
+    --line:      rgba(251, 191, 36, 0.22);
+    --text:      #f4ecd8;
+    --text-2:    #d4c895;
+    --hint:      #8a7d4f;
+    --accent:    #fbbf24;
+    --accent-2:  #f59e0b;
+    --on-accent: #1a1407;
+    --green:     #34d399;
+    --danger:    #f87171;
+    --cyan:      #4cc9f0;
+    --mono: ui-monospace,SFMono-Regular,'JetBrains Mono','Fira Code','Menlo','Consolas',monospace;
+    --shadow-glow: 0 0 22px rgba(251, 191, 36, 0.30), 0 0 4px rgba(251, 191, 36, 0.45) inset;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--mono);
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    line-height:1.5;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+  }
+  body::before{
+    content:'';
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(251, 191, 36, 0.025) 0px,
+      rgba(251, 191, 36, 0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode:screen;
+  }
+  body::after{
+    content:'';
+    position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(50% 40% at 80% 10%, rgba(251, 191, 36, 0.18), transparent 60%),
+      radial-gradient(40% 35% at 15% 90%, rgba(245, 158, 11, 0.14), transparent 60%);
+    animation: drift 24s ease-in-out infinite;
+    filter: blur(4px);
+  }
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(2%,-2%) scale(1.05);}}
+
+  header{
+    flex:0 0 auto;
+    padding:12px 16px 10px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(180deg, rgba(251,191,36,0.08), transparent);
+  }
+  .crown{
+    width:32px;height:32px;border-radius:8px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:var(--on-accent);font-size:18px;
+    box-shadow:var(--shadow-glow);
+    flex-shrink:0;
+  }
+  .title{flex:1;min-width:0;}
+  .title h1{
+    font-size:13px;font-weight:600;letter-spacing:0.04em;
+    color:var(--text);text-transform:uppercase;
+  }
+  .title .sub{
+    font-size:11px;color:var(--hint);letter-spacing:0.02em;
+    display:flex;align-items:center;gap:6px;margin-top:1px;
+  }
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 6px var(--accent);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+  main{
+    flex:1 1 auto;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:14px 14px 24px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;animation:fadeIn 0.2s ease-out;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .section-label{
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--hint);
+    padding:0 4px 6px;
+  }
+  .section-label::before{content:'>';color:var(--accent);margin-right:6px;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:10px;
+  }
+
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .stat-card{
+    padding:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);position:relative;overflow:hidden;
+  }
+  .stat-card .lbl{
+    font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:0.08em;
+  }
+  .stat-card .num{
+    font-size:24px;font-weight:700;color:var(--accent);
+    text-shadow:0 0 12px rgba(251,191,36,0.45);
+    font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px;
+  }
+
+  .field{margin-bottom:10px;}
+  .field-label{
+    font-size:10px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.08em;
+    margin-bottom:6px;display:block;
+  }
+  .input,.select{
+    width:100%;padding:10px 12px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;color:var(--text);
+    font-family:var(--mono);font-size:13px;
+    outline:none;-webkit-user-select:text;user-select:text;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .input:focus,.select:focus{
+    border-color:var(--accent);background:var(--panel-2);
+    box-shadow:0 0 0 3px rgba(251,191,36,0.15);
+  }
+  textarea.input{min-height:120px;resize:vertical;line-height:1.4;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:9px 14px;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel-2);
+    color:var(--text);font-family:var(--mono);font-size:12px;font-weight:600;
+    letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;
+    transition:all 0.15s;-webkit-tap-highlight-color:transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .btn.primary{
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:var(--on-accent);border-color:transparent;box-shadow:var(--shadow-glow);
+  }
+  .btn.full{width:100%;}
+  .btn.danger{color:var(--danger);border-color:rgba(248,113,113,0.4);}
+  .btn-row{display:flex;gap:8px;}
+  .btn-row .btn{flex:1;}
+
+  .tier-pill{
+    display:inline-block;padding:2px 8px;border-radius:999px;
+    font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+    border:1px solid var(--line);color:var(--accent);
+  }
+
+  /* Bottom tabbar */
+  nav{
+    flex:0 0 auto;
+    display:grid;grid-template-columns:repeat(5, 1fr);
+    background:var(--bg-2);border-top:1px solid var(--line);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    position:relative;z-index:5;
+  }
+  nav::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity:0.5;
+  }
+  .tab{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;padding:7px 2px;
+    border:none;background:transparent;cursor:pointer;
+    color:var(--hint);font-family:var(--mono);font-size:9px;letter-spacing:0.04em;
+    text-transform:uppercase;border-radius:8px;
+    transition:color 0.18s, background 0.18s;
+    -webkit-tap-highlight-color:transparent;min-width:0;overflow:hidden;
+  }
+  .tab span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tab .ico{font-size:17px;line-height:1;transition:transform 0.18s, filter 0.18s;}
+  .tab.active{color:var(--accent);background:var(--panel-2);}
+  .tab.active .ico{filter:drop-shadow(0 0 6px var(--accent));transform:translateY(-1px);}
+  .tab:active{transform:scale(0.95);}
+
+  .toast{
+    position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
+    background:var(--bg-2);border:1px solid var(--accent);
+    color:var(--text);padding:10px 16px;border-radius:8px;
+    font-size:12px;box-shadow:var(--shadow-glow);
+    opacity:0;pointer-events:none;
+    transition:opacity 0.2s, transform 0.2s;
+    z-index:100;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crown">👑</div>
+  <div class="title">
+    <h1>Owner Console</h1>
+    <div class="sub"><span class="dot"></span><span id="status-text">connected</span></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Stats ───────────────────────────────────────────────────────── -->
+  <section class="tab-pane active" data-pane="stats">
+    <div class="section-label">Snapshot</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="lbl">Users</div><div class="num" id="stat-users">—</div></div>
+      <div class="stat-card"><div class="lbl">AutoFarm pool</div><div class="num" id="stat-af">—</div></div>
+      <div class="stat-card"><div class="lbl">Promos active</div><div class="num" id="stat-promo">—</div></div>
+      <div class="stat-card"><div class="lbl">AF state</div><div class="num" id="stat-af-state">—</div></div>
+    </div>
+
+    <div class="section-label">Tier breakdown</div>
+    <div class="card" id="tier-breakdown">—</div>
+
+    <div class="section-label">Refresh</div>
+    <button class="btn primary full" id="btn-state">⟳ Pull fresh state from bot</button>
+  </section>
+
+  <!-- ── Users ────────────────────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="users">
+    <div class="section-label">Grant / extend tier</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Telegram user id</label>
+        <input class="input" type="text" id="set-tg" inputmode="numeric" placeholder="123456789">
+      </div>
+      <div class="field">
+        <label class="field-label">Tier</label>
+        <select class="select" id="set-tier">
+          <option value="trial">trial</option>
+          <option value="week">week</option>
+          <option value="month" selected>month</option>
+          <option value="3month">3 months</option>
+          <option value="6month">6 months</option>
+          <option value="lifetime">lifetime</option>
+          <option value="legacy">legacy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Days (0 = tier default)</label>
+        <input class="input" type="number" id="set-days" min="0" placeholder="0">
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="btn-set-tier">Grant / extend</button>
+        <button class="btn danger" id="btn-remove-user">Remove user</button>
+      </div>
+    </div>
+
+    <div class="section-label">Inspect</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Filter by tier (optional)</label>
+        <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial / …">
+      </div>
+      <button class="btn full" id="btn-list-users">📋 List users</button>
+    </div>
+  </section>
+
+  <!-- ── AutoFarm ─────────────────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="autofarm">
+    <div class="section-label">Pool</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="lbl">In pool</div><div class="num" id="af-count">—</div></div>
+      <div class="stat-card"><div class="lbl">Status</div><div class="num" id="af-status" style="font-size:14px;">—</div></div>
+    </div>
+
+    <div class="section-label">Actions</div>
+    <button class="btn primary full" id="btn-af-run" style="margin-bottom:8px;">▶ Run cycle now</button>
+
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Remove account from pool</label>
+        <input class="input" type="email" id="af-rm-email" placeholder="cpm2_xxx@gmail.com">
+      </div>
+      <button class="btn danger full" id="btn-af-remove">🗑 Remove from autofarm</button>
+    </div>
+  </section>
+
+  <!-- ── Promo ────────────────────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="promo">
+    <div class="section-label">Generate</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Number of codes (1-50)</label>
+        <input class="input" type="number" id="promo-count" min="1" max="50" value="5">
+      </div>
+      <button class="btn primary full" id="btn-promo-gen">🎟 Generate</button>
+    </div>
+
+    <div class="section-label">List</div>
+    <button class="btn full" id="btn-promo-list">📋 List active promos</button>
+  </section>
+
+  <!-- ── Broadcast ────────────────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="broadcast">
+    <div class="section-label">Broadcast</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Tier filter (or "all")</label>
+        <select class="select" id="bc-tier">
+          <option value="all" selected>all paid</option>
+          <option value="trial">trial only</option>
+          <option value="week">week</option>
+          <option value="month">month</option>
+          <option value="3month">3month</option>
+          <option value="6month">6month</option>
+          <option value="lifetime">lifetime</option>
+          <option value="legacy">legacy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Message body (HTML allowed)</label>
+        <textarea class="input" id="bc-text" placeholder="📢 Hello everyone …"></textarea>
+      </div>
+      <button class="btn primary full danger" id="btn-broadcast">📢 Send broadcast</button>
+      <div style="font-size:10px;color:var(--hint);margin-top:8px;">
+        ⚠ This will mass-send to all matching users. Mini-app closes after send.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button class="tab active" data-tab="stats"><span class="ico">📊</span><span>stats</span></button>
+  <button class="tab" data-tab="users"><span class="ico">👥</span><span>users</span></button>
+  <button class="tab" data-tab="autofarm"><span class="ico">🤖</span><span>autofarm</span></button>
+  <button class="tab" data-tab="promo"><span class="ico">🎟</span><span>promo</span></button>
+  <button class="tab" data-tab="broadcast"><span class="ico">📢</span><span>broadcast</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+  const tg = window.Telegram?.WebApp;
+  try { tg?.ready(); tg?.expand(); } catch(e){}
+  try { tg?.setHeaderColor?.('#05080f'); tg?.setBackgroundColor?.('#05080f'); } catch(e){}
+
+  // Decode state blob from ?s=...
+  const state = (() => {
+    try {
+      const qs = new URLSearchParams(location.search);
+      const s = qs.get('s'); if (!s) return {};
+      const b64 = s.replace(/-/g,'+').replace(/_/g,'/');
+      const json = atob(b64 + '==='.slice((b64.length + 3) % 4));
+      return JSON.parse(decodeURIComponent(escape(json)));
+    } catch(e){ return {}; }
+  })();
+
+  const fmtNum = n => Number(n||0).toLocaleString('en-US').replace(/,/g,' ');
+  const escHtml = s => String(s||'').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+
+  // ── Render snapshot ──────────────────────────────────────────────
+  function renderSnapshot(s){
+    document.getElementById('stat-users').textContent = fmtNum(s.users_total);
+    document.getElementById('stat-af').textContent = fmtNum(s.af?.count);
+    document.getElementById('stat-promo').textContent = fmtNum(s.promo_active);
+    document.getElementById('stat-af-state').textContent =
+      s.af?.running ? 'running' : 'idle';
+    document.getElementById('af-count').textContent = fmtNum(s.af?.count);
+    document.getElementById('af-status').textContent =
+      s.af?.running ? 'running' : 'idle';
+
+    // Tier breakdown
+    const wrap = document.getElementById('tier-breakdown');
+    const counts = s.tier_counts || {};
+    const total = Object.values(counts).reduce((a,b) => a + b, 0) || 1;
+    wrap.innerHTML = Object.entries(counts).sort((a,b) => b[1] - a[1])
+      .map(([t, n]) => {
+        const pct = (n / total * 100).toFixed(1);
+        return `<div style="display:flex;justify-content:space-between;padding:4px 0;">
+          <span class="tier-pill">${escHtml(t)}</span>
+          <span style="color:var(--text);font-weight:600;">${fmtNum(n)} <span style="color:var(--hint);font-size:10px;">(${pct}%)</span></span>
+        </div>`;
+      }).join('') || '<span style="color:var(--hint);">no data</span>';
+  }
+  if (state.owner) renderSnapshot(state);
+
+  // ── Tab switching ────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+    document.querySelectorAll('.tab-pane').forEach(p =>
+      p.classList.toggle('active', p.dataset.pane === t.dataset.tab));
+    try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
+  }));
+
+  // ── Toast ────────────────────────────────────────────────────────
+  const toastEl = document.getElementById('toast');
+  let toastT = null;
+  const toast = (msg, kind='') => {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  };
+
+  // ── Send-data wrapper ────────────────────────────────────────────
+  function send(payload, closeMsg = '✓ Sent — see chat') {
+    try {
+      tg?.HapticFeedback?.impactOccurred?.('medium');
+      tg?.sendData?.(JSON.stringify(payload));
+      toast(closeMsg, 'ok');
+    } catch(e) {
+      toast('Send failed: ' + e.message, 'err');
+    }
+  }
+
+  // ── Stats refresh ────────────────────────────────────────────────
+  document.getElementById('btn-state')?.addEventListener('click', () =>
+    send({ mode: 'owner_state' }, '⟳ pulling…'));
+
+  // ── Users ────────────────────────────────────────────────────────
+  document.getElementById('btn-set-tier')?.addEventListener('click', () => {
+    const tg_id = parseInt(document.getElementById('set-tg').value, 10);
+    const tier  = document.getElementById('set-tier').value;
+    const days  = parseInt(document.getElementById('set-days').value, 10) || 0;
+    if (!tg_id) { toast('Bad tg_id', 'err'); return; }
+    send({ mode: 'owner_set_tier', tg_id, tier, days });
+  });
+  document.getElementById('btn-remove-user')?.addEventListener('click', () => {
+    const tg_id = parseInt(document.getElementById('set-tg').value, 10);
+    if (!tg_id) { toast('Bad tg_id', 'err'); return; }
+    if (!confirm(`Remove user ${tg_id} from allowlist?`)) return;
+    send({ mode: 'owner_remove_user', tg_id });
+  });
+  document.getElementById('btn-list-users')?.addEventListener('click', () => {
+    const tier = document.getElementById('filter-tier').value.trim();
+    send({ mode: 'owner_users_list', tier });
+  });
+
+  // ── AutoFarm ─────────────────────────────────────────────────────
+  document.getElementById('btn-af-run')?.addEventListener('click', () => {
+    if (!confirm('Trigger autofarm cycle on entire pool?')) return;
+    send({ mode: 'owner_af_run_now' });
+  });
+  document.getElementById('btn-af-remove')?.addEventListener('click', () => {
+    const email = document.getElementById('af-rm-email').value.trim();
+    if (!email) { toast('Bad email', 'err'); return; }
+    send({ mode: 'owner_af_remove', email });
+  });
+
+  // ── Promo ────────────────────────────────────────────────────────
+  document.getElementById('btn-promo-gen')?.addEventListener('click', () => {
+    const count = Math.max(1, Math.min(50, parseInt(document.getElementById('promo-count').value, 10) || 1));
+    send({ mode: 'owner_promo_gen', count });
+  });
+  document.getElementById('btn-promo-list')?.addEventListener('click', () =>
+    send({ mode: 'owner_promo_list' }));
+
+  // ── Broadcast ────────────────────────────────────────────────────
+  document.getElementById('btn-broadcast')?.addEventListener('click', () => {
+    const text = document.getElementById('bc-text').value.trim();
+    const tier = document.getElementById('bc-tier').value;
+    if (!text) { toast('Empty message', 'err'); return; }
+    if (!confirm(`Broadcast to ${tier === 'all' ? 'ALL paid users' : tier + ' tier only'}?\n\n${text.slice(0, 200)}${text.length > 200 ? '…' : ''}`)) return;
+    send({ mode: 'owner_broadcast', text, tier }, '📢 broadcasting…');
+  });
+
+  // BackButton
+  try { tg?.BackButton?.show(); tg?.BackButton?.onClick(() => tg?.close()); } catch(e){}
+})();
+</script>
+</body>
+</html>
