@@ -1865,32 +1865,27 @@ code{
 
   // ── Tiers — pricing & buy buttons ──────────────────────────────────────
   // Source of truth lives in the bot's TIER_LIMITS / TIER_PRICE_USD; this
-  // mini-app mirrors them statically. Promo prices kick in via the bot's
-  // `_is_promo_active()` window — when accountState.promo=true we render
-  // strikethrough originals + promo cents.
+  // mini-app mirrors them statically. Single regular price per tier —
+  // launch-promo discount tier was retired.
   var TIER_DATA = [
-    { id:'week',     name:'Week',       reg:25,  promo:19,  popular:false, feats:[
-      'Coins (Max) farm + Cash farm',
-      '<b>30/day</b>, <b>100/week</b> accounts',
-      'Bulk login: 5 at a time',
-      'Drag-target coins not included' ]},
-    { id:'month',    name:'Month',      reg:50,  promo:39,  popular:false, feats:[
+    { id:'month',    name:'Month',      reg:60,  popular:false, feats:[
       'All farm features (incl. targeted coins)',
-      '<b>30/day</b>, <b>200/month</b> accounts',
-      'Bulk login: 10 at a time',
-      'Anchor tier — full personal kit' ]},
-    { id:'3month',   name:'3 Months',   reg:130, promo:99,  popular:true,  feats:[
-      'Everything in Month',
       '<b>+ AutoFarm</b> (bot grinds while you sleep)',
       '<b>+ Reset Push</b> notifications',
+      '<b>30/day</b>, <b>200/cycle</b> accounts',
+      'Bulk login: 10 at a time' ]},
+    { id:'3month',   name:'3 Months',   reg:140, popular:true,  feats:[
+      'Everything in Month',
+      '<b>+ Dev Tool generate</b> (fresh accounts)',
+      '<b>+ Cars / fleet pipeline</b>',
       '<b>100/day</b>, <b>800/cycle</b> accounts',
       'Bulk login: 25 at a time' ]},
-    { id:'6month',   name:'6 Months',   reg:240, promo:185, popular:false, feats:[
+    { id:'6month',   name:'6 Months',   reg:250, popular:false, feats:[
       'Everything in 3 Months',
       '<b>+ Priority Queue</b> at peak load',
       '<b>200/day</b>, <b>2,000/cycle</b> accounts',
       'Bulk login: 50 at a time' ]},
-    { id:'lifetime', name:'Lifetime',   reg:499, promo:349, popular:false, feats:[
+    { id:'lifetime', name:'Lifetime',   reg:509, popular:false, feats:[
       'Everything in 6 Months',
       '<b>+ Reseller Mode</b> (10 promo codes/mo, 40% commission)',
       '<b>Unlimited</b> monthly cap',
@@ -1907,16 +1902,13 @@ code{
   function renderTiers(){
     var host = document.getElementById('tiers-list');
     if (!host) return;
-    var promo = !!(accountState && accountState.promo);
     var currentTier = (accountState && accountState.tier) || '';
     host.innerHTML = '';
     TIER_DATA.forEach(function(t){
       var card = document.createElement('div');
       card.className = 'tier-card' + (t.popular ? ' popular' : '')
                      + (currentTier === t.id ? ' current' : '');
-      var priceHtml = promo
-        ? '<span class="strike">$'+t.reg+'</span>$'+t.promo+'<span class="promo-badge">PROMO</span>'
-        : '$'+t.reg;
+      var priceHtml = '$'+t.reg;
       var featsHtml = '';
       t.feats.forEach(function(f){ featsHtml += '• '+f+'<br>'; });
       card.innerHTML =
@@ -2051,7 +2043,7 @@ code{
       { q: 'How do I pay?',
         a: 'Via <b>@CryptoBot in Telegram</b>. USDT or TON. One tap → pick currency → pay → subscription activates in ~30 seconds.' },
       { q: 'Can I split payment?',
-        a: 'No — single payment. Tight budget? Get Week ($29 promo) or Month ($49 promo) first, upgrade later by paying the difference.' },
+        a: 'No — single payment. Tight budget? Start with Month ($60), then upgrade later by paying the difference to a longer plan.' },
       { q: 'If new features get added during my plan — do I pay again?',
         a: '<b>No.</b> All new features are available free until your current subscription expires. You only pay on renewal.' },
       { q: 'Does the subscription auto-renew?',
