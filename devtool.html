@@ -506,7 +506,7 @@
     margin-bottom:18px;font-family:var(--mono);
   }
   .app-grid{
-    display:grid;grid-template-columns:repeat(5, 1fr);
+    display:grid;grid-template-columns:repeat(3, 1fr);
     gap:14px 4px;
   }
   .app{
@@ -530,6 +530,7 @@
   .app[data-tab="functions"] .icon{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:#c4b5fd;}
   .app[data-tab="cars"]      .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
   .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#fde68a;}
+  .app[data-tab="tiers"]     .icon{background:linear-gradient(135deg,#f472b6,#db2777);border-color:#f9a8d4;}
   .app[data-tab="logs"]      .icon{background:linear-gradient(135deg,#64748b,#475569);border-color:#94a3b8;}
   .app .icon::after{
     content:'';position:absolute;top:0;left:0;right:0;height:50%;
@@ -1504,6 +1505,45 @@
     <div class="stat-meta">
       <span data-i18n="tracked_since">Tracked since</span> <b id="stat-since" data-i18n="launch_lc">launch</b> <span data-i18n="counters_update">· counters update on each successful run</span>
     </div>
+
+    <!-- Quota-exhaustion upsell card. JS toggles .show when day or cycle
+         usage crosses 80% / 100% and renders the right pitch (top-up if
+         month-eligible, tier upgrade otherwise). -->
+    <div class="card upsell-card" id="upsell-card" style="display:none;margin-top:14px;border:1px solid var(--accent);background:var(--panel-2);border-radius:12px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:20px;">💎</span>
+        <span id="upsell-title" style="color:var(--accent);font-weight:700;font-size:13px;">Running low on slots</span>
+      </div>
+      <div id="upsell-body" style="color:var(--text-2);font-size:11px;line-height:1.5;margin-bottom:10px;">—</div>
+      <div id="upsell-buttons" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+  </section>
+
+  <!-- ── Tiers ─────────────────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="tiers">
+    <div class="section-label" data-i18n="my_plan">My plan</div>
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div>
+          <div style="color:var(--hint);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;" data-i18n="current_tier">current tier</div>
+          <div id="tiers-cur-name" style="color:var(--accent);font-size:18px;font-weight:700;margin-top:2px;">—</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:var(--hint);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;" data-i18n="ends_lbl">ends</div>
+          <div id="tiers-cur-exp" style="color:var(--text);font-size:13px;margin-top:2px;">—</div>
+        </div>
+      </div>
+      <div id="tiers-cur-quota" style="margin-top:10px;font-size:11px;color:var(--text-2);">—</div>
+    </div>
+
+    <div class="section-label" data-i18n="all_tiers">All tiers</div>
+    <div id="tiers-list"></div>
+
+    <div class="section-label" style="margin-top:14px;" data-i18n="topup_packs">Top-up packs</div>
+    <div style="font-size:11px;color:var(--hint);padding:0 4px 8px;" data-i18n="topup_hint">
+      Extra account slots for the current cycle. Available on Month / 3M / 6M tiers.
+    </div>
+    <div id="topup-list"></div>
   </section>
 
   <!-- ── Logs ──────────────────────────────────────────────────────── -->
@@ -1577,6 +1617,7 @@
     <button class="app"        data-tab="functions"><div class="icon">⚙️</div><div class="label" data-i18n="tab_functions">functions</div></button>
     <button class="app"        data-tab="cars"><div class="icon">🚗</div><div class="label" data-i18n="tab_cars">cars</div></button>
     <button class="app"        data-tab="dashboard"><div class="icon">📊</div><div class="label" data-i18n="tab_dashboard">dashboard</div></button>
+    <button class="app"        data-tab="tiers"><div class="icon">💎</div><div class="label" data-i18n="tab_tiers">tiers</div></button>
     <button class="app"        data-tab="logs"><div class="icon">📜</div><div class="label" data-i18n="tab_logs">logs</div></button>
   </div>
 </div>
@@ -1696,7 +1737,9 @@
   const I18N = {
     en:{
       app_devtool:'Dev Tool',connected:'connected',
-      tab_accounts:'accounts',tab_functions:'functions',tab_cars:'cars',tab_dashboard:'dashboard',tab_logs:'logs',
+      tab_accounts:'accounts',tab_functions:'functions',tab_cars:'cars',tab_dashboard:'dashboard',tab_tiers:'tiers',tab_logs:'logs',
+      current_tier:'current tier',ends_lbl:'ends',all_tiers:'All tiers',topup_packs:'Top-up packs',
+      topup_hint:'Extra account slots for the current cycle. Available on Month / 3M / 6M tiers.',
       sec_resources:'Resources',sec_manage:'Manage accounts',sec_sessions:'Sessions',
       fn_coins_n:'Full Coins',fn_coins_d:'Coins from every source · max by default',
       fn_boost_n:'Full Boost',fn_boost_d:'Apply all boosts · or pick which',
@@ -1741,7 +1784,9 @@
     },
     ru:{
       app_devtool:'Dev Tool',connected:'подключено',
-      tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_logs:'логи',
+      tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_tiers:'тарифы',tab_logs:'логи',
+      current_tier:'текущий тариф',ends_lbl:'до',all_tiers:'Все тарифы',topup_packs:'Доп. слоты',
+      topup_hint:'Дополнительные слоты на текущий цикл. Доступно на Month / 3M / 6M.',
       sec_resources:'Ресурсы',sec_manage:'Управление аккаунтами',sec_sessions:'Сессии',
       fn_coins_n:'Полные коины',fn_coins_d:'Коины из всех источников · по умолчанию максимум',
       fn_boost_n:'Полный буст',fn_boost_d:'Применить все бусты · или выбрать',
@@ -2195,6 +2240,237 @@
     renderBar(q.month_used, q.month_limit,
               document.getElementById('quota-month'),
               document.getElementById('quota-month-bar'));
+  })();
+
+  // ── Tier catalogue + upsell card ─────────────────────────────────
+  // Source-of-truth mirror of the bot's TIER_PRICE_USD / TOPUP_PACKS.
+  // Single regular price per tier (Week + launch-promo were retired).
+  const TIER_DATA = [
+    { id:'month',    name:'Month',     price:60,  days:30,
+      popular:false,
+      feats:[
+        '<b>30/day</b>, <b>200/cycle</b> accounts',
+        'Bulk login: 10 at a time',
+        'Coins (max + targeted) + Cash + Boost',
+        'AutoFarm + Reset Push',
+      ]},
+    { id:'3month',   name:'3 Months',  price:140, days:90,
+      popular:true,
+      feats:[
+        'Everything in Month',
+        '<b>+ Dev Tool generate</b> (fresh accs)',
+        '<b>+ Cars / fleet pipeline</b>',
+        '<b>100/day</b>, <b>800/cycle</b> accounts',
+        'Bulk login: 25 at a time',
+      ]},
+    { id:'6month',   name:'6 Months',  price:250, days:180,
+      popular:false,
+      feats:[
+        'Everything in 3 Months',
+        '<b>+ Priority Queue</b> at peak load',
+        '<b>200/day</b>, <b>2,000/cycle</b> accounts',
+        'Bulk login: 50 at a time',
+      ]},
+    { id:'lifetime', name:'Lifetime',  price:509, days:36500,
+      popular:false,
+      feats:[
+        'Everything in 6 Months',
+        '<b>+ Reseller Mode</b> (10 codes/mo, 40%)',
+        '<b>Unlimited</b> monthly cap',
+        'Bulk login: 100 at a time',
+        'Pay once — never again',
+      ]},
+  ];
+  const TOPUP_DATA = [
+    { id:'small',  accs:50,  price:10 },
+    { id:'medium', accs:200, price:32, popular:true },
+    { id:'large',  accs:500, price:70 },
+  ];
+  const TOPUP_ELIGIBLE = new Set(['month', '3month', '6month', 'legacy']);
+
+  function buyTier(id){
+    if (!confirm(`Buy ${id}? Mini-app will close and the bot will send a pay link.`)) return;
+    try {
+      tg?.HapticFeedback?.impactOccurred?.('medium');
+      tg?.sendData?.(JSON.stringify({ mode:'buy', kind:'tier', sub:id }));
+    } catch(e){}
+    setTimeout(() => { try { tg?.close(); } catch(e){} }, 400);
+  }
+  function buyTopup(id){
+    if (!confirm(`Buy top-up "${id}"? Mini-app will close and the bot will send a pay link.`)) return;
+    try {
+      tg?.HapticFeedback?.impactOccurred?.('medium');
+      tg?.sendData?.(JSON.stringify({ mode:'buy', kind:'topup', sub:id }));
+    } catch(e){}
+    setTimeout(() => { try { tg?.close(); } catch(e){} }, 400);
+  }
+
+  function renderTiers(){
+    const sub = state.sub || {};
+    const curTier = sub.tier || state.tier || 'no_sub';
+    const cur = TIER_DATA.find(t => t.id === curTier);
+    const curName = document.getElementById('tiers-cur-name');
+    const curExp  = document.getElementById('tiers-cur-exp');
+    const curQ    = document.getElementById('tiers-cur-quota');
+    if (curName) curName.textContent = (cur ? cur.name : curTier).toUpperCase();
+    if (curExp) {
+      const ends = +sub.ends_at || 0;
+      if (state.owner)      curExp.textContent = '∞';
+      else if (!ends)       curExp.textContent = '—';
+      else {
+        const days = Math.max(0, Math.floor((ends - Date.now()/1000)/86400));
+        curExp.textContent = days <= 0 ? 'expired'
+                           : days === 1 ? '1 day' : `${days} days`;
+      }
+    }
+    if (curQ) {
+      const q = state.quota || {};
+      const dl = q.day_limit === -1 ? '∞' : (q.day_limit || '—');
+      const ml = q.month_limit === -1 ? '∞' : (q.month_limit || '—');
+      curQ.textContent = `Day ${q.day_used||0}/${dl}  ·  Cycle ${q.month_used||0}/${ml}`;
+    }
+
+    const list = document.getElementById('tiers-list');
+    if (list) {
+      list.innerHTML = '';
+      TIER_DATA.forEach(t => {
+        const card = document.createElement('div');
+        const isCurrent = t.id === curTier;
+        card.className = 'card';
+        card.style.cssText = `margin-bottom:10px;padding:14px;border:1px solid ${t.popular ? 'var(--accent)' : 'var(--line-soft)'};${isCurrent ? 'background:rgba(76,201,240,0.08);' : ''}`;
+        const ribbon = t.popular
+          ? '<div style="display:inline-block;background:linear-gradient(135deg,#f472b6,#db2777);color:#fff;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-bottom:6px;">⭐ Most popular</div>'
+          : '';
+        const feats = t.feats.map(f => `<li style="margin-bottom:3px;">${f}</li>`).join('');
+        card.innerHTML = `
+          ${ribbon}
+          <div style="display:flex;justify-content:space-between;align-items:baseline;">
+            <div style="font-size:15px;font-weight:700;color:var(--text);">${t.name}</div>
+            <div style="font-size:18px;font-weight:800;color:var(--accent);">$${t.price}</div>
+          </div>
+          <ul style="margin:8px 0 10px 16px;padding:0;list-style:'• ';font-size:11px;color:var(--text-2);line-height:1.5;">${feats}</ul>
+          <button class="launch-btn" data-buy-tier="${t.id}" style="width:100%;font-size:12px;padding:9px;${isCurrent ? 'opacity:0.5;cursor:default;' : ''}" ${isCurrent ? 'disabled' : ''}>
+            ${isCurrent ? '✓ Current plan' : `Buy ${t.name} — $${t.price}`}
+          </button>`;
+        list.appendChild(card);
+      });
+      list.querySelectorAll('[data-buy-tier]').forEach(b => {
+        b.addEventListener('click', () => buyTier(b.dataset.buyTier));
+      });
+    }
+
+    const tlist = document.getElementById('topup-list');
+    if (tlist) {
+      const eligible = state.owner || TOPUP_ELIGIBLE.has(curTier);
+      tlist.innerHTML = '';
+      TOPUP_DATA.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.cssText = `margin-bottom:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid ${p.popular ? 'var(--accent)' : 'var(--line-soft)'};`;
+        card.innerHTML = `
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">+${p.accs} accounts</div>
+            <div style="font-size:10px;color:var(--hint);">${p.popular ? '⭐ best value · ' : ''}cycle-bound</div>
+          </div>
+          <button class="launch-btn" data-buy-topup="${p.id}" style="font-size:12px;padding:8px 14px;${eligible ? '' : 'opacity:0.5;'}" ${eligible ? '' : 'disabled'}>$${p.price}</button>`;
+        tlist.appendChild(card);
+      });
+      if (!eligible) {
+        const note = document.createElement('div');
+        note.style.cssText = 'font-size:11px;color:var(--amber);padding:8px 4px;';
+        note.textContent = '🔒 Top-ups require Month / 3 Months / 6 Months tier.';
+        tlist.appendChild(note);
+      }
+      tlist.querySelectorAll('[data-buy-topup]').forEach(b => {
+        b.addEventListener('click', () => buyTopup(b.dataset.buyTopup));
+      });
+    }
+  }
+  renderTiers();
+
+  // ── Quota-exhaustion upsell on dashboard ──────────────────────────
+  // Trigger at 80% (warn) and 100% (blocked) of either day or cycle cap.
+  // Strategy: month-eligible tiers see top-up offers (cheaper, immediate);
+  // others see tier upgrades. Owner / unlimited never sees the card.
+  (() => {
+    if (state.owner) return;
+    const q = state.quota || {};
+    const sub = state.sub || {};
+    const dUsed = +q.day_used || 0,   dLim = +q.day_limit || 0;
+    const mUsed = +q.month_used || 0, mLim = +q.month_limit || 0;
+    if (dLim === -1 && mLim === -1) return;
+    const dPct = dLim > 0 ? dUsed * 100 / dLim : 0;
+    const mPct = mLim > 0 ? mUsed * 100 / mLim : 0;
+    const worst = Math.max(dPct, mPct);
+    if (worst < 80) return;
+
+    const card  = document.getElementById('upsell-card');
+    const title = document.getElementById('upsell-title');
+    const body  = document.getElementById('upsell-body');
+    const btns  = document.getElementById('upsell-buttons');
+    if (!card || !btns) return;
+
+    const blocked = worst >= 100;
+    const which = mPct >= dPct ? 'cycle' : 'day';
+    title.textContent = blocked
+      ? (which === 'cycle' ? '⛔ Cycle cap reached'  : '⛔ Daily cap reached')
+      : (which === 'cycle' ? '⚠ Cycle cap nearly reached' : '⚠ Daily cap nearly reached');
+    title.style.color = blocked ? 'var(--danger)' : 'var(--amber)';
+    card.style.borderColor = blocked ? 'var(--danger)' : 'var(--amber)';
+
+    const curTier = sub.tier || state.tier || 'no_sub';
+    const usingDay  = `${dUsed} / ${dLim || '—'}`;
+    const usingCyc  = `${mUsed} / ${mLim || '—'}`;
+    const reasonTxt = blocked
+      ? (which === 'cycle'
+          ? `You've used your full <b>${usingCyc}</b> cycle quota — actions are paused until cycle rollover.`
+          : `You've used your full <b>${usingDay}</b> daily quota — slots reset on the next UTC day.`)
+      : (which === 'cycle'
+          ? `You're at <b>${Math.round(mPct)}%</b> of your cycle cap (${usingCyc}). Add slots so you don't run out mid-batch.`
+          : `You're at <b>${Math.round(dPct)}%</b> of today's cap (${usingDay}). Tomorrow resets — but if you need slots now:`);
+
+    btns.innerHTML = '';
+    const eligibleForTopup = TOPUP_ELIGIBLE.has(curTier);
+    if (eligibleForTopup && which === 'cycle') {
+      // Cycle exhaustion → top-up packs (immediate, cycle-bound)
+      body.innerHTML = reasonTxt + `<br><br>💎 <b>Top-up packs</b> add slots to your current cycle:`;
+      TOPUP_DATA.forEach(p => {
+        const b = document.createElement('button');
+        b.className = 'launch-btn';
+        b.style.cssText = 'flex:1;min-width:90px;font-size:11px;padding:8px 10px;';
+        b.textContent = `+${p.accs} · $${p.price}`;
+        b.addEventListener('click', () => buyTopup(p.id));
+        btns.appendChild(b);
+      });
+    } else {
+      // Daily exhaustion or non-eligible tier → suggest tier upgrade
+      const ladder = ['month','3month','6month','lifetime'];
+      const idx = ladder.indexOf(curTier);
+      const nexts = idx < 0 ? ladder.slice(0, 2)
+                            : ladder.slice(idx + 1, idx + 3);
+      const target = nexts.length ? nexts : ['lifetime'];
+      body.innerHTML = reasonTxt + `<br><br>💎 <b>Upgrade tier</b> for higher caps:`;
+      target.forEach(id => {
+        const t = TIER_DATA.find(x => x.id === id);
+        if (!t) return;
+        const b = document.createElement('button');
+        b.className = 'launch-btn';
+        b.style.cssText = 'flex:1;min-width:120px;font-size:11px;padding:8px 10px;';
+        b.textContent = `${t.name} — $${t.price}`;
+        b.addEventListener('click', () => buyTier(t.id));
+        btns.appendChild(b);
+      });
+      // Also offer top-up if eligible (even when daily exhaustion — gives flex)
+      if (eligibleForTopup) {
+        const b = document.createElement('button');
+        b.className = 'launch-btn';
+        b.style.cssText = 'flex:1;min-width:120px;font-size:11px;padding:8px 10px;background:transparent;border:1px solid var(--accent);color:var(--accent);';
+        b.textContent = '💎 Top-up packs';
+        b.addEventListener('click', () => dtSwitchTab('tiers'));
+        btns.appendChild(b);
+      }
+    }
+    card.style.display = 'block';
   })();
 
   // ── Tab switching via the iPhone home-grid ───────────────────────
