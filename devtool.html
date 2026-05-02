@@ -2119,6 +2119,26 @@
     if (state.owner) tierBadge.classList.add('owner');
   }
 
+  // Tier gating: account generation and the Cars / fleet pipeline require
+  // 3M+ tier. Add a 🔒 badge to those tabs and the Generate launch button.
+  // Backend still enforces the gate — this is purely a UX hint.
+  const PRO_TIERS = new Set(['3month', '6month', 'lifetime']);
+  const isProTier = !!state.owner || PRO_TIERS.has(state.tier);
+  if (!isProTier) {
+    document.querySelectorAll('.app[data-tab="cars"] .label').forEach(l => {
+      l.textContent = '🔒 ' + l.textContent;
+    });
+    // Add a small lock note to the Cars pane header if present.
+    const carsHead = document.querySelector('[data-pane="cars"] .section-head, [data-pane="cars"] h2, [data-pane="cars"]');
+    // And to the Generate-accounts button in the Accounts pane.
+    document.querySelectorAll('[data-action="open-generate"], [data-modal-open="generate"]').forEach(b => {
+      b.dataset.proLocked = '1';
+      const orig = b.textContent;
+      if (!orig.includes('🔒')) b.textContent = '🔒 ' + orig;
+      b.title = 'Requires 3 Months tier or higher';
+    });
+  }
+
   // Dashboard stats — populated from the state blob the bot encoded into
   // the WebApp URL on open. Lifetime counters per seller (this Telegram
   // user); reset on file delete only.
