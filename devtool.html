@@ -161,7 +161,7 @@
     flex:1 1 auto;
     overflow-y:auto;
     overflow-x:hidden;
-    padding:14px 14px 24px;
+    padding:14px 14px 140px;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
     scrollbar-color:var(--line) transparent;
@@ -455,56 +455,96 @@
   .empty .msg{font-size:13px;}
   .empty .sub{font-size:11px;margin-top:4px;opacity:0.7;}
 
-  /* ── Bottom tab bar ─────────────────────────────────────────────────── */
-  nav{
-    flex:0 0 auto;
-    display:grid;
-    grid-template-columns:repeat(5, 1fr);
-    background:var(--bg-2);
-    border-top:1px solid var(--line);
-    padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
-    position:relative;
-    z-index:5;
-  }
-  nav::before{
-    content:'';
-    position:absolute;top:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity:0.5;
-  }
-  .tab{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:2px;
-    padding:7px 2px;
-    border:none;background:transparent;cursor:pointer;
-    color:var(--hint);
-    font-family:var(--mono);font-size:9px;letter-spacing:0.04em;
-    text-transform:uppercase;
-    border-radius:8px;
-    transition:color 0.18s, background 0.18s;
+  /* ── Floating iPhone widget — replaces the legacy bottom tab bar ─── */
+  .iphone-fab{
+    position:fixed;
+    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    right:18px;
+    width:60px;height:112px;
+    z-index:90;
+    background:transparent;border:none;cursor:pointer;
+    transition:transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.5);
     -webkit-tap-highlight-color:transparent;
-    min-width:0;            /* allow grid item to shrink past content */
-    overflow:hidden;
+    filter:drop-shadow(0 8px 22px rgba(76,201,240,0.35));
   }
-  .tab span:last-child{
-    max-width:100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+  .iphone-fab:active{transform:scale(0.92);}
+  .iphone-fab svg{width:100%;height:100%;display:block;}
+
+  .home-back{
+    position:fixed;inset:0;
+    background:rgba(2, 6, 16, 0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    z-index:100;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.25s;
   }
-  .tab .ico{
-    font-size:17px;line-height:1;
-    transition:transform 0.18s, filter 0.18s;
+  .home-back.show{opacity:1;pointer-events:auto;}
+
+  .home-sheet{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    padding:24px 18px calc(28px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, rgba(15, 20, 35, 0.94), rgba(5, 8, 15, 0.98));
+    border-top:1px solid var(--line);
+    border-radius:24px 24px 0 0;
+    transform:translateY(100%);
+    transition:transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    z-index:101;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.6);
   }
-  .tab.active{
-    color:var(--accent);
-    background:var(--panel-2);
+  .home-sheet.show{transform:translateY(0);}
+  .home-sheet .grip{
+    width:38px;height:4px;border-radius:999px;
+    background:rgba(76,201,240,0.4);
+    margin:0 auto 18px;
   }
-  .tab.active .ico{
-    filter:drop-shadow(0 0 6px var(--accent));
-    transform:translateY(-1px);
+  .home-sheet .head{
+    text-align:center;
+    font-size:11px;color:var(--hint);
+    text-transform:uppercase;letter-spacing:0.16em;
+    margin-bottom:18px;font-family:var(--mono);
   }
-  .tab:active{transform:scale(0.95);}
+  .app-grid{
+    display:grid;grid-template-columns:repeat(5, 1fr);
+    gap:14px 4px;
+  }
+  .app{
+    display:flex;flex-direction:column;align-items:center;
+    gap:6px;padding:6px;
+    background:transparent;border:none;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app:active{transform:scale(0.94);}
+  .app .icon{
+    width:58px;height:58px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    background:linear-gradient(135deg, rgba(76,201,240,0.20), rgba(72,149,239,0.30));
+    border:1px solid rgba(76,201,240,0.45);
+    box-shadow:0 6px 18px rgba(0,0,0,0.5),
+               0 0 14px rgba(76,201,240,0.25),
+               0 1px 0 rgba(255,255,255,0.1) inset;
+    position:relative;overflow:hidden;
+  }
+  .app[data-tab="accounts"]  .icon{background:linear-gradient(135deg,#4cc9f0,#3a82d6);border-color:#7dd3fc;}
+  .app[data-tab="functions"] .icon{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:#c4b5fd;}
+  .app[data-tab="cars"]      .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
+  .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#fde68a;}
+  .app[data-tab="logs"]      .icon{background:linear-gradient(135deg,#64748b,#475569);border-color:#94a3b8;}
+  .app .icon::after{
+    content:'';position:absolute;top:0;left:0;right:0;height:50%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    pointer-events:none;
+  }
+  .app .label{
+    font-size:11px;color:var(--text-2);font-family:var(--mono);
+    font-weight:500;
+  }
+  .app.active .icon{
+    box-shadow:0 0 0 3px var(--accent),
+               0 6px 18px rgba(0,0,0,0.5),
+               0 0 22px rgba(76,201,240,0.5);
+  }
 
   /* ── Logs viewer ────────────────────────────────────────────────────── */
   .log-view{
@@ -1500,23 +1540,46 @@
 
 </main>
 
-<nav>
-  <button class="tab active" data-tab="accounts">
-    <span class="ico">👥</span><span data-i18n="tab_accounts">accounts</span>
-  </button>
-  <button class="tab" data-tab="functions">
-    <span class="ico">⚙️</span><span data-i18n="tab_functions">functions</span>
-  </button>
-  <button class="tab" data-tab="cars">
-    <span class="ico">🚗</span><span data-i18n="tab_cars">cars</span>
-  </button>
-  <button class="tab" data-tab="dashboard">
-    <span class="ico">📊</span><span data-i18n="tab_dashboard">dashboard</span>
-  </button>
-  <button class="tab" data-tab="logs">
-    <span class="ico">📜</span><span data-i18n="tab_logs">logs</span>
-  </button>
-</nav>
+<!-- ── Floating iPhone navigation (replaces the legacy bottom tab bar) ── -->
+<button class="iphone-fab" id="phone-fab" aria-label="Open tabs">
+  <svg viewBox="0 0 64 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="58" height="114" rx="14" ry="14"
+          fill="#0a0f1c" stroke="#4cc9f0" stroke-width="1.5"/>
+    <rect x="6" y="6" width="52" height="108" rx="11" ry="11"
+          fill="url(#dtScreenGrad)" stroke="rgba(76,201,240,0.2)"/>
+    <rect x="22" y="9" width="20" height="4" rx="2" fill="#000"/>
+    <g opacity="0.95">
+      <rect x="11" y="22" width="10" height="10" rx="2.5" fill="#4cc9f0"/>
+      <rect x="25" y="22" width="10" height="10" rx="2.5" fill="#7dd3fc"/>
+      <rect x="39" y="22" width="10" height="10" rx="2.5" fill="#34d399"/>
+      <rect x="11" y="36" width="10" height="10" rx="2.5" fill="#a78bfa"/>
+      <rect x="25" y="36" width="10" height="10" rx="2.5" fill="#fbbf24"/>
+    </g>
+    <rect x="22" y="108" width="20" height="3" rx="1.5" fill="rgba(76,201,240,0.7)"/>
+    <rect x="1" y="22" width="2" height="10" rx="1" fill="rgba(76,201,240,0.5)"/>
+    <rect x="1" y="36" width="2" height="14" rx="1" fill="rgba(76,201,240,0.5)"/>
+    <rect x="61" y="32" width="2" height="20" rx="1" fill="rgba(76,201,240,0.5)"/>
+    <defs>
+      <linearGradient id="dtScreenGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#03101e"/>
+        <stop offset="100%" stop-color="#05080f"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</button>
+
+<div class="home-back" id="home-back"></div>
+<div class="home-sheet" id="home-sheet">
+  <div class="grip"></div>
+  <div class="head" data-i18n="dt_apps">Dev Tool</div>
+  <div class="app-grid" id="app-grid">
+    <button class="app active" data-tab="accounts"><div class="icon">👥</div><div class="label" data-i18n="tab_accounts">accounts</div></button>
+    <button class="app"        data-tab="functions"><div class="icon">⚙️</div><div class="label" data-i18n="tab_functions">functions</div></button>
+    <button class="app"        data-tab="cars"><div class="icon">🚗</div><div class="label" data-i18n="tab_cars">cars</div></button>
+    <button class="app"        data-tab="dashboard"><div class="icon">📊</div><div class="label" data-i18n="tab_dashboard">dashboard</div></button>
+    <button class="app"        data-tab="logs"><div class="icon">📜</div><div class="label" data-i18n="tab_logs">logs</div></button>
+  </div>
+</div>
 
 <!-- ── Modal: Generate New ─────────────────────────────────────────── -->
 <div class="backdrop" data-backdrop="generate"></div>
@@ -2114,15 +2177,40 @@
               document.getElementById('quota-month-bar'));
   })();
 
-  // ── Tab switching ────────────────────────────────────────────────
-  const tabs = document.querySelectorAll('.tab');
+  // ── Tab switching via the iPhone home-grid ───────────────────────
+  const apps  = document.querySelectorAll('.app');
   const panes = document.querySelectorAll('.tab-pane');
-  tabs.forEach(t => t.addEventListener('click', () => {
-    const id = t.dataset.tab;
-    tabs.forEach(x => x.classList.toggle('active', x === t));
+  function dtSwitchTab(id){
+    apps.forEach(x => x.classList.toggle('active', x.dataset.tab === id));
     panes.forEach(p => p.classList.toggle('active', p.dataset.pane === id));
+    document.querySelector('main').scrollTop = 0;
+  }
+  apps.forEach(a => a.addEventListener('click', () => {
+    dtSwitchTab(a.dataset.tab);
+    closeDtHome();
     try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
   }));
+
+  // iPhone widget — open / close home grid
+  const dtBack  = document.getElementById('home-back');
+  const dtSheet = document.getElementById('home-sheet');
+  function openDtHome(){
+    dtBack.classList.add('show');
+    dtSheet.classList.add('show');
+    try { tg?.HapticFeedback?.impactOccurred?.('light'); } catch(e){}
+  }
+  function closeDtHome(){
+    dtBack.classList.remove('show');
+    dtSheet.classList.remove('show');
+  }
+  document.getElementById('phone-fab')?.addEventListener('click', openDtHome);
+  dtBack?.addEventListener('click', closeDtHome);
+  let _dtTy0 = 0;
+  dtSheet?.addEventListener('touchstart', e => { _dtTy0 = e.touches[0].clientY; }, {passive:true});
+  dtSheet?.addEventListener('touchmove',  e => {
+    const dy = e.touches[0].clientY - _dtTy0;
+    if (dy > 80) { closeDtHome(); _dtTy0 = 1e9; }
+  }, {passive:true});
 
   // ── Toggles → reveal pick-amount / pick-boosts panel ─────────────
   // Turning the toggle ON also auto-selects the card for launch — UX
