@@ -1824,8 +1824,9 @@ code{
       var b = document.createElement('div');
       b.id = 'trial-banner';
       b.className = 'trial-banner';
-      b.innerHTML = '🔒 <b>Trial — preview only.</b> Sign in works, but ' +
-                    'farming requires a paid plan. <span class="upsell">Tap here → 💎 Tiers</span>';
+      b.innerHTML = '🔒 <b>Subscription required.</b> ' +
+                    'Sign in works, but farming needs an active paid plan. ' +
+                    '<span class="upsell">Tap here → 💎 Tiers</span>';
       b.addEventListener('click', function(){ activate('tiers'); });
       return b;
     }
@@ -1836,8 +1837,8 @@ code{
     for (var i=0;i<locks.length;i++) locks[i].classList.add('locked');
   }
 
-  // ── Trial / no-sub gating ──────────────────────────────────────────────
-  // accountState.can.farm  — false for trial / no-sub users.
+  // ── No-subscription gating ─────────────────────────────────────────────
+  // accountState.can.farm  — false for no-sub users (trial tier was retired).
   // accountState.can.drag  — false unless tier ≥ Month.
   // accountState.can.circuit — same.
   // accountState.can.boost — same.

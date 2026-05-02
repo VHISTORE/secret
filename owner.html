@@ -531,7 +531,6 @@
       <div class="field">
         <label class="field-label" data-i18n="tier_lbl">Tier</label>
         <select class="select" id="set-tier">
-          <option value="trial">trial</option>
           <option value="month" selected>month</option>
           <option value="3month">3 months</option>
           <option value="6month">6 months</option>
@@ -553,7 +552,7 @@
     <div class="card">
       <div class="field">
         <label class="field-label" data-i18n="filter_tier">Filter by tier (blank = all)</label>
-        <input class="input" type="text" id="filter-tier" placeholder="lifetime / month / trial">
+        <input class="input" type="text" id="filter-tier" placeholder="lifetime / 6month / 3month / month">
       </div>
       <button class="btn full" id="btn-list-users" data-i18n="list_users">📋 List users</button>
     </div>
@@ -602,7 +601,6 @@
         <label class="field-label" data-i18n="tier_filter">Tier filter</label>
         <select class="select" id="bc-tier">
           <option value="all" selected>all paid</option>
-          <option value="trial">trial only</option>
           <option value="month">month</option>
           <option value="3month">3month</option>
           <option value="6month">6month</option>
