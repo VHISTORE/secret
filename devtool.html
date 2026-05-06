@@ -1582,6 +1582,8 @@
   <!-- ── AutoFarm (per-user pool) ────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="autofarm">
     <div class="section-label" data-i18n="af_section_h">Daily auto-farm</div>
+
+    <!-- Status card -->
     <div class="card" style="margin-bottom:14px;padding:14px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
         <div>
@@ -1594,18 +1596,26 @@
         </div>
       </div>
       <div style="margin-top:8px;font-size:11px;color:var(--text-2);line-height:1.5;" data-i18n="af_intro">
-        Daily cycle runs at 03:00 Kyiv time. We sign in to every account in your pool, claim the daily, drag and circuit rewards, then DM you the summary. Add accounts you've already logged in below.
+        Daily cycle runs at 03:00 Kyiv time. We sign in to every account in your pool, claim the daily, drag and circuit rewards, then DM you the summary.
+      </div>
+    </div>
+
+    <!-- Action tiles (like the Accounts tab) -->
+    <div class="action-grid">
+      <div class="action-tile" id="act-af-add">
+        <span class="ico">➕</span>
+        <div class="ttl" data-i18n="af_add_t">Add account</div>
+        <div class="sub" data-i18n="af_add_d">Email + password, or from sessions</div>
+      </div>
+      <div class="action-tile" id="act-af-clear">
+        <span class="ico">🗑</span>
+        <div class="ttl" data-i18n="af_clear_t">Remove all</div>
+        <div class="sub" data-i18n="af_clear_d">Clear your auto-farm pool</div>
       </div>
     </div>
 
     <div class="section-label" data-i18n="af_my_pool">In auto-farm</div>
     <div id="af-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
-
-    <div class="section-label" data-i18n="af_add_from_sessions">Add from your sessions</div>
-    <div id="af-candidates" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div id="af-empty-hint" style="display:none;color:var(--hint);font-size:11px;padding:18px 4px;text-align:center;line-height:1.5;" data-i18n="af_empty_hint">
-      No logged-in accounts yet. Open the <b>accounts</b> tab to add one, then come back here.
-    </div>
   </section>
 
 </main>
@@ -1731,6 +1741,51 @@
   </div>
 </div>
 
+<!-- ── AutoFarm: Add modal (manual creds OR pick from sessions) ─────── -->
+<div class="modal" data-modal="afadd">
+  <div class="modal-head">
+    <span class="mh-icon">🤖</span>
+    <span class="mh-title" data-i18n="af_modal_title">Add to auto-farm</span>
+    <button class="mh-close" data-close="afadd">×</button>
+  </div>
+  <div class="modal-body">
+    <div class="seg" id="afadd-seg">
+      <button type="button" class="active" data-afmethod="manual" data-i18n="af_method_manual">Manual</button>
+      <button type="button" data-afmethod="sessions" data-i18n="af_method_sessions">From sessions</button>
+    </div>
+
+    <!-- Manual entry: email + password (one or many) -->
+    <div data-afmethod-pane="manual">
+      <div class="field">
+        <label class="field-label" data-i18n="email">Email</label>
+        <input class="input" type="email" id="afadd-email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="account@gmail.com">
+      </div>
+      <div class="field">
+        <label class="field-label" data-i18n="password">Password</label>
+        <input class="input" type="password" id="afadd-pw" autocomplete="off" placeholder="••••••">
+      </div>
+      <div class="field" style="font-size:11px;color:var(--hint);" data-i18n="af_modal_bulk_hint">
+        Or paste multiple lines as email:password below.
+      </div>
+      <div class="field">
+        <textarea class="input" id="afadd-bulk" placeholder="user1@gmail.com:pass1&#10;user2@gmail.com:pass2" spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <!-- Pick from active sessions -->
+    <div data-afmethod-pane="sessions" style="display:none;">
+      <div style="font-size:11px;color:var(--hint);margin-bottom:10px;line-height:1.5;" data-i18n="af_modal_sessions_hint">
+        These accounts are already logged in. Tap one to enroll it — we re-use the cached password.
+      </div>
+      <div id="afadd-sessions" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn ghost" data-close="afadd" data-i18n="cancel">Cancel</button>
+    <button class="btn primary" id="afadd-submit" data-i18n="add">Add</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1826,6 +1881,16 @@
       af_add_btn:'Add',
       af_cap_hit:'Tier limit reached — upgrade or remove an account.',
       af_confirm_rm:'Remove this account from daily auto-farm?',
+      af_add_t:'Add account',af_add_d:'Email + password, or from sessions',
+      af_clear_t:'Remove all',af_clear_d:'Clear your auto-farm pool',
+      af_modal_title:'Add to auto-farm',
+      af_method_manual:'Manual',af_method_sessions:'From sessions',
+      af_modal_bulk_hint:'Or paste multiple lines as email:password below.',
+      af_modal_sessions_hint:'These accounts are already logged in. Tap one to enroll it — we re-use the cached password.',
+      af_no_candidates:'No logged-in sessions available. Switch to Manual.',
+      af_no_creds:'Enter email + password (or paste pairs).',
+      af_pick_session_hint:'Tap a session row above to add it.',
+      af_confirm_clear:'Remove ALL accounts from auto-farm?',
     },
     ru:{
       app_devtool:'Dev Tool',connected:'подключено',
@@ -1843,6 +1908,16 @@
       af_add_btn:'Добавить',
       af_cap_hit:'Лимит тарифа достигнут — проапгрейдь или удали акк.',
       af_confirm_rm:'Удалить этот аккаунт из автофарма?',
+      af_add_t:'Добавить акк',af_add_d:'Email + пароль или из сессий',
+      af_clear_t:'Очистить',af_clear_d:'Удалить все аккаунты из автофарма',
+      af_modal_title:'Добавить в автофарм',
+      af_method_manual:'Вручную',af_method_sessions:'Из сессий',
+      af_modal_bulk_hint:'Или вставь несколько строк формата email:password.',
+      af_modal_sessions_hint:'Эти аккаунты уже залогинены. Тапни на нужный — пароль возьмём из кэша.',
+      af_no_candidates:'Нет залогиненных сессий. Переключись в "Вручную".',
+      af_no_creds:'Введи email и пароль (или вставь пары).',
+      af_pick_session_hint:'Тапни на строку сессии выше, чтобы добавить.',
+      af_confirm_clear:'Удалить ВСЕ аккаунты из автофарма?',
       current_tier:'текущий тариф',ends_lbl:'до',all_tiers:'Все тарифы',topup_packs:'Доп. слоты',
       topup_hint:'Дополнительные слоты на текущий цикл. Доступно на Month / 3M / 6M.',
       sec_resources:'Ресурсы',sec_manage:'Управление аккаунтами',sec_sessions:'Сессии',
@@ -2457,18 +2532,14 @@
   function renderAutoFarm(){
     const pool   = Array.isArray(state.af_pool) ? state.af_pool : [];
     const cap    = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
-    const sess   = Array.isArray(state.accounts) ? state.accounts : [];
     const counterEl = document.getElementById('af-pool-counter');
     const nextEl    = document.getElementById('af-next-run');
     const listEl    = document.getElementById('af-list');
-    const candEl    = document.getElementById('af-candidates');
-    const emptyEl   = document.getElementById('af-empty-hint');
     if (!counterEl) return;
     counterEl.textContent = `${pool.length}/${cap === null ? '∞' : cap}`;
     nextEl.textContent = fmtAfTime(state.af_next_run);
-    // Existing pool — render a card per entry with a remove (×) button.
     if (pool.length === 0) {
-      listEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:14px 4px;text-align:center;">${tr('af_pool_empty', 'No accounts in auto-farm yet.')}</div>`;
+      listEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:18px 4px;text-align:center;">${tr('af_pool_empty', 'No accounts in auto-farm yet. Tap "Add account" above.')}</div>`;
     } else {
       listEl.innerHTML = pool.map(p => {
         const last = p.last ? fmtAfTime(p.last) : tr('af_never', 'never');
@@ -2485,32 +2556,113 @@
         b.addEventListener('click', () => afRemove(b.dataset.afRemove));
       });
     }
-    // Candidates — sessions not yet in pool. Adding uses sessionStorage to
-    // pick up the password we cached at login time (see sessionAddPassword
-    // wrapper around the existing `add accounts` flow).
-    const inPoolMasks = new Set(pool.map(p => p.email));
-    const candidates = sess.filter(s => !inPoolMasks.has(s.mask));
+  }
+
+  // === AutoFarm modal (Add) ===
+  function openAfAddModal(){
+    const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
+    const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
+    if (cap !== null && pool.length >= cap) {
+      toast(tr('af_cap_hit','Tier limit reached — upgrade or remove an account.'),'err');
+      return;
+    }
+    // Populate sessions list
+    const sess = Array.isArray(state.accounts) ? state.accounts : [];
+    const inPool = new Set(pool.map(p => p.email));
+    const candidates = sess.filter(s => !inPool.has(s.mask));
+    const sessEl = document.getElementById('afadd-sessions');
     if (candidates.length === 0) {
-      candEl.innerHTML = '';
-      emptyEl.style.display = sess.length === 0 ? 'block' : 'none';
-      if (sess.length > 0 && pool.length > 0) {
-        candEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:8px 4px;text-align:center;">${tr('af_all_added', 'All your sessions are already in auto-farm.')}</div>`;
-      }
+      sessEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:14px 4px;text-align:center;">${tr('af_no_candidates','No logged-in sessions available. Switch to Manual.')}</div>`;
     } else {
-      emptyEl.style.display = 'none';
-      const atCap = (cap !== null && pool.length >= cap);
-      candEl.innerHTML = candidates.map(c => {
-        return `
-          <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
-            <div style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">${c.mask}</div>
-            <button type="button" class="btn primary" data-af-add="${c.mask}" ${atCap ? 'disabled' : ''} style="padding:6px 12px;font-size:12px;${atCap ? 'opacity:0.45;' : ''}">${tr('af_add_btn', 'Add')}</button>
-          </div>`;
-      }).join('');
-      candEl.querySelectorAll('[data-af-add]').forEach(b => {
-        b.addEventListener('click', () => afAdd(b.dataset.afAdd));
+      sessEl.innerHTML = candidates.map(c => `
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" data-af-pick="${c.mask}">
+          <div style="font-size:13px;color:var(--text);">${c.mask}</div>
+          <button type="button" class="btn primary" style="padding:6px 12px;font-size:12px;">${tr('af_add_btn','Add')}</button>
+        </div>`).join('');
+      sessEl.querySelectorAll('[data-af-pick]').forEach(row => {
+        row.addEventListener('click', () => {
+          afAdd(row.dataset.afPick);
+          closeAfModal();
+        });
       });
     }
+    // Reset form
+    const e = document.getElementById('afadd-email'); if (e) e.value = '';
+    const p = document.getElementById('afadd-pw');    if (p) p.value = '';
+    const b = document.getElementById('afadd-bulk');  if (b) b.value = '';
+    document.querySelector('[data-modal="afadd"]').classList.add('open');
   }
+  function closeAfModal(){
+    document.querySelector('[data-modal="afadd"]').classList.remove('open');
+  }
+  // Wire tile buttons
+  const tileAdd = document.getElementById('act-af-add');
+  if (tileAdd) tileAdd.addEventListener('click', openAfAddModal);
+  const tileClear = document.getElementById('act-af-clear');
+  if (tileClear) tileClear.addEventListener('click', () => {
+    const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
+    if (pool.length === 0) { toast(tr('af_pool_empty','No accounts in auto-farm yet.'),'info'); return; }
+    if (!confirm(tr('af_confirm_clear','Remove ALL accounts from auto-farm?'))) return;
+    pool.forEach((p, i) => setTimeout(() => afRemove(p.raw), i * 80));
+  });
+  // Modal close + segment toggles
+  document.querySelectorAll('[data-close="afadd"]').forEach(b => b.addEventListener('click', closeAfModal));
+  document.querySelectorAll('#afadd-seg [data-afmethod]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#afadd-seg [data-afmethod]').forEach(x => x.classList.toggle('active', x === b));
+      const m = b.dataset.afmethod;
+      document.querySelectorAll('[data-afmethod-pane]').forEach(p =>
+        p.style.display = (p.dataset.afmethodPane === m ? '' : 'none'));
+    });
+  });
+  // Manual submit
+  const afSubmit = document.getElementById('afadd-submit');
+  if (afSubmit) afSubmit.addEventListener('click', () => {
+    const active = document.querySelector('#afadd-seg [data-afmethod].active');
+    const method = active ? active.dataset.afmethod : 'manual';
+    if (method === 'sessions') {
+      // User picks a row directly; submit button is a no-op here.
+      toast(tr('af_pick_session_hint','Tap a session row above to add it.'),'info');
+      return;
+    }
+    const single = (document.getElementById('afadd-email')?.value || '').trim().toLowerCase();
+    const singlePw = (document.getElementById('afadd-pw')?.value || '');
+    const bulk = (document.getElementById('afadd-bulk')?.value || '').trim();
+    let pairs = [];
+    if (single && singlePw) pairs.push({email: single, password: singlePw});
+    if (bulk) {
+      bulk.split(/\r?\n/).forEach(line => {
+        line = line.trim(); if (!line || line.startsWith('#')) return;
+        const idx = line.indexOf(':'); if (idx < 0) return;
+        const em = line.slice(0,idx).trim().toLowerCase();
+        const pw = line.slice(idx+1);
+        if (em && pw) pairs.push({email: em, password: pw});
+      });
+    }
+    if (pairs.length === 0) {
+      toast(tr('af_no_creds','Enter email + password (or paste pairs).'),'err');
+      return;
+    }
+    // Tier cap check client-side; bot also enforces.
+    const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
+    const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
+    if (cap !== null && pool.length + pairs.length > cap) {
+      toast(`${tr('af_cap_hit','Tier limit reached.')} (${pool.length + pairs.length} > ${cap})`,'err');
+      return;
+    }
+    // Send each pair as a separate sendData — but Telegram closes the
+    // mini-app on the first sendData. So we send a single batch payload
+    // and handle bulk on the bot side.
+    const payload = pairs.length === 1
+      ? { mode:'af_user_add', email: pairs[0].email, password: pairs[0].password }
+      : { mode:'af_user_add_bulk', accounts: pairs };
+    try {
+      tg?.sendData?.(JSON.stringify(payload));
+      closeAfModal();
+    } catch(e){
+      toast('sendData failed: ' + e.message, 'err');
+    }
+  });
   function tr(key, fallback){
     try {
       const v = t(key);
