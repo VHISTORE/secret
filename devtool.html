@@ -2529,7 +2529,14 @@
   }
   function renderAutoFarm(){
     const pool   = Array.isArray(state.af_pool) ? state.af_pool : [];
-    const cap    = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
+    const rawCap = state.af_cap;
+    // cap === 0 → user's tier doesn't include AutoFarm. Hide tab + pane.
+    if (rawCap === 0) {
+      document.querySelectorAll('[data-tab="autofarm"]').forEach(b => b.style.display = 'none');
+      document.querySelectorAll('[data-pane="autofarm"]').forEach(p => p.style.display = 'none');
+      return;
+    }
+    const cap    = (rawCap === null || rawCap === undefined) ? null : Number(rawCap);
     const counterEl = document.getElementById('af-pool-counter');
     const nextEl    = document.getElementById('af-next-run');
     if (!counterEl) return;
