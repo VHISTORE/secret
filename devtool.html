@@ -532,6 +532,7 @@
   .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#fde68a;}
   .app[data-tab="tiers"]     .icon{background:linear-gradient(135deg,#f472b6,#db2777);border-color:#f9a8d4;}
   .app[data-tab="logs"]      .icon{background:linear-gradient(135deg,#64748b,#475569);border-color:#94a3b8;}
+  .app[data-tab="autofarm"]  .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
   .app .icon::after{
     content:'';position:absolute;top:0;left:0;right:0;height:50%;
     background:linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
@@ -1578,6 +1579,35 @@
 
   </section>
 
+  <!-- ── AutoFarm (per-user pool) ────────────────────────────────────────── -->
+  <section class="tab-pane" data-pane="autofarm">
+    <div class="section-label" data-i18n="af_section_h">Daily auto-farm</div>
+    <div class="card" style="margin-bottom:14px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="color:var(--hint);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;" data-i18n="af_pool_lbl">your pool</div>
+          <div id="af-pool-counter" style="color:var(--accent);font-size:22px;font-weight:700;margin-top:2px;">—</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:var(--hint);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;" data-i18n="af_next_run">next run</div>
+          <div id="af-next-run" style="color:var(--text);font-size:13px;margin-top:2px;">—</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-2);line-height:1.5;" data-i18n="af_intro">
+        Daily cycle runs at 03:00 Kyiv time. We sign in to every account in your pool, claim the daily, drag and circuit rewards, then DM you the summary. Add accounts you've already logged in below.
+      </div>
+    </div>
+
+    <div class="section-label" data-i18n="af_my_pool">In auto-farm</div>
+    <div id="af-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+
+    <div class="section-label" data-i18n="af_add_from_sessions">Add from your sessions</div>
+    <div id="af-candidates" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="af-empty-hint" style="display:none;color:var(--hint);font-size:11px;padding:18px 4px;text-align:center;line-height:1.5;" data-i18n="af_empty_hint">
+      No logged-in accounts yet. Open the <b>accounts</b> tab to add one, then come back here.
+    </div>
+  </section>
+
 </main>
 
 <!-- ── Floating iPhone navigation (replaces the legacy bottom tab bar) ── -->
@@ -1619,6 +1649,7 @@
     <button class="app"        data-tab="dashboard"><div class="icon">📊</div><div class="label" data-i18n="tab_dashboard">dashboard</div></button>
     <button class="app"        data-tab="tiers"><div class="icon">💎</div><div class="label" data-i18n="tab_tiers">tiers</div></button>
     <button class="app"        data-tab="logs"><div class="icon">📜</div><div class="label" data-i18n="tab_logs">logs</div></button>
+    <button class="app"        data-tab="autofarm"><div class="icon">🤖</div><div class="label" data-i18n="tab_autofarm">autofarm</div></button>
   </div>
 </div>
 
@@ -2387,6 +2418,103 @@
     }
   }
   renderTiers();
+
+  // ── AutoFarm tab — per-user pool view & actions ──────────────────
+  function fmtAfTime(ts){
+    if (!ts) return '—';
+    try {
+      const d = new Date(ts*1000);
+      return d.toLocaleString(undefined,{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    } catch(e){ return '—'; }
+  }
+  function renderAutoFarm(){
+    const pool   = Array.isArray(state.af_pool) ? state.af_pool : [];
+    const cap    = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
+    const sess   = Array.isArray(state.accounts) ? state.accounts : [];
+    const counterEl = document.getElementById('af-pool-counter');
+    const nextEl    = document.getElementById('af-next-run');
+    const listEl    = document.getElementById('af-list');
+    const candEl    = document.getElementById('af-candidates');
+    const emptyEl   = document.getElementById('af-empty-hint');
+    if (!counterEl) return;
+    counterEl.textContent = `${pool.length}/${cap === null ? '∞' : cap}`;
+    nextEl.textContent = fmtAfTime(state.af_next_run);
+    // Existing pool — render a card per entry with a remove (×) button.
+    if (pool.length === 0) {
+      listEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:14px 4px;text-align:center;">${tr('af_pool_empty', 'No accounts in auto-farm yet.')}</div>`;
+    } else {
+      listEl.innerHTML = pool.map(p => {
+        const last = p.last ? fmtAfTime(p.last) : tr('af_never', 'never');
+        return `
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.email}</div>
+              <div style="font-size:10px;color:var(--hint);margin-top:2px;">cycles ${p.cycles} · last ${last}</div>
+            </div>
+            <button type="button" class="btn ghost" data-af-remove="${p.raw}" style="padding:6px 10px;font-size:12px;color:#f87171;border-color:#7f1d1d;">×</button>
+          </div>`;
+      }).join('');
+      listEl.querySelectorAll('[data-af-remove]').forEach(b => {
+        b.addEventListener('click', () => afRemove(b.dataset.afRemove));
+      });
+    }
+    // Candidates — sessions not yet in pool. Adding uses sessionStorage to
+    // pick up the password we cached at login time (see sessionAddPassword
+    // wrapper around the existing `add accounts` flow).
+    const inPoolMasks = new Set(pool.map(p => p.email));
+    const candidates = sess.filter(s => !inPoolMasks.has(s.mask));
+    if (candidates.length === 0) {
+      candEl.innerHTML = '';
+      emptyEl.style.display = sess.length === 0 ? 'block' : 'none';
+      if (sess.length > 0 && pool.length > 0) {
+        candEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:8px 4px;text-align:center;">${tr('af_all_added', 'All your sessions are already in auto-farm.')}</div>`;
+      }
+    } else {
+      emptyEl.style.display = 'none';
+      const atCap = (cap !== null && pool.length >= cap);
+      candEl.innerHTML = candidates.map(c => {
+        return `
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+            <div style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">${c.mask}</div>
+            <button type="button" class="btn primary" data-af-add="${c.mask}" ${atCap ? 'disabled' : ''} style="padding:6px 12px;font-size:12px;${atCap ? 'opacity:0.45;' : ''}">${tr('af_add_btn', 'Add')}</button>
+          </div>`;
+      }).join('');
+      candEl.querySelectorAll('[data-af-add]').forEach(b => {
+        b.addEventListener('click', () => afAdd(b.dataset.afAdd));
+      });
+    }
+  }
+  function tr(key, fallback){
+    try {
+      const d = (window.__I18N_DICT__ || {});
+      return d[key] || fallback;
+    } catch(e){ return fallback; }
+  }
+  function afAdd(mask){
+    // The state blob delivers email masks (k***@d.com), not raw addresses,
+    // so we hand the bot the mask + a marker; the bot resolves it against
+    // the user's session list to recover the real email + password.
+    const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
+    const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
+    if (cap !== null && pool.length >= cap) {
+      toast(tr('af_cap_hit', 'Tier limit reached — upgrade or remove an account.'), 'err');
+      return;
+    }
+    try {
+      tg?.sendData?.(JSON.stringify({ mode: 'af_user_add', email_mask: mask }));
+    } catch(e){
+      toast('sendData failed: ' + e.message, 'err');
+    }
+  }
+  function afRemove(rawEmail){
+    if (!confirm(tr('af_confirm_rm','Remove this account from daily auto-farm?'))) return;
+    try {
+      tg?.sendData?.(JSON.stringify({ mode: 'af_user_remove', email: rawEmail }));
+    } catch(e){
+      toast('sendData failed: ' + e.message, 'err');
+    }
+  }
+  renderAutoFarm();
 
   // ── Quota-exhaustion upsell on dashboard ──────────────────────────
   // Trigger at 80% (warn) and 100% (blocked) of either day or cycle cap.
