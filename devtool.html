@@ -1600,22 +1600,19 @@
       </div>
     </div>
 
-    <!-- Action tiles (like the Accounts tab) -->
+    <!-- Action tiles -->
     <div class="action-grid">
       <div class="action-tile" id="act-af-add">
         <span class="ico">➕</span>
         <div class="ttl" data-i18n="af_add_t">Add account</div>
         <div class="sub" data-i18n="af_add_d">Email + password, or from sessions</div>
       </div>
-      <div class="action-tile" id="act-af-clear">
-        <span class="ico">🗑</span>
-        <div class="ttl" data-i18n="af_clear_t">Remove all</div>
-        <div class="sub" data-i18n="af_clear_d">Clear your auto-farm pool</div>
+      <div class="action-tile" id="act-af-list">
+        <span class="ico">📋</span>
+        <div class="ttl" data-i18n="af_list_t">My list</div>
+        <div class="sub" data-i18n="af_list_d">Bot sends pool to chat with delete buttons</div>
       </div>
     </div>
-
-    <div class="section-label" data-i18n="af_my_pool">In auto-farm</div>
-    <div id="af-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
   </section>
 
 </main>
@@ -1883,7 +1880,7 @@
       af_cap_hit:'Tier limit reached — upgrade or remove an account.',
       af_confirm_rm:'Remove this account from daily auto-farm?',
       af_add_t:'Add account',af_add_d:'Email + password, or from sessions',
-      af_clear_t:'Remove all',af_clear_d:'Clear your auto-farm pool',
+      af_list_t:'My list',af_list_d:'Bot sends pool to chat with delete buttons',
       af_modal_title:'Add to auto-farm',
       af_method_manual:'Manual',af_method_sessions:'From sessions',
       af_modal_bulk_hint:'Or paste multiple lines as email:password below.',
@@ -1910,7 +1907,7 @@
       af_cap_hit:'Лимит тарифа достигнут — проапгрейдь или удали акк.',
       af_confirm_rm:'Удалить этот аккаунт из автофарма?',
       af_add_t:'Добавить акк',af_add_d:'Email + пароль или из сессий',
-      af_clear_t:'Очистить',af_clear_d:'Удалить все аккаунты из автофарма',
+      af_list_t:'Список',af_list_d:'Бот пришлёт список в чат с кнопками удаления',
       af_modal_title:'Добавить в автофарм',
       af_method_manual:'Вручную',af_method_sessions:'Из сессий',
       af_modal_bulk_hint:'Или вставь несколько строк формата email:password.',
@@ -2535,28 +2532,9 @@
     const cap    = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
     const counterEl = document.getElementById('af-pool-counter');
     const nextEl    = document.getElementById('af-next-run');
-    const listEl    = document.getElementById('af-list');
     if (!counterEl) return;
     counterEl.textContent = `${pool.length}/${cap === null ? '∞' : cap}`;
     nextEl.textContent = fmtAfTime(state.af_next_run);
-    if (pool.length === 0) {
-      listEl.innerHTML = `<div style="color:var(--hint);font-size:11px;padding:18px 4px;text-align:center;">${tr('af_pool_empty', 'No accounts in auto-farm yet. Tap "Add account" above.')}</div>`;
-    } else {
-      listEl.innerHTML = pool.map(p => {
-        const last = p.last ? fmtAfTime(p.last) : tr('af_never', 'never');
-        return `
-          <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
-            <div style="min-width:0;flex:1;">
-              <div style="font-size:13px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.email}</div>
-              <div style="font-size:10px;color:var(--hint);margin-top:2px;">cycles ${p.cycles} · last ${last}</div>
-            </div>
-            <button type="button" class="btn ghost" data-af-remove="${p.raw}" style="padding:6px 10px;font-size:12px;color:#f87171;border-color:#7f1d1d;">×</button>
-          </div>`;
-      }).join('');
-      listEl.querySelectorAll('[data-af-remove]').forEach(b => {
-        b.addEventListener('click', () => afRemove(b.dataset.afRemove));
-      });
-    }
   }
 
   // === AutoFarm modal (Add) ===
@@ -2599,12 +2577,13 @@
   // Wire tile buttons
   const tileAdd = document.getElementById('act-af-add');
   if (tileAdd) tileAdd.addEventListener('click', openAfAddModal);
-  const tileClear = document.getElementById('act-af-clear');
-  if (tileClear) tileClear.addEventListener('click', () => {
-    const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
-    if (pool.length === 0) { toast(tr('af_pool_empty','No accounts in auto-farm yet.'),'info'); return; }
-    if (!confirm(tr('af_confirm_clear','Remove ALL accounts from auto-farm?'))) return;
-    pool.forEach((p, i) => setTimeout(() => afRemove(p.raw), i * 80));
+  const tileList = document.getElementById('act-af-list');
+  if (tileList) tileList.addEventListener('click', () => {
+    try {
+      tg?.sendData?.(JSON.stringify({ mode: 'af_user_list' }));
+    } catch(e){
+      toast('sendData failed: ' + e.message, 'err');
+    }
   });
   // Modal close + segment toggles
   document.querySelectorAll('[data-close="afadd"]').forEach(b => b.addEventListener('click', closeAfModal));
