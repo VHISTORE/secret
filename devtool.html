@@ -1812,10 +1812,37 @@
       m_add_choose:'Choose .txt file',m_add_oneperline:'One per line: email:password',
       pending_label:'Pending add (will run on Launch)',pending_sub:'queued for verify + add',
       accs_in_batch:'accounts in latest batch',copy:'Copy',copy_visible:'Copy visible',dl_txt:'Download .txt',pool_server:'pool stored on server — tap Download to fetch',more_in_dl:'more in copy/download',my_plan:'My plan',plan_active:'active',day_quota:'Today',month_quota:'Cycle',more:'more',download:'Download',
+      tab_autofarm:'autofarm',
+      af_section_h:'Daily auto-farm',
+      af_pool_lbl:'your pool',
+      af_next_run:'next run',
+      af_intro:'Daily cycle runs at 03:00 Kyiv time. We sign in to every account in your pool, claim the daily, drag and circuit rewards, then DM you the summary. Add accounts you have already logged in below.',
+      af_my_pool:'In auto-farm',
+      af_add_from_sessions:'Add from your sessions',
+      af_empty_hint:'No logged-in accounts yet. Open the accounts tab to add one, then come back here.',
+      af_pool_empty:'No accounts in auto-farm yet.',
+      af_never:'never',
+      af_all_added:'All your sessions are already in auto-farm.',
+      af_add_btn:'Add',
+      af_cap_hit:'Tier limit reached — upgrade or remove an account.',
+      af_confirm_rm:'Remove this account from daily auto-farm?',
     },
     ru:{
       app_devtool:'Dev Tool',connected:'подключено',
-      tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_tiers:'тарифы',tab_logs:'логи',
+      tab_accounts:'аккаунты',tab_functions:'функции',tab_cars:'тачки',tab_dashboard:'панель',tab_tiers:'тарифы',tab_logs:'логи',tab_autofarm:'автофарм',
+      af_section_h:'Ежедневный автофарм',
+      af_pool_lbl:'ваш пул',
+      af_next_run:'следующий запуск',
+      af_intro:'Ежедневный цикл стартует в 03:00 по Киеву. Мы логинимся на каждый акк из пула, забираем daily, drag и circuit, и присылаем сводку в этот чат. Добавьте сюда уже залогиненные аккаунты.',
+      af_my_pool:'В автофарме',
+      af_add_from_sessions:'Добавить из ваших сессий',
+      af_empty_hint:'Нет залогиненных аккаунтов. Откройте вкладку accounts, добавьте акк и возвращайтесь сюда.',
+      af_pool_empty:'Пусто. Добавьте аккаунты ниже.',
+      af_never:'ни разу',
+      af_all_added:'Все ваши сессии уже в автофарме.',
+      af_add_btn:'Добавить',
+      af_cap_hit:'Лимит тарифа достигнут — проапгрейдь или удали акк.',
+      af_confirm_rm:'Удалить этот аккаунт из автофарма?',
       current_tier:'текущий тариф',ends_lbl:'до',all_tiers:'Все тарифы',topup_packs:'Доп. слоты',
       topup_hint:'Дополнительные слоты на текущий цикл. Доступно на Month / 3M / 6M.',
       sec_resources:'Ресурсы',sec_manage:'Управление аккаунтами',sec_sessions:'Сессии',
@@ -2486,8 +2513,9 @@
   }
   function tr(key, fallback){
     try {
-      const d = (window.__I18N_DICT__ || {});
-      return d[key] || fallback;
+      const v = t(key);
+      // t() falls back to the key string when missing — treat that as "not translated".
+      return (v && v !== key) ? v : fallback;
     } catch(e){ return fallback; }
   }
   function afAdd(mask){
