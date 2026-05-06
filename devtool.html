@@ -1742,6 +1742,7 @@
 </div>
 
 <!-- ── AutoFarm: Add modal (manual creds OR pick from sessions) ─────── -->
+<div class="backdrop" data-backdrop="afadd"></div>
 <div class="modal" data-modal="afadd">
   <div class="modal-head">
     <span class="mh-icon">🤖</span>
@@ -2590,10 +2591,10 @@
     const e = document.getElementById('afadd-email'); if (e) e.value = '';
     const p = document.getElementById('afadd-pw');    if (p) p.value = '';
     const b = document.getElementById('afadd-bulk');  if (b) b.value = '';
-    document.querySelector('[data-modal="afadd"]').classList.add('open');
+    openModal('afadd');
   }
   function closeAfModal(){
-    document.querySelector('[data-modal="afadd"]').classList.remove('open');
+    closeModal('afadd');
   }
   // Wire tile buttons
   const tileAdd = document.getElementById('act-af-add');
