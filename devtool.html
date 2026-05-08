@@ -787,6 +787,7 @@
     min-height:48px;
     transition:border-color .15s, background .15s, transform .1s;
   }
+  .car-picker-list .pcard.has-img{ min-height:140px; }
   .car-picker-list .pcard:hover{
     background:rgba(76,201,240,0.06);
     border-color:rgba(76,201,240,0.35);
@@ -806,17 +807,24 @@
   }
   .car-picker-list .pcard .pimg{
     width:100%;
-    height:160px;
-    object-fit:cover;
+    height:140px;
+    object-fit:contain;
+    object-position:center;
     background:#0a0a0a;
     display:block;
+  }
+  /* When a card has an image, the info strip is overlaid on the bottom with a
+     readable gradient backdrop. Without an image, .pinfo is the whole card. */
+  .car-picker-list .pcard.has-img .pinfo{
+    position:absolute;left:0;right:0;bottom:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0));
+    padding-top:18px;
   }
   .car-picker-list .pcard .pinfo{
     display:flex;align-items:center;gap:10px;
     padding:10px 12px;
     font-size:13px;
     color:#e6e6e6;
-    background:rgba(0,0,0,0.35);
   }
   .car-picker-list .pcard .pinfo .id{
     color:var(--accent,#4cc9f0);font-weight:700;min-width:52px;
@@ -3354,6 +3362,7 @@
       return `
         <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
           <img class="pimg" src="assets/cars/${c.id}.jpg" loading="lazy" alt=""
+               onload="this.closest('.pcard')?.classList.add('has-img')"
                onerror="window._carImgFallback&&window._carImgFallback(this)">
           <div class="pinfo">
             <span class="id">#${c.id}</span>
