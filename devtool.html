@@ -778,12 +778,13 @@
   }
   .car-picker-list .pcard{
     position:relative;
-    display:flex;flex-direction:column;
-    border:1px solid rgba(76,201,240,0.12);
+    display:block;
+    border:1px solid rgba(76,201,240,0.18);
     border-radius:10px;
     overflow:hidden;
     cursor:pointer;
-    background:rgba(255,255,255,0.02);
+    background:rgba(255,255,255,0.03);
+    min-height:48px;
     transition:border-color .15s, background .15s, transform .1s;
   }
   .car-picker-list .pcard:hover{
@@ -805,27 +806,29 @@
   }
   .car-picker-list .pcard .pimg{
     width:100%;
-    aspect-ratio:16/9;
+    height:160px;
     object-fit:cover;
-    background:#000;
+    background:#0a0a0a;
     display:block;
   }
   .car-picker-list .pcard .pinfo{
     display:flex;align-items:center;gap:10px;
-    padding:8px 10px;
-    font-size:12px;
+    padding:10px 12px;
+    font-size:13px;
+    color:#e6e6e6;
+    background:rgba(0,0,0,0.35);
   }
   .car-picker-list .pcard .pinfo .id{
-    color:var(--accent);font-weight:700;min-width:48px;
+    color:var(--accent,#4cc9f0);font-weight:700;min-width:52px;
   }
   .car-picker-list .pcard .pinfo .price{
-    min-width:90px;text-align:left;
-    color:var(--text);font-weight:600;
+    min-width:100px;text-align:left;
+    color:#e6e6e6;font-weight:600;
   }
-  .car-picker-list .pcard .pinfo .price.coin{color:var(--amber);}
-  .car-picker-list .pcard .pinfo .price.cash{color:var(--green);}
+  .car-picker-list .pcard .pinfo .price.coin{color:var(--amber,#ffb627);}
+  .car-picker-list .pcard .pinfo .price.cash{color:var(--green,#10b981);}
   .car-picker-list .pcard .pinfo .meta{
-    flex:1;text-align:right;color:var(--hint);font-size:11px;
+    flex:1;text-align:right;color:var(--hint,#9aa);font-size:11px;
   }
 
   /* ── Stat cards (Dashboard tab) ──────────────────────────────────── */
@@ -3293,8 +3296,8 @@
         const meta = c ? `${c.cur} ${c.p} · cl${c.cl} · ${c.hp}hp · ${c.y}` : '?';
         return `
           <div class="row" data-id="${w.id}">
-            <img class="wimg" src="assets/cars/${w.id}.jpg" loading="lazy"
-                 onerror="window._carImgFallback?window._carImgFallback(this):this.remove();">
+            <img class="wimg" src="assets/cars/${w.id}.jpg" loading="lazy" alt=""
+                 onerror="window._carImgFallback&&window._carImgFallback(this)">
             <span class="id">#${w.id}</span>
             <span class="meta">${escHtml(meta)}</span>
             <span class="qty" title="qty per donor"
@@ -3350,8 +3353,8 @@
       // <img> onerror removes itself so the card collapses to a text-only strip.
       return `
         <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
-          <img class="pimg" src="assets/cars/${c.id}.jpg" loading="lazy"
-               onerror="window._carImgFallback?window._carImgFallback(this):this.remove();">
+          <img class="pimg" src="assets/cars/${c.id}.jpg" loading="lazy" alt=""
+               onerror="window._carImgFallback&&window._carImgFallback(this)">
           <div class="pinfo">
             <span class="id">#${c.id}</span>
             <span class="price ${c.cur}">${curIcon} ${priceFmt}</span>
