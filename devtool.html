@@ -734,6 +734,10 @@
   .car-wishlist .row .id{
     color:var(--accent);font-weight:700;min-width:42px;
   }
+  .car-wishlist .row .wimg{
+    width:42px;height:24px;object-fit:cover;border-radius:4px;
+    background:#000;flex-shrink:0;
+  }
   .car-wishlist .row .meta{flex:1;color:var(--text-2);font-size:10.5px;}
   .car-wishlist .row .qty{
     background:var(--panel-2);border:1px solid var(--line);
@@ -766,30 +770,62 @@
     background:#000;
     border:1px solid var(--line);
     border-radius:8px;
-    max-height:34vh;
+    max-height:62vh;
     overflow-y:auto;
     font-family:var(--mono);
+    display:flex;flex-direction:column;gap:8px;
+    padding:8px;
   }
   .car-picker-list .pcard{
-    display:flex;align-items:center;gap:8px;
-    padding:6px 10px;
-    border-bottom:1px solid rgba(76,201,240,0.06);
+    position:relative;
+    display:flex;flex-direction:column;
+    border:1px solid rgba(76,201,240,0.12);
+    border-radius:10px;
+    overflow:hidden;
     cursor:pointer;
-    font-size:11px;
+    background:rgba(255,255,255,0.02);
+    transition:border-color .15s, background .15s, transform .1s;
   }
-  .car-picker-list .pcard:hover{background:rgba(76,201,240,0.08);}
-  .car-picker-list .pcard:last-child{border-bottom:none;}
-  .car-picker-list .pcard .id{color:var(--accent);font-weight:700;min-width:42px;}
-  .car-picker-list .pcard .price{
-    min-width:74px;text-align:right;
+  .car-picker-list .pcard:hover{
+    background:rgba(76,201,240,0.06);
+    border-color:rgba(76,201,240,0.35);
+  }
+  .car-picker-list .pcard:active{transform:scale(0.995);}
+  .car-picker-list .pcard.in-list{
+    background:rgba(76,201,240,0.10);
+    border-color:var(--accent);
+  }
+  .car-picker-list .pcard.in-list::after{
+    content:'✓';position:absolute;top:6px;right:8px;
+    color:var(--accent);font-weight:700;font-size:14px;
+    background:rgba(0,0,0,0.55);
+    width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+  }
+  .car-picker-list .pcard .pimg{
+    width:100%;
+    aspect-ratio:16/9;
+    object-fit:cover;
+    background:#000;
+    display:block;
+  }
+  .car-picker-list .pcard .pinfo{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px;
+    font-size:12px;
+  }
+  .car-picker-list .pcard .pinfo .id{
+    color:var(--accent);font-weight:700;min-width:48px;
+  }
+  .car-picker-list .pcard .pinfo .price{
+    min-width:90px;text-align:left;
     color:var(--text);font-weight:600;
   }
-  .car-picker-list .pcard .price.coin{color:var(--amber);}
-  .car-picker-list .pcard .price.cash{color:var(--green);}
-  .car-picker-list .pcard .meta{flex:1;color:var(--hint);font-size:10px;}
-  .car-picker-list .pcard.in-list{background:rgba(76,201,240,0.12);}
-  .car-picker-list .pcard.in-list::after{
-    content:'✓';color:var(--accent);margin-left:auto;font-weight:700;
+  .car-picker-list .pcard .pinfo .price.coin{color:var(--amber);}
+  .car-picker-list .pcard .pinfo .price.cash{color:var(--green);}
+  .car-picker-list .pcard .pinfo .meta{
+    flex:1;text-align:right;color:var(--hint);font-size:11px;
   }
 
   /* ── Stat cards (Dashboard tab) ──────────────────────────────────── */
@@ -3231,6 +3267,21 @@
 
   function findCar(id){ return CAR_CATALOG.find(c => c.id === id); }
 
+  // Image fallback chain for catalog tiles. Tries .jpg → .png → .webp; if all
+  // three are missing the <img> is removed so the card collapses to its
+  // text-only strip. Exposed on window so onerror handlers in inline HTML
+  // (which can't close over module-scope helpers) can reach it.
+  window._carImgFallback = function(el){
+    const id = el.dataset.cid
+      || el.closest('[data-id]')?.dataset?.id;
+    if (!id) { el.remove(); return; }
+    const tried = (el.dataset.tried || 'jpg').split(',');
+    const next  = ['png','webp'].find(ext => !tried.includes(ext));
+    if (!next) { el.remove(); return; }
+    el.dataset.tried = tried.concat(next).join(',');
+    el.src = `assets/cars/${id}.${next}`;
+  };
+
   function renderWishlist(){
     const wrap = document.getElementById('car-wishlist');
     if (!wrap) return;
@@ -3242,6 +3293,8 @@
         const meta = c ? `${c.cur} ${c.p} · cl${c.cl} · ${c.hp}hp · ${c.y}` : '?';
         return `
           <div class="row" data-id="${w.id}">
+            <img class="wimg" src="assets/cars/${w.id}.jpg" loading="lazy"
+                 onerror="window._carImgFallback?window._carImgFallback(this):this.remove();">
             <span class="id">#${w.id}</span>
             <span class="meta">${escHtml(meta)}</span>
             <span class="qty" title="qty per donor"
@@ -3290,12 +3343,22 @@
       }
       return true;
     }).sort((a, b) => a.p - b.p || a.id - b.id);
-    list.innerHTML = filtered.slice(0, 200).map(c => `
-      <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
-        <span class="id">#${c.id}</span>
-        <span class="price ${c.cur}">${c.cur} ${c.p.toLocaleString('en-US').replace(/,/g,' ')}</span>
-        <span class="meta">cl${c.cl} · ${c.hp}hp · ${c.y}</span>
-      </div>`).join('') + (filtered.length > 200 ? `<div class="empty" style="padding:6px 0;color:var(--hint);">… +${filtered.length - 200} more (refine filter)</div>` : '');
+    list.innerHTML = filtered.slice(0, 200).map(c => {
+      const priceFmt = c.p.toLocaleString('en-US').replace(/,/g,' ');
+      const curIcon  = c.cur === 'coin' ? '🪙' : '💵';
+      // Image is best-effort: if assets/cars/<id>.{jpg,png,webp} is missing,
+      // <img> onerror removes itself so the card collapses to a text-only strip.
+      return `
+        <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
+          <img class="pimg" src="assets/cars/${c.id}.jpg" loading="lazy"
+               onerror="window._carImgFallback?window._carImgFallback(this):this.remove();">
+          <div class="pinfo">
+            <span class="id">#${c.id}</span>
+            <span class="price ${c.cur}">${curIcon} ${priceFmt}</span>
+            <span class="meta">cl${c.cl} · ${c.hp}hp · ${c.y}</span>
+          </div>
+        </div>`;
+    }).join('') + (filtered.length > 200 ? `<div class="empty" style="padding:6px 0;color:var(--hint);">… +${filtered.length - 200} more (refine filter)</div>` : '');
     list.querySelectorAll('.pcard').forEach(card => card.addEventListener('click', () => {
       const id = parseInt(card.dataset.id, 10);
       const i = wishlist.findIndex(w => w.id === id);
