@@ -1556,11 +1556,11 @@ code{
     t += newAf  * 1.5;
     // Per-session farm/boost (parallel, semaphore=8).
     var perSession = 0;
-    if (payload.coins === 'max')      perSession += 6 + 6 + 14*60;   // daily + drag + circuit
+    if (payload.coins === 'max')      perSession += 1 + 7 + 5.5*60;  // daily(1) + drag(7) + circuit-to-cap(~5.5min)
     else if (payload.coins) {
       var n = parseInt(payload.coins, 10) || 0;
       var races = Math.min(36, Math.ceil(n / 1000));
-      perSession += 6 + races * 0.5;
+      perSession += 1 + races * 0.2;
     }
     if (payload.cash) perSession += 2;
     if (payload.boost && payload.boost.length) {
