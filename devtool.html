@@ -6,7 +6,11 @@
 <title>CPM2 · Dev Tool</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-
+  /* ──────────────────────────────────────────────────────────────────────
+     Console / terminal aesthetic. Matches the main hub's dark navy palette
+     but leans monospace and adds scanline + CRT-glow accents to make this
+     feel distinct — Dev Tool is a "power user" surface.
+     ────────────────────────────────────────────────────────────────────── */
   :root{
     --bg:        #05080f;
     --bg-2:      #0a0f1c;
@@ -41,7 +45,7 @@
     -webkit-tap-highlight-color:transparent;
     position:relative;
   }
-
+  /* Subtle scanline overlay — pure decoration, doesn't impact readability. */
   body::before{
     content:'';
     position:fixed;inset:0;pointer-events:none;z-index:1;
@@ -54,7 +58,7 @@
     );
     mix-blend-mode:screen;
   }
-
+  /* Soft drifting glow for depth. */
   body::after{
     content:'';
     position:fixed;inset:-20%;z-index:-1;pointer-events:none;
@@ -69,6 +73,7 @@
     50%{transform:translate(2%,-2%) scale(1.05);}
   }
 
+  /* ── Header ─────────────────────────────────────────────────────────── */
   header{
     flex:0 0 auto;
     padding:12px 16px 10px;
@@ -117,6 +122,7 @@
     background:rgba(251, 191, 36, 0.08);
   }
 
+  /* ── Language switcher ──────────────────────────────────────────────── */
   .lang-wrap{position:relative;flex-shrink:0;}
   .lang-btn{
     display:inline-flex;align-items:center;gap:4px;
@@ -150,6 +156,7 @@
   .lang-opt.active{color:var(--accent);background:rgba(76,201,240,0.08);}
   .lang-opt .flag{font-size:14px;}
 
+  /* ── Main scroll area ───────────────────────────────────────────────── */
   main{
     flex:1 1 auto;
     overflow-y:auto;
@@ -169,6 +176,7 @@
     to{opacity:1;transform:translateY(0);}
   }
 
+  /* ── Section blocks ─────────────────────────────────────────────────── */
   .section-label{
     font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
     color:var(--hint);
@@ -187,7 +195,7 @@
     position:relative;
   }
   .card:hover{border-color:rgba(76, 201, 240, 0.32);background:var(--panel-2);}
-
+  /* Selected (in launch queue) — glowing accent border + icon halo. */
   .card.selected{
     border-color:var(--accent);
     background:var(--panel-2);
@@ -249,6 +257,7 @@
   }
   .card.expanded .card-body{display:block;}
 
+  /* ── Buttons ────────────────────────────────────────────────────────── */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:6px;
     padding:9px 14px;
@@ -276,6 +285,7 @@
   .btn.full{width:100%;}
   .btn.danger{color:var(--danger);border-color:rgba(248, 113, 113, 0.4);}
 
+  /* ── Toggle (custom amount switch) ──────────────────────────────────── */
   .toggle-row{
     display:flex;align-items:center;justify-content:space-between;
     padding:10px 0 8px;
@@ -313,6 +323,7 @@
     box-shadow:0 0 8px var(--accent);
   }
 
+  /* ── Range slider (used for garage slot count) ───────────────────── */
   input[type=range]{
     -webkit-appearance:none;appearance:none;
     width:100%;height:4px;
@@ -337,6 +348,7 @@
     border:2px solid var(--bg);
   }
 
+  /* ── Reveal panel (shown when toggle is ON) ─────────────────────────── */
   .reveal{
     display:none;
     margin-top:10px;
@@ -352,6 +364,7 @@
     margin-bottom:8px;
   }
 
+  /* ── Pills (preset coin amounts — single-select) ────────────────────── */
   .pills{
     display:grid;
     grid-template-columns:repeat(3, 1fr);
@@ -377,6 +390,7 @@
     box-shadow:0 0 10px rgba(76, 201, 240, 0.18) inset;
   }
 
+  /* ── Checklist (boost picker) ───────────────────────────────────────── */
   .check-list{
     display:flex;flex-direction:column;gap:4px;
   }
@@ -429,6 +443,7 @@
   }
   .link-btn:active{opacity:0.6;}
 
+  /* ── Empty state for not-yet-built tabs ─────────────────────────────── */
   .empty{
     text-align:center;
     padding:60px 20px;
@@ -440,6 +455,7 @@
   .empty .msg{font-size:13px;}
   .empty .sub{font-size:11px;margin-top:4px;opacity:0.7;}
 
+  /* ── Floating iPhone widget — replaces the legacy bottom tab bar ─── */
   .iphone-fab{
     position:fixed;
     bottom:calc(20px + env(safe-area-inset-bottom, 0px));
@@ -532,6 +548,7 @@
                0 0 22px rgba(76,201,240,0.5);
   }
 
+  /* ── Logs viewer ────────────────────────────────────────────────────── */
   .log-view{
     background:#000;
     border:1px solid var(--line);
@@ -552,6 +569,7 @@
   .log-view .err{color:var(--danger);}
   .log-view .info{color:var(--accent-3);}
 
+  /* ── Launch dock (sticky CTA at bottom of functions tab) ────────────── */
   .launch-dock{
     position:sticky;
     bottom:8px;
@@ -599,6 +617,11 @@
   }
   .launch-meta b{color:var(--accent);font-weight:700;}
 
+  /* ── Engine-start animation ──────────────────────────────────────────
+     On click the launch button fires a 4-stage sequence that mimics
+     starting a car engine: ignition flash → rev (icon shake + scale)
+     → vroom (radial sweep) → settle. Pure CSS keyframes — no JS-driven
+     RAF loops, so it stays smooth on low-end Android devices. */
   .launch-btn.starting{
     animation: ignite 1.4s ease-out forwards;
   }
@@ -645,7 +668,7 @@
   @keyframes spin{
     to { transform:rotate(360deg); }
   }
-
+  /* Subtle smoke puff at engine ignition. */
   .smoke{
     position:fixed;
     bottom:120px;
@@ -666,6 +689,7 @@
     100% { opacity:0; transform:translate(-50%, -80px) scale(2.4); filter:blur(8px); }
   }
 
+  /* ── Cars tab ────────────────────────────────────────────────────── */
   .cars-section{margin-bottom:14px;}
   .cars-section .head{
     font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
@@ -690,6 +714,7 @@
   }
   .main-acc-card .gstatus b{color:var(--accent);}
 
+  /* Wishlist (cars to buy) */
   .car-wishlist{
     background:var(--panel);
     border:1px solid var(--line);
@@ -725,6 +750,7 @@
   }
   .car-wishlist .row .x:hover{filter:brightness(1.4);}
 
+  /* Picker (catalog browser) */
   .car-picker-toolbar{
     display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;
   }
@@ -787,7 +813,8 @@
     background:#0a0a0a;
     display:block;
   }
-
+  /* When a card has an image, the info strip is overlaid on the bottom with a
+     readable gradient backdrop. Without an image, .pinfo is the whole card. */
   .car-picker-list .pcard.has-img .pinfo{
     position:absolute;left:0;right:0;bottom:0;
     background:linear-gradient(to top, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0));
@@ -812,6 +839,7 @@
     flex:1;text-align:right;color:var(--hint,#9aa);font-size:11px;
   }
 
+  /* ── Stat cards (Dashboard tab) ──────────────────────────────────── */
   .stat-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -868,6 +896,7 @@
   }
   .stat-meta b{color:var(--text-2);font-weight:600;}
 
+  /* ── Generated pool block (Accounts tab) ─────────────────────────── */
   .gen-pool{
     background:var(--panel);
     border:1px solid var(--line);
@@ -915,6 +944,7 @@
   .gen-pool .preview .pw{color:var(--text-2);}
   .gen-pool .preview .more{color:var(--hint);text-align:center;padding-top:4px;}
 
+  /* ── Action grid (Accounts tab) ──────────────────────────────────── */
   .action-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -946,6 +976,7 @@
     letter-spacing:0.02em;
   }
 
+  /* ── Modal ───────────────────────────────────────────────────────── */
   .backdrop{
     position:fixed;inset:0;
     background:rgba(2, 6, 16, 0.7);
@@ -1006,6 +1037,7 @@
     display:flex;gap:8px;justify-content:flex-end;
   }
 
+  /* Field styling inside modals */
   .field{margin-bottom:12px;}
   .field-label{
     font-size:10px;color:var(--hint);
@@ -1034,6 +1066,7 @@
     min-height:120px;resize:vertical;line-height:1.4;
   }
 
+  /* Method chooser (segmented control) */
   .seg{
     display:grid;grid-template-columns:1fr 1fr;
     gap:0;
@@ -1086,6 +1119,7 @@
   .file-info.show{display:block;}
   .file-info b{color:var(--accent);}
 
+  /* Stepper for account count */
   .stepper{
     display:flex;align-items:center;gap:8px;
   }
@@ -1108,6 +1142,7 @@
     color:var(--accent);
   }
 
+  /* ── Logs tab ────────────────────────────────────────────────────── */
   .log-section{margin-bottom:18px;}
   .log-section .head{
     display:flex;align-items:center;gap:8px;
@@ -1217,6 +1252,7 @@
   }
   .passive-row .dl-btn:active{transform:scale(0.94);}
 
+  /* ── Toast ──────────────────────────────────────────────────────────── */
   .toast{
     position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
     background:var(--bg-2);
@@ -1257,10 +1293,12 @@
 
 <main>
 
+  <!-- ── Functions ──────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="functions">
 
     <div class="section-label" data-i18n="sec_resources">Resources</div>
 
+    <!-- Full Coins -->
     <div class="card" data-fn="coins">
       <div class="card-head">
         <div class="card-icon">🪙</div>
@@ -1286,6 +1324,7 @@
       </div>
     </div>
 
+    <!-- Full Boost -->
     <div class="card" data-fn="boost">
       <div class="card-head">
         <div class="card-icon">⚡</div>
@@ -1344,6 +1383,7 @@
       </div>
     </div>
 
+    <!-- Full Cash -->
     <div class="card" data-fn="cash">
       <div class="card-head">
         <div class="card-icon">💵</div>
@@ -1355,6 +1395,7 @@
       </div>
     </div>
 
+    <!-- Launch dock — sticky CTA, drives everything that's selected. -->
     <div class="launch-dock">
       <div class="launch-meta"><span id="queue-summary" data-i18n="queue_empty">Tap a card to add to queue</span></div>
       <button class="launch-btn" id="launch-btn" disabled>
@@ -1365,6 +1406,7 @@
 
   </section>
 
+  <!-- ── Accounts ──────────────────────────────────────────────────── -->
   <section class="tab-pane active" data-pane="accounts">
     <div class="section-label" data-i18n="sec_manage">Manage accounts</div>
     <div class="action-grid">
@@ -1379,7 +1421,7 @@
         <div class="sub" data-i18n="add_exist_d">Login + password / file</div>
       </div>
     </div>
-
+    <!-- Generated pool (rendered when state.gen.total > 0) -->
     <div id="gen-pool-block" style="display:none;">
       <div class="section-label" data-i18n="latest_batch">Latest batch</div>
       <div class="gen-pool" id="gen-pool"></div>
@@ -1389,10 +1431,11 @@
     <div class="empty">
       <div class="icon">👥</div>
       <div class="msg" data-i18n="no_accs">No accounts yet</div>
-      <div class="sub" data-i18n="no_accs_sub">
+      <div class="sub" data-i18n="no_accs_sub">// generate or add to populate</div>
     </div>
   </section>
 
+  <!-- ── Cars (fleet builder) ─────────────────────────────────────── -->
   <section class="tab-pane" data-pane="cars">
 
     <div class="cars-section">
@@ -1468,6 +1511,7 @@
 
   </section>
 
+  <!-- ── Dashboard ─────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="dashboard">
     <div class="section-label" data-i18n="lifetime_stats">Lifetime stats</div>
     <div class="stat-grid">
@@ -1510,6 +1554,9 @@
       <span data-i18n="tracked_since">Tracked since</span> <b id="stat-since" data-i18n="launch_lc">launch</b> <span data-i18n="counters_update">· counters update on each successful run</span>
     </div>
 
+    <!-- Quota-exhaustion upsell card. JS toggles .show when day or cycle
+         usage crosses 80% / 100% and renders the right pitch (top-up if
+         month-eligible, tier upgrade otherwise). -->
     <div class="card upsell-card" id="upsell-card" style="display:none;margin-top:14px;border:1px solid var(--accent);background:var(--panel-2);border-radius:12px;padding:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <span style="font-size:20px;">💎</span>
@@ -1520,6 +1567,7 @@
     </div>
   </section>
 
+  <!-- ── Tiers ─────────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="tiers">
     <div class="section-label" data-i18n="my_plan">My plan</div>
     <div class="card" style="margin-bottom:14px;">
@@ -1546,6 +1594,7 @@
     <div id="topup-list"></div>
   </section>
 
+  <!-- ── Logs ──────────────────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="logs">
 
     <div class="log-section">
@@ -1577,9 +1626,11 @@
 
   </section>
 
+  <!-- ── AutoFarm (per-user pool) ────────────────────────────────────────── -->
   <section class="tab-pane" data-pane="autofarm">
     <div class="section-label" data-i18n="af_section_h">Daily auto-farm</div>
 
+    <!-- Status card -->
     <div class="card" style="margin-bottom:14px;padding:14px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
         <div>
@@ -1596,6 +1647,7 @@
       </div>
     </div>
 
+    <!-- Action tiles -->
     <div class="action-grid">
       <div class="action-tile" id="act-af-add">
         <span class="ico">➕</span>
@@ -1612,6 +1664,7 @@
 
 </main>
 
+<!-- ── Floating iPhone navigation (replaces the legacy bottom tab bar) ── -->
 <button class="iphone-fab" id="phone-fab" aria-label="Open tabs">
   <svg viewBox="0 0 64 120" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="3" y="3" width="58" height="114" rx="14" ry="14"
@@ -1654,6 +1707,7 @@
   </div>
 </div>
 
+<!-- ── Modal: Generate New ─────────────────────────────────────────── -->
 <div class="backdrop" data-backdrop="generate"></div>
 <div class="modal" data-modal="generate">
   <div class="modal-head">
@@ -1682,6 +1736,7 @@
   </div>
 </div>
 
+<!-- ── Modal: Add Existing ─────────────────────────────────────────── -->
 <div class="backdrop" data-backdrop="add"></div>
 <div class="modal" data-modal="add">
   <div class="modal-head">
@@ -1695,6 +1750,7 @@
       <button type="button" data-method="file" data-i18n="m_add_file">File</button>
     </div>
 
+    <!-- Manual entry -->
     <div data-method-pane="manual">
       <div class="field">
         <label class="field-label" data-i18n="email">Email</label>
@@ -1712,6 +1768,7 @@
       </div>
     </div>
 
+    <!-- File upload -->
     <div data-method-pane="file" style="display:none;">
       <label class="file-drop" id="add-drop">
         <span class="ico">📁</span>
@@ -1728,6 +1785,7 @@
   </div>
 </div>
 
+<!-- ── AutoFarm: Add modal (manual creds OR pick from sessions) ─────── -->
 <div class="backdrop" data-backdrop="afadd"></div>
 <div class="modal" data-modal="afadd">
   <div class="modal-head">
@@ -1741,6 +1799,7 @@
       <button type="button" data-afmethod="sessions" data-i18n="af_method_sessions">From sessions</button>
     </div>
 
+    <!-- Manual entry: email + password (one or many) -->
     <div data-afmethod-pane="manual">
       <div class="field">
         <label class="field-label" data-i18n="email">Email</label>
@@ -1758,6 +1817,7 @@
       </div>
     </div>
 
+    <!-- Pick from active sessions -->
     <div data-afmethod-pane="sessions" style="display:none;">
       <div style="font-size:11px;color:var(--hint);margin-bottom:10px;line-height:1.5;" data-i18n="af_modal_sessions_hint">
         These accounts are already logged in. Tap one to enroll it — we re-use the cached password.
@@ -1780,18 +1840,21 @@
   try { tg?.ready(); tg?.expand(); } catch(e){}
   try { tg?.setHeaderColor?.('#05080f'); tg?.setBackgroundColor?.('#05080f'); } catch(e){}
 
+  // ── State blob from URL (?s=base64). Carries tier + owner flag so we
+  //    can render gating without a network round-trip on cold start.
   const state = (() => {
     try {
       const qs = new URLSearchParams(location.search);
       const s = qs.get('s');
       if (!s) return {};
-
+      // Bot sends base64url-encoded JSON.
       const b64 = s.replace(/-/g,'+').replace(/_/g,'/');
       const json = atob(b64 + '==='.slice((b64.length + 3) % 4));
       return JSON.parse(decodeURIComponent(escape(json)));
     } catch(e){ return {}; }
   })();
 
+  // ── i18n ─────────────────────────────────────────────────────────
   const LANGS = [
     {code:'en', label:'EN', flag:'🇬🇧', name:'English'},
     {code:'ru', label:'RU', flag:'🇷🇺', name:'Русский'},
@@ -1823,7 +1886,7 @@
       queue_empty:'Tap a card to add to queue',launch:'Launch',
       gen_new_t:'Generate New',gen_new_d:'Create N fresh accounts',
       add_exist_t:'Add Existing',add_exist_d:'Login + password / file',
-      latest_batch:'Latest batch',no_accs:'No accounts yet',no_accs_sub:'
+      latest_batch:'Latest batch',no_accs:'No accounts yet',no_accs_sub:'// generate or add to populate',
       cars_main_h:'Main account (target garage)',
       cars_donors_h:'Donor accounts (one email:password per line, or upload .txt)',
       cars_wishlist_h:'Wishlist · cars to buy on each donor',
@@ -1917,7 +1980,7 @@
       queue_empty:'Тапни карточку, чтобы добавить в очередь',launch:'Запуск',
       gen_new_t:'Создать новые',gen_new_d:'Создать N свежих аков',
       add_exist_t:'Добавить свои',add_exist_d:'Логин + пароль / файл',
-      latest_batch:'Последний батч',no_accs:'Аков пока нет',no_accs_sub:'
+      latest_batch:'Последний батч',no_accs:'Аков пока нет',no_accs_sub:'// создай или добавь свои',
       cars_main_h:'Основной аккаунт (целевой гараж)',
       cars_donors_h:'Доноры (по одному email:password на строку, или .txt)',
       cars_wishlist_h:'Список · какие тачки купить на каждом доноре',
@@ -1962,7 +2025,7 @@
       queue_empty:'Toca una tarjeta para añadir a la cola',launch:'Lanzar',
       gen_new_t:'Generar nuevas',gen_new_d:'Crear N cuentas nuevas',
       add_exist_t:'Añadir existentes',add_exist_d:'Login + contraseña / archivo',
-      latest_batch:'Último lote',no_accs:'Sin cuentas todavía',no_accs_sub:'
+      latest_batch:'Último lote',no_accs:'Sin cuentas todavía',no_accs_sub:'// genera o añade para llenar',
       cars_main_h:'Cuenta principal (garaje destino)',
       cars_donors_h:'Cuentas donantes (una email:pass por línea o .txt)',
       cars_wishlist_h:'Lista · coches a comprar en cada donante',
@@ -2007,7 +2070,7 @@
       queue_empty:'Toca num cartão para adicionar à fila',launch:'Lançar',
       gen_new_t:'Gerar novas',gen_new_d:'Criar N contas novas',
       add_exist_t:'Adicionar existentes',add_exist_d:'Login + senha / arquivo',
-      latest_batch:'Último lote',no_accs:'Sem contas ainda',no_accs_sub:'
+      latest_batch:'Último lote',no_accs:'Sem contas ainda',no_accs_sub:'// gera ou adiciona',
       cars_main_h:'Conta principal (garagem destino)',
       cars_donors_h:'Contas doadoras (uma email:senha por linha ou .txt)',
       cars_wishlist_h:'Lista · carros para comprar em cada doadora',
@@ -2052,7 +2115,7 @@
       queue_empty:'Tippe eine Karte zum Hinzufügen',launch:'Starten',
       gen_new_t:'Neu generieren',gen_new_d:'N neue Konten erstellen',
       add_exist_t:'Vorhandene hinzufügen',add_exist_d:'Login + Passwort / Datei',
-      latest_batch:'Letzter Batch',no_accs:'Noch keine Konten',no_accs_sub:'
+      latest_batch:'Letzter Batch',no_accs:'Noch keine Konten',no_accs_sub:'// generieren oder hinzufügen',
       cars_main_h:'Hauptkonto (Ziel-Garage)',
       cars_donors_h:'Spender-Konten (email:passwort pro Zeile oder .txt)',
       cars_wishlist_h:'Wunschliste · Autos pro Spender',
@@ -2097,7 +2160,7 @@
       queue_empty:'Tape une carte pour l’ajouter',launch:'Lancer',
       gen_new_t:'Générer nouveaux',gen_new_d:'Créer N nouveaux comptes',
       add_exist_t:'Ajouter existant',add_exist_d:'Login + mdp / fichier',
-      latest_batch:'Dernier lot',no_accs:'Aucun compte',no_accs_sub:'
+      latest_batch:'Dernier lot',no_accs:'Aucun compte',no_accs_sub:'// générer ou ajouter',
       cars_main_h:'Compte principal (garage cible)',
       cars_donors_h:'Donneurs (un email:mdp par ligne ou .txt)',
       cars_wishlist_h:'Liste · voitures à acheter par donneur',
@@ -2142,7 +2205,7 @@
       queue_empty:'Tocca una scheda per aggiungere',launch:'Avvia',
       gen_new_t:'Genera nuovi',gen_new_d:'Crea N account nuovi',
       add_exist_t:'Aggiungi esistenti',add_exist_d:'Login + password / file',
-      latest_batch:'Ultimo lotto',no_accs:'Nessun account',no_accs_sub:'
+      latest_batch:'Ultimo lotto',no_accs:'Nessun account',no_accs_sub:'// genera o aggiungi',
       cars_main_h:'Account principale (garage target)',
       cars_donors_h:'Donatori (un email:password per riga o .txt)',
       cars_wishlist_h:'Lista · auto da comprare per ogni donatore',
@@ -2187,7 +2250,7 @@
       queue_empty:'Sıraya eklemek için karta dokun',launch:'Başlat',
       gen_new_t:'Yeni oluştur',gen_new_d:'N adet yeni hesap',
       add_exist_t:'Mevcut ekle',add_exist_d:'Giriş + şifre / dosya',
-      latest_batch:'Son grup',no_accs:'Henüz hesap yok',no_accs_sub:'
+      latest_batch:'Son grup',no_accs:'Henüz hesap yok',no_accs_sub:'// oluştur veya ekle',
       cars_main_h:'Ana hesap (hedef garaj)',
       cars_donors_h:'Donör hesaplar (her satıra email:şifre veya .txt)',
       cars_wishlist_h:'Liste · her donörde alınacak arabalar',
@@ -2279,15 +2342,18 @@
     if (state.owner) tierBadge.classList.add('owner');
   }
 
+  // Tier gating: account generation and the Cars / fleet pipeline require
+  // 3M+ tier. Add a 🔒 badge to those tabs and the Generate launch button.
+  // Backend still enforces the gate — this is purely a UX hint.
   const PRO_TIERS = new Set(['3month', '6month', 'lifetime']);
   const isProTier = !!state.owner || PRO_TIERS.has(state.tier);
   if (!isProTier) {
     document.querySelectorAll('.app[data-tab="cars"] .label').forEach(l => {
       l.textContent = '🔒 ' + l.textContent;
     });
-
+    // Add a small lock note to the Cars pane header if present.
     const carsHead = document.querySelector('[data-pane="cars"] .section-head, [data-pane="cars"] h2, [data-pane="cars"]');
-
+    // And to the Generate-accounts button in the Accounts pane.
     document.querySelectorAll('[data-action="open-generate"], [data-modal-open="generate"]').forEach(b => {
       b.dataset.proLocked = '1';
       const orig = b.textContent;
@@ -2296,6 +2362,9 @@
     });
   }
 
+  // Dashboard stats — populated from the state blob the bot encoded into
+  // the WebApp URL on open. Lifetime counters per seller (this Telegram
+  // user); reset on file delete only.
   const fmtNum = n => Number(n||0).toLocaleString('en-US').replace(/,/g,' ');
   const stats = state.stats || { boosted: 0, generated: 0 };
   const boostedEl   = document.getElementById('stat-boosted');
@@ -2303,6 +2372,8 @@
   if (boostedEl)   boostedEl.textContent   = fmtNum(stats.boosted);
   if (generatedEl) generatedEl.textContent = fmtNum(stats.generated);
 
+  // Plan + quota dashboard — bot embeds these in the URL state blob.
+  // `-1` on a limit means infinite (owner). `0` ends_at = no expiry / lifetime.
   (() => {
     const q = state.quota || {};
     const sub = state.sub || {};
@@ -2349,6 +2420,9 @@
               document.getElementById('quota-month-bar'));
   })();
 
+  // ── Tier catalogue + upsell card ─────────────────────────────────
+  // Source-of-truth mirror of the bot's TIER_PRICE_USD / TOPUP_PACKS.
+  // Single regular price per tier (Week + launch-promo were retired).
   const TIER_DATA = [
     { id:'month',    name:'Month',     price:60,  days:30,
       popular:false,
@@ -2492,6 +2566,7 @@
   }
   renderTiers();
 
+  // ── AutoFarm tab — per-user pool view & actions ──────────────────
   function fmtAfTime(ts){
     if (!ts) return '—';
     try {
@@ -2502,7 +2577,7 @@
   function renderAutoFarm(){
     const pool   = Array.isArray(state.af_pool) ? state.af_pool : [];
     const rawCap = state.af_cap;
-
+    // cap === 0 → user's tier doesn't include AutoFarm. Hide tab + pane.
     if (rawCap === 0) {
       document.querySelectorAll('[data-tab="autofarm"]').forEach(b => b.style.display = 'none');
       document.querySelectorAll('[data-pane="autofarm"]').forEach(p => p.style.display = 'none');
@@ -2516,6 +2591,7 @@
     nextEl.textContent = fmtAfTime(state.af_next_run);
   }
 
+  // === AutoFarm modal (Add) ===
   function openAfAddModal(){
     const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
     const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
@@ -2523,7 +2599,7 @@
       toast(tr('af_cap_hit','Tier limit reached — upgrade or remove an account.'),'err');
       return;
     }
-
+    // Populate sessions list
     const sess = Array.isArray(state.accounts) ? state.accounts : [];
     const inPool = new Set(pool.map(p => p.email));
     const candidates = sess.filter(s => !inPool.has(s.mask));
@@ -2543,7 +2619,7 @@
         });
       });
     }
-
+    // Reset form
     const e = document.getElementById('afadd-email'); if (e) e.value = '';
     const p = document.getElementById('afadd-pw');    if (p) p.value = '';
     const b = document.getElementById('afadd-bulk');  if (b) b.value = '';
@@ -2552,7 +2628,7 @@
   function closeAfModal(){
     closeModal('afadd');
   }
-
+  // Wire tile buttons
   const tileAdd = document.getElementById('act-af-add');
   if (tileAdd) tileAdd.addEventListener('click', openAfAddModal);
   const tileList = document.getElementById('act-af-list');
@@ -2563,7 +2639,7 @@
       toast('sendData failed: ' + e.message, 'err');
     }
   });
-
+  // Modal close + segment toggles
   document.querySelectorAll('[data-close="afadd"]').forEach(b => b.addEventListener('click', closeAfModal));
   document.querySelectorAll('#afadd-seg [data-afmethod]').forEach(b => {
     b.addEventListener('click', () => {
@@ -2573,13 +2649,13 @@
         p.style.display = (p.dataset.afmethodPane === m ? '' : 'none'));
     });
   });
-
+  // Manual submit
   const afSubmit = document.getElementById('afadd-submit');
   if (afSubmit) afSubmit.addEventListener('click', () => {
     const active = document.querySelector('#afadd-seg [data-afmethod].active');
     const method = active ? active.dataset.afmethod : 'manual';
     if (method === 'sessions') {
-
+      // User picks a row directly; submit button is a no-op here.
       toast(tr('af_pick_session_hint','Tap a session row above to add it.'),'info');
       return;
     }
@@ -2601,14 +2677,16 @@
       toast(tr('af_no_creds','Enter email + password (or paste pairs).'),'err');
       return;
     }
-
+    // Tier cap check client-side; bot also enforces.
     const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
     const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
     if (cap !== null && pool.length + pairs.length > cap) {
       toast(`${tr('af_cap_hit','Tier limit reached.')} (${pool.length + pairs.length} > ${cap})`,'err');
       return;
     }
-
+    // Send each pair as a separate sendData — but Telegram closes the
+    // mini-app on the first sendData. So we send a single batch payload
+    // and handle bulk on the bot side.
     const payload = pairs.length === 1
       ? { mode:'af_user_add', email: pairs[0].email, password: pairs[0].password }
       : { mode:'af_user_add_bulk', accounts: pairs };
@@ -2622,12 +2700,14 @@
   function tr(key, fallback){
     try {
       const v = t(key);
-
+      // t() falls back to the key string when missing — treat that as "not translated".
       return (v && v !== key) ? v : fallback;
     } catch(e){ return fallback; }
   }
   function afAdd(mask){
-
+    // The state blob delivers email masks (k***@d.com), not raw addresses,
+    // so we hand the bot the mask + a marker; the bot resolves it against
+    // the user's session list to recover the real email + password.
     const cap = (state.af_cap === null || state.af_cap === undefined) ? null : Number(state.af_cap);
     const pool = Array.isArray(state.af_pool) ? state.af_pool : [];
     if (cap !== null && pool.length >= cap) {
@@ -2650,6 +2730,10 @@
   }
   renderAutoFarm();
 
+  // ── Quota-exhaustion upsell on dashboard ──────────────────────────
+  // Trigger at 80% (warn) and 100% (blocked) of either day or cycle cap.
+  // Strategy: month-eligible tiers see top-up offers (cheaper, immediate);
+  // others see tier upgrades. Owner / unlimited never sees the card.
   (() => {
     if (state.owner) return;
     const q = state.quota || {};
@@ -2690,7 +2774,7 @@
     btns.innerHTML = '';
     const eligibleForTopup = TOPUP_ELIGIBLE.has(curTier);
     if (eligibleForTopup && which === 'cycle') {
-
+      // Cycle exhaustion → top-up packs (immediate, cycle-bound)
       body.innerHTML = reasonTxt + `<br><br>💎 <b>Top-up packs</b> add slots to your current cycle:`;
       TOPUP_DATA.forEach(p => {
         const b = document.createElement('button');
@@ -2701,7 +2785,7 @@
         btns.appendChild(b);
       });
     } else {
-
+      // Daily exhaustion or non-eligible tier → suggest tier upgrade
       const ladder = ['month','3month','6month','lifetime'];
       const idx = ladder.indexOf(curTier);
       const nexts = idx < 0 ? ladder.slice(0, 2)
@@ -2718,7 +2802,7 @@
         b.addEventListener('click', () => buyTier(t.id));
         btns.appendChild(b);
       });
-
+      // Also offer top-up if eligible (even when daily exhaustion — gives flex)
       if (eligibleForTopup) {
         const b = document.createElement('button');
         b.className = 'launch-btn';
@@ -2731,6 +2815,7 @@
     card.style.display = 'block';
   })();
 
+  // ── Tab switching via the iPhone home-grid ───────────────────────
   const apps  = document.querySelectorAll('.app');
   const panes = document.querySelectorAll('.tab-pane');
   function dtSwitchTab(id){
@@ -2744,6 +2829,7 @@
     try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
   }));
 
+  // iPhone widget — open / close home grid
   const dtBack  = document.getElementById('home-back');
   const dtSheet = document.getElementById('home-sheet');
   function openDtHome(){
@@ -2764,13 +2850,18 @@
     if (dy > 80) { closeDtHome(); _dtTy0 = 1e9; }
   }, {passive:true});
 
+  // ── Toggles → reveal pick-amount / pick-boosts panel ─────────────
+  // Turning the toggle ON also auto-selects the card for launch — UX
+  // shortcut so the user doesn't have to separately tap the card header
+  // *and* the toggle. (The Pick toggle is a "I want to customize" signal,
+  // which logically implies "I want to run this", so we couple them.)
   document.querySelectorAll('.toggle').forEach(tog => {
     tog.addEventListener('click', () => {
       tog.classList.toggle('on');
       const fn = tog.dataset.toggle;
       const reveal = document.querySelector(`.reveal[data-reveal="${fn}"]`);
       reveal?.classList.toggle('show', tog.classList.contains('on'));
-
+      // Auto-select the parent card whenever this toggle is ON.
       const card = tog.closest('.card[data-fn]');
       if (card && tog.classList.contains('on')) {
         card.classList.add('selected');
@@ -2780,6 +2871,9 @@
     });
   });
 
+  // ── Coin pills (single-select, tap-again to clear) ───────────────
+  // State lives on the .pills container as data-selected. Mirrors the
+  // original mini-app's farm-tab UX so users feel at home.
   document.querySelectorAll('[data-pills]').forEach(group => {
     group.addEventListener('click', e => {
       const pill = e.target.closest('.pill');
@@ -2797,6 +2891,10 @@
     });
   });
 
+  // ── Boost checklist (multi-select) ───────────────────────────────
+  // Garage row gets a slot-count slider revealed alongside its checkbox.
+  // Stock account cap is 17; user picks 1..17 to control how many slots
+  // get bought this run instead of "until server cap".
   const garagePicker = document.getElementById('garage-slot-picker');
   const garageRange  = document.getElementById('garage-slot-range');
   const garageVal    = document.getElementById('garage-slot-val');
@@ -2817,7 +2915,7 @@
       if (row.dataset.b === 'garage') syncGaragePicker();
     });
   });
-
+  // "All" link — toggle: if anything unchecked, check all; else clear.
   document.getElementById('boost-all')?.addEventListener('click', e => {
     e.stopPropagation();
     const rows = document.querySelectorAll('#boost-checklist .check-row');
@@ -2827,6 +2925,7 @@
     syncGaragePicker();
   });
 
+  // ── Toast helper ─────────────────────────────────────────────────
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
   const toast = (msg, kind='') => {
@@ -2836,6 +2935,7 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
   };
 
+  // ── Log view helper ──────────────────────────────────────────────
   const logEl = document.getElementById('log-view');
   const logLine = (msg, kind='info') => {
     const t = new Date().toTimeString().slice(0,8);
@@ -2844,8 +2944,21 @@
     logEl.scrollTop = logEl.scrollHeight;
   };
 
+  // ── Run handlers (stubbed — wire to bot via sendData when backend
+  //    endpoints are ready). For now we just log the intent so the UX
+  //    can be tested end-to-end on-device.
+  // Pending-add stash declared here so it's reachable from
+  // updateLaunchState (defined right below). Telegram closes the mini-app
+  // on every sendData call, so we cannot Add Accounts mid-flow without
+  // losing the seller's session — entries pile up locally and ship out
+  // bundled in the single Launch sendData call.
   const pendingAdds = [];
 
+  // ── Card selection (cart-style) ──────────────────────────────────
+  // Tapping the card head toggles whether the function joins the launch
+  // queue. The inner "Pick amount/boosts" toggles still operate
+  // independently — user can configure without selecting, or pick
+  // defaults by selecting without configuring.
   const launchBtn   = document.getElementById('launch-btn');
   const launchLabel = document.getElementById('launch-label');
   const launchIco   = document.getElementById('launch-ico');
@@ -2855,7 +2968,8 @@
     const selected = document.querySelectorAll('.card.selected');
     const n = selected.length;
     const pendN = pendingAdds.length;
-
+    // Launch is enabled when there's anything to do — selected functions
+    // OR pending accounts. Add-only run is allowed (just verifies+adds).
     launchBtn.disabled = (n === 0 && pendN === 0);
     const parts = [];
     if (pendN) parts.push(`<b>+${pendN} acc</b>`);
@@ -2878,6 +2992,7 @@
   });
   updateLaunchState();
 
+  // ── Build payload from current selection + per-card config ───────
   function buildPayload(){
     const items = [];
     document.querySelectorAll('.card.selected').forEach(card => {
@@ -2897,7 +3012,8 @@
         } else {
           item.boosts = 'all';
         }
-
+        // Garage slot target (1..17). Only meaningful when garage is in
+        // the list; backend ignores it otherwise. 'all'=all → use full 17.
         const garageActive = (item.boosts === 'all') ||
           (Array.isArray(item.boosts) && item.boosts.includes('garage'));
         if (garageActive) {
@@ -2909,17 +3025,25 @@
       }
       items.push(item);
     });
-
+    // Bundle pending account adds so the bot does login + farm in one
+    // shot (single sendData = single mini-app close = no UX whiplash).
+    // Compact "email:password" string array — same encoding as the
+    // standalone Add Existing path; bot accepts both forms.
     const out = { mode: 'devtool_launch', items };
     if (pendingAdds.length) out.c = pendingAdds.map(a => `${a.email}:${a.password}`);
     return out;
   }
 
+  // ── Engine-start sequence ────────────────────────────────────────
+  // Multi-stage so the user feels something happen even if the network
+  // request takes a moment. CSS does the heavy lifting; JS only sequences
+  // class toggles + haptics + smoke puff.
   function ignite(payload){
     launchBtn.classList.add('starting');
     launchLabel.textContent = 'IGNITION';
     try { tg?.HapticFeedback?.impactOccurred('rigid'); } catch(e){}
 
+    // Stage 1 (50ms): ignition flash + first rev
     setTimeout(() => {
       launchLabel.textContent = 'REVVING';
       try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
@@ -2928,11 +3052,13 @@
       try { tg?.HapticFeedback?.impactOccurred('heavy'); } catch(e){}
     }, 500);
 
+    // Stage 2 (1.0s): conic-gradient spinner kicks in
     setTimeout(() => {
       launchBtn.classList.add('spin');
       launchLabel.textContent = 'LAUNCHING';
     }, 1000);
 
+    // Stage 3 (1.2s): smoke puff at the bottom + send payload
     setTimeout(() => {
       const smoke = document.createElement('div');
       smoke.className = 'smoke';
@@ -2953,10 +3079,11 @@
       catch(e){ logLine(`sendData failed: ${e.message}`, 'err'); }
     }, 1200);
 
+    // Stage 4 (2.4s): settle back, clear queue
     setTimeout(() => {
       launchBtn.classList.remove('starting', 'spin');
       launchIco.textContent = '🚀';
-
+      // Clear selections so the user starts fresh next time
       document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
       updateLaunchState();
       toast('▶ Launched', 'ok');
@@ -2970,6 +3097,11 @@
     ignite(payload);
   });
 
+  // ── Logs rendering ───────────────────────────────────────────────
+  // Snapshot-based: full state arrives in the URL state blob on each open.
+  // No live websocket / polling — Telegram WebApps don't support a clean
+  // bidirectional channel. Reopen the mini-app to refresh while a long
+  // session is mid-run.
   const fmtTs = t => {
     if (!t) return '—';
     try {
@@ -2986,7 +3118,7 @@
     const dot   = document.getElementById('live-dot');
     if (!live) {
       dot.style.display = 'none';
-      return;
+      return; // keep default empty placeholder
     }
     dot.style.display = '';
     const sel = (live.selected || []).map(it => {
@@ -3048,7 +3180,8 @@
         try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
         try {
           tg?.sendData?.(JSON.stringify({ mode: 'devtool_log_download', session_id: sid }));
-
+          // sendData closes the WebApp; bot replies with the .txt as a
+          // chat document. Toast for tactile feedback before the close.
           toast('📥 Sending to chat…', 'ok');
         } catch(err) {
           toast('Download failed: ' + err.message, 'err');
@@ -3060,6 +3193,10 @@
   renderLive(state.logs?.live);
   renderPassive(state.logs?.passive);
 
+  // ── Generated accounts pool rendering + actions ───────────────────
+  // The bot embeds the most recent ~20 accounts (full email+password) in
+  // the state blob so Copy works without a server round-trip. Larger
+  // pools are downloadable via sendData → bot replies with .txt in chat.
   function renderGenPool(gen){
     if (!gen || !gen.total) return;
     const wrap  = document.getElementById('gen-pool');
@@ -3087,6 +3224,9 @@
     `;
     block.style.display = '';
 
+    // Copy = recent slice (full email:password lines). For the full pool
+    // the user taps Download so the bot re-emits the .txt — keeps the
+    // URL blob from blowing past Telegram's ~2KB cap.
     document.getElementById('gen-copy')?.addEventListener('click', async () => {
       if (!recent.length) {
         toast('Nothing to copy locally — use Download', 'err');
@@ -3098,7 +3238,7 @@
         toast(`📋 Copied ${recent.length} line(s)`, 'ok');
         try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
       } catch(err) {
-
+        // Fallback for older WebViews — fake a textarea + execCommand.
         try {
           const ta = document.createElement('textarea');
           ta.value = text;
@@ -3125,12 +3265,23 @@
   }
   renderGenPool(state.gen);
 
+  // ── Cars tab ─────────────────────────────────────────────────────
+  // Compact car catalogue embedded so the picker is instant — no need
+  // for a server round-trip and no URL-blob bloat.
+  // {id, p:price, cur:'cash'|'coin', cl:class, hp, y:year}
+  // 199 buyable visible cars; hidden donate IDs filtered out — those
+  // return R=0 from BuyCar22_1 (IAP-gated).
   const CAR_CATALOG = [{"id":0,"p":1000,"cur":"coin","cl":2,"hp":371,"y":1994},{"id":1,"p":1000,"cur":"coin","cl":2,"hp":344,"y":2012},{"id":2,"p":18000,"cur":"cash","cl":2,"hp":403,"y":2008},{"id":3,"p":2500,"cur":"coin","cl":2,"hp":437,"y":2011},{"id":4,"p":5000,"cur":"coin","cl":2,"hp":344,"y":2018},{"id":5,"p":1500,"cur":"coin","cl":2,"hp":358,"y":2010},{"id":6,"p":1000,"cur":"coin","cl":0,"hp":247,"y":2020},{"id":7,"p":10000,"cur":"coin","cl":3,"hp":452,"y":2010},{"id":8,"p":1000,"cur":"coin","cl":1,"hp":284,"y":2007},{"id":9,"p":500,"cur":"coin","cl":1,"hp":314,"y":2010},{"id":10,"p":10000,"cur":"coin","cl":4,"hp":574,"y":2013},{"id":11,"p":1500,"cur":"coin","cl":1,"hp":304,"y":1999},{"id":12,"p":1000,"cur":"coin","cl":1,"hp":303,"y":2007},{"id":13,"p":12000,"cur":"cash","cl":0,"hp":247,"y":1997},{"id":14,"p":2000,"cur":"coin","cl":3,"hp":461,"y":2007},{"id":15,"p":2000,"cur":"coin","cl":2,"hp":418,"y":2012},{"id":17,"p":1500,"cur":"coin","cl":2,"hp":396,"y":2012},{"id":19,"p":1500,"cur":"coin","cl":3,"hp":483,"y":2015},{"id":20,"p":1500,"cur":"coin","cl":2,"hp":405,"y":2019},{"id":21,"p":500,"cur":"coin","cl":0,"hp":217,"y":2007},{"id":22,"p":2000,"cur":"coin","cl":2,"hp":433,"y":2012},{"id":23,"p":200000,"cur":"cash","cl":2,"hp":381,"y":2012},{"id":24,"p":2000,"cur":"coin","cl":2,"hp":418,"y":2009},{"id":27,"p":10000,"cur":"coin","cl":5,"hp":717,"y":2005},{"id":28,"p":1500,"cur":"coin","cl":2,"hp":389,"y":2012},{"id":29,"p":80000,"cur":"cash","cl":0,"hp":224,"y":2007},{"id":30,"p":1000,"cur":"coin","cl":2,"hp":342,"y":1998},{"id":31,"p":2000,"cur":"coin","cl":2,"hp":380,"y":2005},{"id":32,"p":10000,"cur":"coin","cl":5,"hp":952,"y":2011},{"id":35,"p":1500,"cur":"coin","cl":2,"hp":381,"y":2015},{"id":39,"p":500,"cur":"coin","cl":4,"hp":569,"y":1969},{"id":40,"p":2000,"cur":"coin","cl":5,"hp":636,"y":2014},{"id":41,"p":10000,"cur":"coin","cl":5,"hp":747,"y":2013},{"id":43,"p":1000,"cur":"coin","cl":1,"hp":268,"y":2009},{"id":45,"p":70000,"cur":"cash","cl":1,"hp":303,"y":1991},{"id":47,"p":1500,"cur":"coin","cl":1,"hp":262,"y":1999},{"id":48,"p":500000,"cur":"cash","cl":1,"hp":252,"y":2003},{"id":49,"p":1500,"cur":"coin","cl":1,"hp":337,"y":1993},{"id":51,"p":1500,"cur":"coin","cl":2,"hp":346,"y":1959},{"id":53,"p":250000,"cur":"cash","cl":0,"hp":224,"y":1969},{"id":54,"p":500,"cur":"coin","cl":1,"hp":300,"y":1985},{"id":55,"p":60000,"cur":"cash","cl":0,"hp":192,"y":-1},{"id":56,"p":1500,"cur":"coin","cl":2,"hp":373,"y":2008},{"id":57,"p":50000,"cur":"cash","cl":2,"hp":424,"y":2014},{"id":58,"p":10000,"cur":"coin","cl":3,"hp":447,"y":2009},{"id":59,"p":1000,"cur":"coin","cl":0,"hp":199,"y":2007},{"id":60,"p":500,"cur":"coin","cl":1,"hp":283,"y":2011},{"id":61,"p":1500,"cur":"coin","cl":2,"hp":416,"y":2005},{"id":62,"p":500,"cur":"coin","cl":3,"hp":473,"y":2020},{"id":66,"p":220000,"cur":"cash","cl":2,"hp":370,"y":2005},{"id":74,"p":18000,"cur":"cash","cl":0,"hp":212,"y":2014},{"id":76,"p":1500,"cur":"coin","cl":2,"hp":344,"y":2009},{"id":77,"p":20000,"cur":"cash","cl":2,"hp":386,"y":2009},{"id":81,"p":1000,"cur":"coin","cl":1,"hp":325,"y":2001},{"id":82,"p":1500,"cur":"coin","cl":1,"hp":314,"y":2005},{"id":85,"p":1000,"cur":"coin","cl":1,"hp":309,"y":2012},{"id":86,"p":1500,"cur":"coin","cl":2,"hp":361,"y":2009},{"id":87,"p":2000,"cur":"coin","cl":3,"hp":476,"y":2006},{"id":88,"p":1500,"cur":"coin","cl":1,"hp":316,"y":2001},{"id":89,"p":90000,"cur":"cash","cl":2,"hp":358,"y":1951},{"id":99,"p":12000,"cur":"cash","cl":0,"hp":178,"y":2007},{"id":100,"p":60000,"cur":"cash","cl":0,"hp":177,"y":1971},{"id":102,"p":30000,"cur":"cash","cl":0,"hp":136,"y":1997},{"id":103,"p":2500,"cur":"coin","cl":2,"hp":402,"y":2014},{"id":104,"p":5000,"cur":"coin","cl":3,"hp":477,"y":2018},{"id":105,"p":2000,"cur":"coin","cl":3,"hp":505,"y":2018},{"id":106,"p":150000,"cur":"cash","cl":0,"hp":216,"y":1984},{"id":107,"p":2500,"cur":"coin","cl":2,"hp":352,"y":2006},{"id":108,"p":1500,"cur":"coin","cl":2,"hp":416,"y":1984},{"id":109,"p":2500,"cur":"coin","cl":3,"hp":440,"y":2014},{"id":110,"p":1500,"cur":"coin","cl":1,"hp":337,"y":2013},{"id":111,"p":2000,"cur":"coin","cl":2,"hp":437,"y":2016},{"id":112,"p":1000,"cur":"coin","cl":1,"hp":339,"y":1991},{"id":113,"p":1000,"cur":"coin","cl":1,"hp":319,"y":2013},{"id":114,"p":2500,"cur":"coin","cl":3,"hp":485,"y":2016},{"id":115,"p":5000,"cur":"coin","cl":3,"hp":448,"y":2015},{"id":116,"p":1500,"cur":"coin","cl":2,"hp":369,"y":2022},{"id":117,"p":2500,"cur":"coin","cl":2,"hp":409,"y":2017},{"id":118,"p":2000,"cur":"coin","cl":2,"hp":380,"y":2015},{"id":120,"p":300000,"cur":"cash","cl":1,"hp":309,"y":2018},{"id":121,"p":500,"cur":"coin","cl":0,"hp":203,"y":2014},{"id":123,"p":2000,"cur":"coin","cl":2,"hp":400,"y":2015},{"id":124,"p":2500,"cur":"coin","cl":2,"hp":393,"y":2015},{"id":126,"p":500,"cur":"coin","cl":1,"hp":288,"y":2019},{"id":127,"p":1500,"cur":"coin","cl":2,"hp":390,"y":2016},{"id":128,"p":1500,"cur":"coin","cl":1,"hp":291,"y":1999},{"id":129,"p":20000,"cur":"coin","cl":1,"hp":322,"y":1991},{"id":130,"p":5000,"cur":"coin","cl":3,"hp":515,"y":2006},{"id":131,"p":280000,"cur":"cash","cl":1,"hp":271,"y":1989},{"id":132,"p":10000,"cur":"cash","cl":0,"hp":151,"y":1982},{"id":133,"p":50000,"cur":"cash","cl":0,"hp":192,"y":2011},{"id":134,"p":1500,"cur":"coin","cl":1,"hp":302,"y":1992},{"id":135,"p":5000,"cur":"coin","cl":2,"hp":434,"y":2020},{"id":136,"p":2000,"cur":"coin","cl":2,"hp":392,"y":2014},{"id":137,"p":18000,"cur":"cash","cl":1,"hp":258,"y":2006},{"id":139,"p":40000,"cur":"cash","cl":1,"hp":259,"y":1998},{"id":140,"p":35000,"cur":"cash","cl":0,"hp":219,"y":1983},{"id":141,"p":2500,"cur":"coin","cl":4,"hp":553,"y":2008},{"id":142,"p":5000,"cur":"coin","cl":3,"hp":465,"y":2019},{"id":143,"p":5000,"cur":"coin","cl":2,"hp":372,"y":2023},{"id":144,"p":2500,"cur":"coin","cl":3,"hp":463,"y":2019},{"id":145,"p":1500,"cur":"coin","cl":1,"hp":311,"y":2002},{"id":146,"p":35000,"cur":"cash","cl":0,"hp":151,"y":2006},{"id":147,"p":500,"cur":"coin","cl":1,"hp":334,"y":2015},{"id":148,"p":500,"cur":"coin","cl":1,"hp":293,"y":1965},{"id":149,"p":25000,"cur":"cash","cl":0,"hp":223,"y":1956},{"id":150,"p":1000,"cur":"coin","cl":2,"hp":369,"y":2019},{"id":151,"p":500,"cur":"coin","cl":0,"hp":231,"y":2014},{"id":152,"p":12000,"cur":"cash","cl":0,"hp":165,"y":1971},{"id":153,"p":2500,"cur":"coin","cl":2,"hp":436,"y":2021},{"id":154,"p":500,"cur":"coin","cl":0,"hp":211,"y":2020},{"id":155,"p":15000,"cur":"coin","cl":6,"hp":1546,"y":1991},{"id":156,"p":1500,"cur":"coin","cl":1,"hp":307,"y":1989},{"id":157,"p":260000,"cur":"cash","cl":0,"hp":225,"y":1984},{"id":158,"p":170000,"cur":"cash","cl":1,"hp":256,"y":2019},{"id":160,"p":1000,"cur":"coin","cl":2,"hp":355,"y":1970},{"id":161,"p":500,"cur":"coin","cl":1,"hp":321,"y":2014},{"id":162,"p":10000,"cur":"coin","cl":5,"hp":623,"y":2017},{"id":163,"p":320000,"cur":"cash","cl":0,"hp":205,"y":1964},{"id":165,"p":20000,"cur":"coin","cl":6,"hp":1209,"y":2018},{"id":166,"p":2500,"cur":"coin","cl":3,"hp":442,"y":2020},{"id":167,"p":1500,"cur":"coin","cl":1,"hp":277,"y":2011},{"id":168,"p":500,"cur":"coin","cl":1,"hp":298,"y":2015},{"id":169,"p":2500,"cur":"coin","cl":2,"hp":391,"y":2003},{"id":172,"p":5000,"cur":"coin","cl":2,"hp":358,"y":2018},{"id":173,"p":1500,"cur":"coin","cl":3,"hp":444,"y":2012},{"id":175,"p":1000,"cur":"coin","cl":1,"hp":296,"y":1995},{"id":176,"p":25000,"cur":"cash","cl":2,"hp":346,"y":1984},{"id":177,"p":500,"cur":"coin","cl":1,"hp":305,"y":1991},{"id":178,"p":10000,"cur":"coin","cl":5,"hp":901,"y":2016},{"id":179,"p":120000,"cur":"cash","cl":0,"hp":211,"y":1977},{"id":180,"p":500,"cur":"coin","cl":2,"hp":341,"y":1984},{"id":181,"p":1000,"cur":"coin","cl":1,"hp":330,"y":1964},{"id":182,"p":1000,"cur":"coin","cl":5,"hp":801,"y":2007},{"id":183,"p":1000,"cur":"coin","cl":5,"hp":754,"y":1965},{"id":184,"p":190000,"cur":"cash","cl":1,"hp":271,"y":1997},{"id":185,"p":500,"cur":"coin","cl":2,"hp":345,"y":1965},{"id":186,"p":60000,"cur":"cash","cl":0,"hp":207,"y":1985},{"id":187,"p":370000,"cur":"cash","cl":0,"hp":216,"y":1989},{"id":188,"p":5000,"cur":"coin","cl":3,"hp":468,"y":2021},{"id":189,"p":1500,"cur":"coin","cl":1,"hp":298,"y":2023},{"id":190,"p":45000,"cur":"cash","cl":0,"hp":227,"y":1995},{"id":192,"p":1500,"cur":"coin","cl":2,"hp":349,"y":2021},{"id":193,"p":2500,"cur":"coin","cl":2,"hp":407,"y":2022},{"id":194,"p":5000,"cur":"coin","cl":3,"hp":493,"y":2003},{"id":196,"p":500,"cur":"coin","cl":1,"hp":324,"y":1973},{"id":197,"p":80000,"cur":"cash","cl":0,"hp":118,"y":1950},{"id":198,"p":10000,"cur":"coin","cl":5,"hp":1254,"y":2019},{"id":199,"p":1500,"cur":"coin","cl":3,"hp":494,"y":2005},{"id":200,"p":500,"cur":"coin","cl":2,"hp":397,"y":2018},{"id":201,"p":1500,"cur":"coin","cl":4,"hp":595,"y":1997},{"id":202,"p":10000,"cur":"coin","cl":5,"hp":743,"y":1999},{"id":203,"p":10000,"cur":"coin","cl":5,"hp":1299,"y":1994},{"id":205,"p":1500,"cur":"coin","cl":2,"hp":402,"y":1994},{"id":206,"p":500,"cur":"coin","cl":3,"hp":495,"y":2016},{"id":208,"p":350000,"cur":"cash","cl":1,"hp":331,"y":2024},{"id":209,"p":500,"cur":"coin","cl":2,"hp":361,"y":2008},{"id":210,"p":1000,"cur":"coin","cl":1,"hp":264,"y":1968},{"id":211,"p":2500,"cur":"coin","cl":3,"hp":451,"y":2023},{"id":212,"p":5000,"cur":"coin","cl":0,"hp":224,"y":2013},{"id":213,"p":1500,"cur":"coin","cl":1,"hp":284,"y":1993},{"id":214,"p":2500,"cur":"coin","cl":1,"hp":306,"y":1996},{"id":215,"p":2000,"cur":"coin","cl":1,"hp":265,"y":2015},{"id":216,"p":10000,"cur":"coin","cl":5,"hp":768,"y":2018},{"id":217,"p":5000,"cur":"coin","cl":1,"hp":321,"y":2019},{"id":219,"p":1500,"cur":"coin","cl":1,"hp":320,"y":2023},{"id":220,"p":1000,"cur":"coin","cl":1,"hp":252,"y":1969},{"id":221,"p":5000,"cur":"coin","cl":1,"hp":302,"y":1991},{"id":223,"p":1500,"cur":"coin","cl":0,"hp":196,"y":1981},{"id":224,"p":1500,"cur":"coin","cl":1,"hp":302,"y":2022},{"id":225,"p":500,"cur":"coin","cl":0,"hp":215,"y":1996},{"id":226,"p":150000,"cur":"cash","cl":0,"hp":178,"y":2017},{"id":228,"p":1000,"cur":"coin","cl":1,"hp":319,"y":1992},{"id":229,"p":5000,"cur":"coin","cl":5,"hp":786,"y":1987},{"id":230,"p":2000,"cur":"coin","cl":1,"hp":276,"y":2023},{"id":231,"p":500000,"cur":"cash","cl":0,"hp":185,"y":1989},{"id":232,"p":500,"cur":"coin","cl":1,"hp":318,"y":2017},{"id":233,"p":2500,"cur":"coin","cl":2,"hp":341,"y":2022},{"id":234,"p":10000,"cur":"coin","cl":3,"hp":510,"y":2018},{"id":235,"p":2500,"cur":"coin","cl":2,"hp":392,"y":2025},{"id":238,"p":5000,"cur":"coin","cl":3,"hp":450,"y":2024},{"id":239,"p":2500,"cur":"coin","cl":2,"hp":359,"y":2024},{"id":240,"p":1000,"cur":"coin","cl":2,"hp":363,"y":2016},{"id":241,"p":10000,"cur":"coin","cl":5,"hp":734,"y":2013},{"id":242,"p":1500,"cur":"coin","cl":2,"hp":418,"y":2017},{"id":243,"p":1500,"cur":"coin","cl":0,"hp":206,"y":2019},{"id":244,"p":5000,"cur":"coin","cl":2,"hp":360,"y":2022},{"id":245,"p":20000,"cur":"coin","cl":2,"hp":357,"y":2024},{"id":248,"p":1000,"cur":"coin","cl":2,"hp":360,"y":2013},{"id":249,"p":5000,"cur":"coin","cl":2,"hp":416,"y":2025},{"id":250,"p":10000,"cur":"coin","cl":4,"hp":532,"y":2004},{"id":251,"p":1500,"cur":"coin","cl":0,"hp":246,"y":1998},{"id":252,"p":150000,"cur":"cash","cl":1,"hp":300,"y":1992},{"id":254,"p":15000,"cur":"cash","cl":0,"hp":193,"y":2004},{"id":255,"p":10000,"cur":"coin","cl":1,"hp":332,"y":2005},{"id":256,"p":2000,"cur":"coin","cl":2,"hp":417,"y":1967},{"id":257,"p":20000,"cur":"coin","cl":2,"hp":423,"y":2025},{"id":258,"p":20000,"cur":"coin","cl":1,"hp":317,"y":1994},{"id":259,"p":20000,"cur":"coin","cl":0,"hp":224,"y":2024}];
 
+  // Wishlist state — array of {id, qty}
   const wishlist = [];
 
   function findCar(id){ return CAR_CATALOG.find(c => c.id === id); }
 
+  // Image fallback chain for catalog tiles. Tries .jpg → .png → .webp; if all
+  // three are missing the <img> is removed so the card collapses to its
+  // text-only strip. Exposed on window so onerror handlers in inline HTML
+  // (which can't close over module-scope helpers) can reach it.
   window._carImgFallback = function(el){
     const id = el.dataset.cid
       || el.closest('[data-id]')?.dataset?.id;
@@ -3206,7 +3357,8 @@
     list.innerHTML = filtered.slice(0, 200).map(c => {
       const priceFmt = c.p.toLocaleString('en-US').replace(/,/g,' ');
       const curIcon  = c.cur === 'coin' ? '🪙' : '💵';
-
+      // Image is best-effort: if assets/cars/<id>.{jpg,png,webp} is missing,
+      // <img> onerror removes itself so the card collapses to a text-only strip.
       return `
         <div class="pcard ${wishIds.has(c.id) ? 'in-list' : ''}" data-id="${c.id}">
           <img class="pimg" src="assets/cars/${c.id}.jpg" loading="lazy" alt=""
@@ -3258,6 +3410,7 @@
     document.getElementById(id)?.addEventListener('input', renderCarPicker);
   });
 
+  // Donor textarea helpers
   document.getElementById('cars-donors-clear')?.addEventListener('click', () => {
     document.getElementById('cars-donors').value = '';
     updateCarsLaunch();
@@ -3317,10 +3470,12 @@
     } catch(err) { toast('sendData failed: ' + err.message, 'err'); }
   });
 
+  // Initial render of the cars tab
   renderWishlist();
   renderCarPicker();
   updateCarsLaunch();
 
+  // ── Modal helpers ────────────────────────────────────────────────
   function openModal(name){
     document.querySelector(`.backdrop[data-backdrop="${name}"]`)?.classList.add('show');
     document.querySelector(`.modal[data-modal="${name}"]`)?.classList.add('show');
@@ -3337,17 +3492,21 @@
     b.addEventListener('click', () => closeModal(b.dataset.backdrop));
   });
 
+  // ── Accounts: tile dispatch ──────────────────────────────────────
   document.getElementById('act-generate')?.addEventListener('click', () => openModal('generate'));
   document.getElementById('act-add-existing')?.addEventListener('click', () => {
     openModal('add');
-
+    // Restore the chunk-loop tail if a previous Submit shipped only the
+    // first 25 of a longer file — Telegram closed the mini-app, the
+    // remaining lines were stashed in localStorage, now we pre-fill the
+    // bulk textarea so the user can continue with one more Submit.
     try {
       const tail = localStorage.getItem('cpm2_devtool_add_remaining');
       if (tail) {
         const ta = document.getElementById('add-bulk');
         if (ta && !ta.value.trim()) {
           ta.value = tail;
-
+          // Switch to Manual segment so the textarea is visible
           const segMan = document.querySelector('#add-seg button[data-method="manual"]');
           segMan?.click?.();
           const total = tail.split(/\r?\n/).filter(l => l.includes(':')).length;
@@ -3355,9 +3514,10 @@
         }
         localStorage.removeItem('cpm2_devtool_add_remaining');
       }
-    } catch(e){  }
+    } catch(e){ /* localStorage blocked — fine */ }
   });
 
+  // ── Generate modal: stepper + create ─────────────────────────────
   const genInput = document.getElementById('gen-count');
   document.querySelectorAll('[data-step]').forEach(b => {
     b.addEventListener('click', () => {
@@ -3379,6 +3539,7 @@
     try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
   });
 
+  // ── Add Existing modal: seg control + manual + file ──────────────
   const addSeg = document.getElementById('add-seg');
   addSeg?.addEventListener('click', e => {
     const b = e.target.closest('button[data-method]');
@@ -3410,10 +3571,14 @@
     reader.readAsText(f);
   });
 
+  // Pending-add stash was hoisted to the top of this IIFE so
+  // updateLaunchState (defined earlier) can read pendingAdds.length
+  // without a TDZ ReferenceError. The visible "queued for verify+add"
+  // block lives below and is rendered on demand.
   const pendingBlock = document.createElement('div');
   pendingBlock.id = 'pending-block';
   pendingBlock.style.display = 'none';
-
+  // Inserted into the Accounts pane just below the action grid.
   document.querySelector('[data-pane="accounts"] .action-grid')
     ?.insertAdjacentElement('afterend', pendingBlock);
 
@@ -3477,7 +3642,7 @@
       try { tg?.HapticFeedback?.notificationOccurred('error'); } catch(e){}
       return;
     }
-
+    // Dedupe against already-pending — server-side handles dup-vs-session.
     const seen = new Set(pendingAdds.map(a => a.email));
     const fresh = pairs.filter(p => !seen.has(p.email));
     if (!fresh.length) {
@@ -3485,6 +3650,15 @@
       return;
     }
 
+    // Telegram WebApp.sendData hard-caps at 4 KB. We encode the pool as a
+    // compact "email:password" string array (mode=c) — ~36 chars/entry vs
+    // ~60 for the verbose dict form, so ~100 accounts fit comfortably in a
+    // single submit. Anything over that is auto-chunked: the first
+    // PER_SUBMIT_CAP go to the bot now, the rest stash in localStorage and
+    // pre-fill the textarea on the next reopen.
+    // 80 leaves ~1 KB headroom for items[] when pendingAdds rides on
+    // Launch, while still fitting comfortably inside Telegram's 4 KB cap
+    // for the standalone devtool_add_accounts path.
     const PER_SUBMIT_CAP = 80;
     const buildPayload = (slice) => ({
       mode: 'devtool_add_accounts',
@@ -3492,13 +3666,14 @@
     });
 
     if (fresh.length > PER_SUBMIT_CAP) {
-
+      // Direct bulk path — first batch goes to bot now, rest stashed for
+      // the next reopen.
       const head = fresh.slice(0, PER_SUBMIT_CAP);
       const tail = fresh.slice(PER_SUBMIT_CAP);
       try {
         const tailLines = tail.map(a => `${a.email}:${a.password}`).join('\n');
         localStorage.setItem('cpm2_devtool_add_remaining', tailLines);
-      } catch(e){  }
+      } catch(e){ /* localStorage not available — okay */ }
 
       const payload = buildPayload(head);
       logLine(`bulk-add 1st chunk: ${head.length} of ${fresh.length} (rest stashed)`, 'info');
@@ -3506,10 +3681,13 @@
       try { tg?.HapticFeedback?.notificationOccurred('success'); } catch(e){}
       try { tg?.sendData?.(JSON.stringify(payload)); }
       catch(e){ logLine(`sendData failed: ${e.message}`, 'err'); toast('Send failed', 'err'); }
-
+      // App closes. On next open, the stashed tail is preloaded into the
+      // textarea so the user just taps Submit again.
       return;
     }
 
+    // Stash limit also applies to the local "pending" pool that gets
+    // bundled into Launch's accounts field. Keep total ≤ cap.
     const room = Math.max(0, PER_SUBMIT_CAP - pendingAdds.length);
     if (room <= 0) {
       toast(`Stash full (${PER_SUBMIT_CAP} max). Run Launch first.`, 'err');
@@ -3526,6 +3704,7 @@
 
     renderPending();
 
+    // Reset form
     document.getElementById('add-email').value = '';
     document.getElementById('add-pw').value    = '';
     document.getElementById('add-bulk').value  = '';
@@ -3533,6 +3712,7 @@
     fileInfo.classList.remove('show');
   });
 
+  // ── BackButton wiring (Telegram chrome) ──────────────────────────
   try {
     tg?.BackButton?.show();
     tg?.BackButton?.onClick(() => tg?.close());

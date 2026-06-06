@@ -6,7 +6,12 @@
 <title>CPM2 · Owner Console</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-
+  /* ──────────────────────────────────────────────────────────────────────
+     Owner console — purple "command bridge" aesthetic. The home
+     screen is always Dashboard; navigation is via a floating iPhone widget
+     (bottom-right) that springs open into a home-screen-style icon grid.
+     Tap an icon → that "app" loads in place. No tab bar, no chrome.
+     ────────────────────────────────────────────────────────────────────── */
   :root{
     --bg:        #05080f;
     --bg-2:      #0a0f1c;
@@ -48,7 +53,7 @@
     -webkit-tap-highlight-color:transparent;
     position:relative;
   }
-
+  /* Subtle scanline overlay */
   body::before{
     content:'';
     position:fixed;inset:0;pointer-events:none;z-index:1;
@@ -61,7 +66,7 @@
     );
     mix-blend-mode:screen;
   }
-
+  /* Drifting glow */
   body::after{
     content:'';
     position:fixed;inset:-20%;z-index:-1;pointer-events:none;
@@ -74,6 +79,7 @@
   }
   @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(2%,-2%) scale(1.05);}}
 
+  /* ── Top bar ─────────────────────────────────────────────────────── */
   header{
     flex:0 0 auto;
     padding:14px 18px 12px;
@@ -115,6 +121,7 @@
   .home-btn.show{display:inline-block;}
   .home-btn:active{transform:scale(0.96);}
 
+  /* ── Main scroll ─────────────────────────────────────────────────── */
   main{
     flex:1 1 auto;
     overflow-y:auto;
@@ -146,6 +153,7 @@
     margin-bottom:12px;
   }
 
+  /* ── Dashboard hero ─────────────────────────────────────────────── */
   .hero{
     background:linear-gradient(135deg, rgba(168,85,247,0.18), rgba(124,58,237,0.08));
     border:1px solid var(--line);
@@ -179,6 +187,7 @@
     font-size:11px;color:var(--text-2);font-family:var(--mono);
   }
 
+  /* ── Stat chip grid ─────────────────────────────────────────────── */
   .chip-grid{
     display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;
   }
@@ -198,6 +207,7 @@
     letter-spacing:0.08em;margin-top:2px;
   }
 
+  /* ── Tier bars ──────────────────────────────────────────────────── */
   .tier-list{padding:0 4px;}
   .tier-row{
     display:flex;align-items:center;gap:10px;
@@ -226,6 +236,7 @@
     font-variant-numeric:tabular-nums;
   }
 
+  /* ── Quick action row ────────────────────────────────────────────── */
   .qa-grid{
     display:grid;grid-template-columns:1fr 1fr;gap:8px;
   }
@@ -245,6 +256,7 @@
            text-transform:uppercase;letter-spacing:0.04em;font-family:var(--mono);}
   .qa .desc{font-size:10px;color:var(--hint);margin-top:1px;}
 
+  /* ── Forms ───────────────────────────────────────────────────────── */
   .field{margin-bottom:10px;}
   .field-label{
     font-size:10px;color:var(--hint);
@@ -284,6 +296,7 @@
   .btn-row{display:flex;gap:8px;}
   .btn-row .btn{flex:1;}
 
+  /* ── Toast ───────────────────────────────────────────────────────── */
   .toast{
     position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
     background:var(--bg-2);border:1px solid var(--accent);
@@ -296,6 +309,11 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* ──────────────────────────────────────────────────────────────────
+     iPhone navigation widget — floating bottom-right. Tap → home screen
+     overlay slides up with the app grid. Each icon swaps the active
+     pane in <main>.
+     ────────────────────────────────────────────────────────────────── */
   .iphone-fab{
     position:fixed;
     bottom:calc(20px + env(safe-area-inset-bottom, 0px));
@@ -310,6 +328,7 @@
   .iphone-fab:active{transform:scale(0.92);}
   .iphone-fab svg{width:100%;height:100%;display:block;}
 
+  /* Backdrop + home-screen sheet */
   .home-back{
     position:fixed;inset:0;
     background:rgba(2, 6, 16, 0.85);
@@ -370,7 +389,8 @@
     position:relative;
     overflow:hidden;
   }
-
+  /* Accent variants per app — gives the home grid a colourful real-iOS
+     feel rather than a wall of gold. */
   .app[data-tab="dashboard"] .icon{background:linear-gradient(135deg,#a855f7,#7c3aed);border-color:#ddd6fe;}
   .app[data-tab="users"]     .icon{background:linear-gradient(135deg,#4cc9f0,#3a82d6);border-color:#7dd3fc;}
   .app[data-tab="autofarm"]  .icon{background:linear-gradient(135deg,#34d399,#10b981);border-color:#6ee7b7;}
@@ -393,6 +413,7 @@
                0 0 22px rgba(168,85,247,0.5);
   }
 
+  /* ── Language switcher ──────────────────────────────────────────────── */
   .lang-wrap{position:relative;flex-shrink:0;margin-right:6px;}
   .lang-btn{
     display:inline-flex;align-items:center;gap:4px;
@@ -448,6 +469,7 @@
 
 <main>
 
+  <!-- ── Dashboard ─────────────────────────────────────────────────── -->
   <section class="pane active" data-pane="dashboard">
     <div class="hero">
       <div class="lbl" data-i18n="hero_lbl">Total paid users</div>
@@ -498,6 +520,7 @@
     <button class="btn primary full" id="btn-state" data-i18n="pull_state">⟳ Pull fresh state from bot</button>
   </section>
 
+  <!-- ── Users ────────────────────────────────────────────────────── -->
   <section class="pane" data-pane="users">
     <div class="section-label" data-i18n="grant_extend">Grant / extend tier</div>
     <div class="card">
@@ -535,6 +558,7 @@
     </div>
   </section>
 
+  <!-- ── AutoFarm ─────────────────────────────────────────────────── -->
   <section class="pane" data-pane="autofarm">
     <div class="chip-grid">
       <div class="chip"><div class="v" id="af-count">—</div><div class="l" data-i18n="in_pool">in pool</div></div>
@@ -554,6 +578,7 @@
     </div>
   </section>
 
+  <!-- ── Promo ────────────────────────────────────────────────────── -->
   <section class="pane" data-pane="promo">
     <div class="section-label" data-i18n="gen_codes">Generate codes</div>
     <div class="card">
@@ -568,6 +593,7 @@
     <button class="btn full" id="btn-promo-list" data-i18n="list_promos">📋 List active promos</button>
   </section>
 
+  <!-- ── Broadcast ────────────────────────────────────────────────── -->
   <section class="pane" data-pane="broadcast">
     <div class="section-label" data-i18n="mass_msg">Mass message</div>
     <div class="card">
@@ -599,16 +625,17 @@
 
 </main>
 
+<!-- ── Floating iPhone navigation ─────────────────────────────────── -->
 <button class="iphone-fab" id="phone-fab" aria-label="Open apps">
   <svg viewBox="0 0 64 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-
+    <!-- Body -->
     <rect x="3" y="3" width="58" height="114" rx="14" ry="14"
           fill="#0a0f1c" stroke="#a855f7" stroke-width="1.5"/>
     <rect x="6" y="6" width="52" height="108" rx="11" ry="11"
           fill="url(#screenGrad)" stroke="rgba(168,85,247,0.2)"/>
-
+    <!-- Notch -->
     <rect x="22" y="9" width="20" height="4" rx="2" fill="#000"/>
-
+    <!-- Screen icons (mini grid) -->
     <g opacity="0.95">
       <rect x="11" y="22" width="10" height="10" rx="2.5" fill="#a855f7"/>
       <rect x="25" y="22" width="10" height="10" rx="2.5" fill="#4cc9f0"/>
@@ -617,9 +644,9 @@
       <rect x="25" y="36" width="10" height="10" rx="2.5" fill="#f472b6"/>
       <rect x="39" y="36" width="10" height="10" rx="2.5" fill="#64748b"/>
     </g>
-
+    <!-- Home indicator -->
     <rect x="22" y="108" width="20" height="3" rx="1.5" fill="rgba(168,85,247,0.7)"/>
-
+    <!-- Buttons (volume, side) -->
     <rect x="1" y="22" width="2" height="10" rx="1" fill="rgba(168,85,247,0.5)"/>
     <rect x="1" y="36" width="2" height="14" rx="1" fill="rgba(168,85,247,0.5)"/>
     <rect x="61" y="32" width="2" height="20" rx="1" fill="rgba(168,85,247,0.5)"/>
@@ -629,10 +656,11 @@
         <stop offset="100%" stop-color="#05080f"/>
       </linearGradient>
     </defs>
-
+    <!-- Soft glow ring on hover/active is via filter on parent; subtle shimmer here -->
   </svg>
 </button>
 
+<!-- Home-screen sheet -->
 <div class="home-back" id="home-back"></div>
 <div class="home-sheet" id="home-sheet">
   <div class="grip"></div>
@@ -655,6 +683,7 @@
   try { tg?.ready(); tg?.expand(); } catch(e){}
   try { tg?.setHeaderColor?.('#05080f'); tg?.setBackgroundColor?.('#05080f'); } catch(e){}
 
+  // Decode state blob from ?s=...
   const state = (() => {
     try {
       const qs = new URLSearchParams(location.search);
@@ -665,6 +694,7 @@
     } catch(e){ return {}; }
   })();
 
+  // ── i18n ─────────────────────────────────────────────────────────
   const LANGS = [
     {code:'en', label:'EN', flag:'🇬🇧', name:'English'},
     {code:'ru', label:'RU', flag:'🇷🇺', name:'Русский'},
@@ -890,7 +920,7 @@
     document.querySelectorAll('.lang-opt').forEach(o => {
       o.classList.toggle('active', o.dataset.lang === code);
     });
-
+    // Re-translate the dynamic screen-title (set by switchPane).
     try {
       const st = document.getElementById('screen-title');
       if (st && typeof _curPane !== 'undefined') st.textContent = t('app_' + _curPane);
@@ -934,6 +964,7 @@
     catch(e){ return String(t); }
   };
 
+  // ── Render snapshot ──────────────────────────────────────────────
   function renderSnapshot(s){
     document.getElementById('hero-users').textContent = fmtNum(s.users_total);
     const counts = s.tier_counts || {};
@@ -951,6 +982,7 @@
     document.getElementById('af-next').style.fontSize = '11px';
     document.getElementById('af-next').textContent = s.af?.next ? fmtTs(s.af.next) : 'idle';
 
+    // Tier bars
     const wrap = document.getElementById('tier-list');
     if (!Object.keys(counts).length) {
       wrap.innerHTML = '<div style="color:var(--hint);text-align:center;padding:8px 0;">no users yet</div>';
@@ -964,6 +996,7 @@
         </div>`).join('');
     }
 
+    // Active jobs (live in-memory tasks: who is farming/boosting/etc right now)
     const aWrap = document.getElementById('active-list');
     const jobs = s.active_jobs || [];
     if (!jobs.length) {
@@ -977,6 +1010,7 @@
         </div>`).join('');
     }
 
+    // Expiring-soon: paid users with < 3 days left
     const eWrap = document.getElementById('expiring-list');
     const exp = s.expiring_soon || [];
     if (!exp.length) {
@@ -992,6 +1026,7 @@
   }
   if (state.owner) renderSnapshot(state);
 
+  // ── Pane / tab switching ─────────────────────────────────────────
   const titleKey = name => 'app_' + name;
   let _curPane = 'dashboard';
   function switchPane(name){
@@ -1002,10 +1037,11 @@
       a.classList.toggle('active', a.dataset.tab === name));
     document.getElementById('screen-title').textContent = t(titleKey(name)) || 'Owner';
     document.getElementById('back-home').classList.toggle('show', name !== 'dashboard');
-
+    // Scroll to top of <main> so the new pane starts at the top.
     document.querySelector('main').scrollTop = 0;
   }
 
+  // App icons
   document.querySelectorAll('.app').forEach(a => a.addEventListener('click', () => {
     const name = a.dataset.tab;
     switchPane(name);
@@ -1013,11 +1049,14 @@
     try { tg?.HapticFeedback?.selectionChanged(); } catch(e){}
   }));
 
+  // Quick-action shortcuts on Dashboard
   document.querySelectorAll('[data-jump]').forEach(b =>
     b.addEventListener('click', () => switchPane(b.dataset.jump)));
 
+  // Header back-to-home
   document.getElementById('back-home')?.addEventListener('click', () => switchPane('dashboard'));
 
+  // ── iPhone widget — open / close home grid ──────────────────────
   const back  = document.getElementById('home-back');
   const sheet = document.getElementById('home-sheet');
   function openHome(){
@@ -1031,7 +1070,7 @@
   }
   document.getElementById('phone-fab')?.addEventListener('click', openHome);
   back?.addEventListener('click', closeHome);
-
+  // Swipe-down on sheet to dismiss (basic touch handling)
   let _ty0 = 0;
   sheet?.addEventListener('touchstart', e => { _ty0 = e.touches[0].clientY; }, {passive:true});
   sheet?.addEventListener('touchmove',  e => {
@@ -1039,6 +1078,7 @@
     if (dy > 80) { closeHome(); _ty0 = 1e9; }
   }, {passive:true});
 
+  // ── Toast + sendData wrapper ─────────────────────────────────────
   const toastEl = document.getElementById('toast');
   let toastT = null;
   const toast = (msg, kind='') => {
@@ -1055,6 +1095,7 @@
     } catch(e){ toast('Send failed: ' + e.message, 'err'); }
   }
 
+  // ── Action handlers ──────────────────────────────────────────────
   document.getElementById('btn-state')?.addEventListener('click', () =>
     send({ mode: 'owner_state' }, '⟳ pulling…'));
 
@@ -1104,13 +1145,14 @@
   document.getElementById('btn-broadcast-media')?.addEventListener('click', () => {
     const text = document.getElementById('bc-text').value.trim();
     const tier = document.getElementById('bc-tier').value;
-
+    // Caption is optional for media; warn if empty so owner knows.
     if (text.length > 1024) { toast('Caption > 1024', 'err'); return; }
     if (!confirm(`Arm media broadcast to ${tier === 'all' ? 'ALL paid users' : tier + ' tier only'}?\n\nThe mini-app will close — upload the photo / video in chat next.`)) return;
     send({ mode: 'owner_broadcast_media_init', text, tier }, '📷 armed — upload in chat');
     setTimeout(() => { try { tg?.close(); } catch(e){} }, 600);
   });
 
+  // BackButton
   try { tg?.BackButton?.show(); tg?.BackButton?.onClick(() => tg?.close()); } catch(e){}
 })();
 </script>
