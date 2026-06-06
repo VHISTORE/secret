@@ -1410,12 +1410,15 @@
   <section class="tab-pane active" data-pane="accounts">
     <div class="section-label" data-i18n="sec_manage">Manage accounts</div>
     <div class="action-grid">
-      <div class="action-tile" id="act-generate">
+      <!-- Generate New removed: API-created accounts aren't usable until opened
+           on a device once (the game does onboarding then). Hidden, not deleted,
+           so the JS handler binding stays valid. -->
+      <div class="action-tile" id="act-generate" style="display:none;">
         <span class="ico">✨</span>
         <div class="ttl" data-i18n="gen_new_t">Generate New</div>
         <div class="sub" data-i18n="gen_new_d">Create N fresh accounts</div>
       </div>
-      <div class="action-tile" id="act-add-existing">
+      <div class="action-tile" id="act-add-existing" style="grid-column:1/-1;">
         <span class="ico">➕</span>
         <div class="ttl" data-i18n="add_exist_t">Add Existing</div>
         <div class="sub" data-i18n="add_exist_d">Login + password / file</div>
